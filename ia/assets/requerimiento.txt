@@ -1,0 +1,82 @@
+Propuesta de aplicación educativa para docentes del MEP
+
+La aplicación tendría como objetivo ayudar a docentes nuevos o en ejercicio a elaborar planeamientos completos según los programas oficiales del MEP y la plantilla institucional vigente.
+
+La persona docente ingresaría:
+
+Datos generales
+
+* Nombre del docente
+* Institución
+* Año lectivo
+* Asignatura
+* Nivel
+* Sección
+* Periodo: semanal, mensual, trimestral, semestral o anual
+* Cantidad de lecciones por semana
+* Fechas del calendario escolar
+* Plantilla oficial del MEP o institucional
+
+Luego, la app buscaría automáticamente el programa de estudio correspondiente del MEP y generaría el planeamiento con:
+
+* Aprendizajes esperados
+* Indicadores de evaluación
+* Estrategias de mediación
+* Actividades clase por clase
+* Recursos y materiales
+* Evidencias de aprendizaje
+* Instrumentos de evaluación
+* Anexos
+* Ejemplos listos para aplicar
+* Tareas o prácticas
+* Rúbricas o listas de cotejo
+
+La aplicación no solo llenaría una plantilla, sino que desarrollaría el planeamiento de forma clara, detallada y aplicable, para que cualquier docente pudiera leerlo y ejecutarlo en el aula.
+
+Ejemplo de función principal
+
+El docente podría escribir:
+
+Necesito un planeamiento mensual de Artes Plásticas para sétimo año, con dos lecciones semanales, usando la plantilla del MEP.
+
+Y la app generaría:
+
+* Planeamiento mensual completo
+* Desarrollo por semana
+* Desarrollo por clase
+* Materiales necesarios
+* Explicación teórica breve
+* Actividades paso a paso
+* Evaluación sugerida
+* Anexos imprimibles
+
+Módulo de adecuaciones curriculares
+
+La misma aplicación tendría un espacio para ingresar información de un estudiante con:
+
+* Adecuación significativa
+* Adecuación no significativa
+* Diagnóstico o características educativas
+* Nivel de funcionamiento
+* Dificultades observadas
+* Fortalezas
+* Recomendaciones del Comité de Apoyo o especialistas
+
+Con esa información, la app propondría:
+
+* Recomendaciones pedagógicas
+* Ajustes metodológicos
+* Ajustes en evaluación
+* Material adaptado
+* Actividades con menor nivel de complejidad
+* Objetivos ajustados
+* Plan individual específico
+* Estrategias de apoyo en el aula
+
+Por ejemplo:
+
+Si el estudiante tiene adecuación significativa, la aplicación bajaría el nivel de exigencia según sus características, propondría actividades más concretas, visuales, guiadas y con productos evaluables más simples.
+
+Idea central
+
+La aplicación funcionaría como un asistente pedagógico basado en los programas oficiales del MEP, capaz de crear planeamientos completos, personalizados y adaptados a las necesidades reales del aula, incluyendo atención a la diversidad y adecuaciones curriculares.
