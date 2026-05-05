@@ -103,9 +103,9 @@ mep/
 | Modo tomar lista manual | ✅ |
 | Offline con PowerSync (SQLite local) | ✅ |
 | **App Web (Next.js)** | |
-| Autenticación con Auth0 | 🔄 |
-| Vista de grupos y estudiantes | 🔄 |
-| Descarga / impresión de QRs (PDF con toda la sección) | 🔄 |
+| Autenticación con Auth0 | ✅ |
+| Vista de grupos y estudiantes | ✅ |
+| Descarga / impresión de QRs (PDF con toda la sección) | ✅ |
 | Vista historial de asistencia por sección | ⏳ |
 | **App Web (Next.js)** | |
 | Autenticación con Auth0 | ⏳ |

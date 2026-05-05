@@ -78,4 +78,4 @@
 | F1 · App móvil: `powersync/PowerSyncContext.tsx` — DB + Connector + Provider | ✅ |
 | F1 · App móvil: rewire GruposScreen + EstudiantesScreen → useQuery SQLite | ✅ |
 | F1 · App móvil: TomarListaScreen escribe en SQLite local (auto-sync) | ✅ |
-| F1 · App web: auth Auth0 + vistas grupos + descarga QRs PDF | 🔄 |
+| F1 · App web: auth Auth0 + vistas grupos + descarga QRs PDF | ✅ |
