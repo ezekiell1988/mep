@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
 > **Última actualización:** 2026-05-05
-> **Fase activa:** Fase 1 — Core: Grupos, Estudiantes y Asistencia QR
+> **Fase activa:** Fase 2 — Planeamiento Didáctico con IA + Calendario
 
 ---
 
@@ -9,9 +9,11 @@
 
 **Fase 0 — Infraestructura Azure y setup del proyecto** (2026-05-05)
 
+**Fase 1 — Core: Grupos, Estudiantes y Asistencia QR** (2026-05-05)
+
 ---
 
-## 🔄 En progreso — Fase 1
+## 🔄 En progreso — Fase 2
 
 > **Decisiones de diseño confirmadas (2026-05-04):**
 > - Stack definido: .NET 10 + EF Core 10 + PostgreSQL + PowerSync + Auth0 + Azure AI Foundry GPT-5.5
@@ -79,3 +81,16 @@
 | F1 · App móvil: rewire GruposScreen + EstudiantesScreen → useQuery SQLite | ✅ |
 | F1 · App móvil: TomarListaScreen escribe en SQLite local (auto-sync) | ✅ |
 | F1 · App web: auth Auth0 + vistas grupos + descarga QRs PDF | ✅ |
+| F1 · Assets de la app: icon, adaptive-icon, splash-icon, favicon (Expo) + web icon (Next.js) | ✅ |
+
+### PC-06: Fase 2 — Planeamiento Didáctico con IA
+| Tarea | Estado |
+|-------|--------|
+| F2 · Programa de Artes Plásticas 7°, 8°, 9° estructurado en JSON | ⏳ |
+| F2 · Migración EF Core: LessonPlan, CalendarEvent | ⏳ |
+| F2 · Módulo Planeamiento: CRUD + servicio Azure AI Foundry | ⏳ |
+| F2 · Endpoint `/api/planeamiento/generar` — genera planeamiento con GPT-5.5 | ⏳ |
+| F2 · Calendario escolar MEP base + CRUD eventos no lectivos | ⏳ |
+| F2 · App web: formulario parámetros + vista planeamiento generado | ⏳ |
+| F2 · App web: descarga PDF/DOCX | ⏳ |
+| F2 · App móvil: vista planeamientos guardados (offline) | ⏳ |

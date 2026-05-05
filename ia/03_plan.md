@@ -75,7 +75,7 @@ mep/
 
 ---
 
-## Fase 1 — Core: Grupos, Estudiantes y Asistencia QR 🔄 En progreso
+## Fase 1 — Core: Grupos, Estudiantes y Asistencia QR ✅ Completada (2026-05-05)
 
 **Objetivo:** MVP mínimo viable para que Adriana pueda usar la app en el aula desde el primer día. El módulo estrella (QR) y el núcleo del sistema funcionan completamente.
 
@@ -115,7 +115,7 @@ mep/
 
 ---
 
-## Fase 2 — Planeamiento Didáctico con IA + Calendario ⏳ Pendiente
+## Fase 2 — Planeamiento Didáctico con IA + Calendario 🔄 En progreso
 
 **Objetivo:** El módulo diferenciador #1 según retroalimentación de Adriana (2026-05-05). El docente genera un planeamiento completo, alineado al programa oficial del MEP y adaptado a su calendario institucional, en minutos.
 

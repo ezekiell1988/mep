@@ -8,6 +8,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "AulaIA — Asistente pedagógico MEP",
   description: "Planeamiento, asistencia y notas para docentes del MEP de Costa Rica.",
+  icons: { icon: '/icon.png' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
