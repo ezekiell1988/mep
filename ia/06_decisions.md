@@ -4,6 +4,41 @@
 
 ---
 
+## ADR-007: Frontend Next.js como SPA estático servido por .NET 10
+
+**Fecha:** 2026-05-05
+**Estado:** ✅ Decidido
+**Decidido por:** Ezequiel Baltodano (dev principal)
+
+### Contexto
+Se evaluó usar Azure Static Web App (swa-demo) para el frontend Next.js de forma separada al App Service del backend. Esto implica dos recursos de hosting, dos pipelines de CI/CD y CORS entre dominios diferentes.
+
+### Opciones evaluadas
+
+| Opción | Pros | Contras |
+|--------|------|---------|
+| Static Web App separado | CDN edge nativa, deploy independiente | Dos recursos, CORS, más complejidad CI/CD |
+| SPA en App Service único | Un solo recurso, sin CORS, más simple | Sin CDN edge (se puede agregar Cloudflare CDN) |
+
+### Decisión
+**Next.js compilado como `output: 'export'` (HTML/CSS/JS estático) servido por .NET 10 desde `wwwroot/`.**
+
+- Next.js usa `next.config.ts` con `output: 'export'`
+- El build genera una carpeta `out/` que se copia a `wwwroot/` del proyecto .NET
+- .NET 10 usa `app.UseStaticFiles()` + `app.MapFallbackToFile("index.html")` para el routing SPA
+- Un único App Service `app-demo-api` sirve tanto la API (`/api/*`) como el frontend (`/*`)
+- CI/CD: un solo workflow construye ambos y despliega al App Service
+
+### Consecuencias
+- ✅ Un solo recurso de Azure — menor costo y menor complejidad operativa
+- ✅ Sin problemas de CORS entre frontend y backend
+- ✅ Un solo pipeline de CI/CD
+- ✅ Cloudflare actúa como CDN edge frente al App Service (caché de assets estáticos)
+- ⚠️ Next.js pierde SSR/SSG dinámico — solo páginas estáticas o client-side rendering
+- ⚠️ Para rutas que requieran SSR en el futuro, evaluar migración a Container Apps
+
+---
+
 ## ADR-001: Backend con .NET 10 + Entity Framework Core
 
 **Fecha:** 2026-05-04

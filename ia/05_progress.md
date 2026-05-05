@@ -26,16 +26,16 @@
 | F0-01 · Storage Account `stdemomep` + 5 contenedores | ✅ |
 | F0-02 · Key Vault `kv-demomep` | ✅ |
 | F0-03 · PostgreSQL 16 en VM `demo-itqs` (ver `credentials/db.txt`) + DB `aulaia` | ✅ |
-| F0-04 · App Service Plan `asp-demo` + App Service `app-demo-api` | ⏳ |
-| F0-05 · Managed Identity + roles (Key Vault, Blob Storage) | ⏳ |
-| F0-06 · AI Foundry Hub `aif-demo` + Project `aiproj-demo` + deploy GPT-5.5 | ⏳ |
-| F0-07 · Static Web App `swa-demo` | ⏳ |
-| F0-08 · PowerSync Cloud conectado a `psql-demo` | ⏳ |
+| F0-04 · App Service Plan `asp-demomep` + App Service `app-demo-api` | ✅ |
+| F0-05 · Managed Identity asignada (roles KV/Storage pendientes — Fase 3) | ⚠️ |
+| F0-06 · AI Foundry configurado — credenciales en `credentials/ai.txt` | ✅ |
+| F0-07 · Static Web App — **cancelado** (Next.js SPA servido desde App Service único) | ❌ |
+| F0-08 · PowerSync Cloud conectado a PostgreSQL (`aulaia`) — publication `powersync` activa | ✅ |
 
 ### PC-02: DNS y Dominio
 | Tarea | Estado |
 |-------|--------|
-| F0-15 · CNAME `mep.ezekl.com` → `swa-demo` en Cloudflare | ⏳ |
+| F0-15 · CNAME `mep.ezekl.com` → `app-demo-api` en Cloudflare (web + api unificados) | ⏳ |
 | F0-15 · CNAME `api.mep.ezekl.com` → `app-demo-api` en Cloudflare | ⏳ |
 
 ### PC-03: Repositorio y CI/CD
