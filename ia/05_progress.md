@@ -44,7 +44,7 @@
 | F0-09 · Solución .NET 10 `AulaIA.Api` con Feature Folders | ✅ |
 | F0-10 · Proyecto Next.js `aulaia-web` (output: export, SPA estático, 0 vulnerabilidades) | ✅ |
 | F0-11 · Proyecto Expo `aulaia-app` (SDK 55, TypeScript, mobile/) | ✅ |
-| F0-12 · GitHub Actions CI/CD (backend + web) | ⏳ |
+| F0-12 · GitHub Actions CI/CD — workflow unificado `deploy.yml` (Next.js export → wwwroot + .NET publish → App Service) | ✅ |
 
 ### PC-04: Base de datos y Auth
 | Tarea | Estado |

@@ -1,0 +1,66 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  NODE_VERSION: "22.x"
+  API_PROJECT: "src/AulaIA.Api/AulaIA.Api.csproj"
+  WEB_DIR: "src/aulaia-web"
+  PUBLISH_DIR: "publish"
+  AZURE_WEBAPP_NAME: "app-demo-api"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout ──────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Node.js + Next.js build ────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ env.WEB_DIR }}/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ${{ env.WEB_DIR }}
+        run: npm ci
+
+      - name: Build Next.js (static export)
+        working-directory: ${{ env.WEB_DIR }}
+        run: npm run build
+
+      # ── .NET build + publish ───────────────────────────────────
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore .NET dependencies
+        run: dotnet restore ${{ env.API_PROJECT }}
+
+      - name: Build .NET
+        run: dotnet build ${{ env.API_PROJECT }} --no-restore --configuration Release
+
+      - name: Publish .NET
+        run: dotnet publish ${{ env.API_PROJECT }} --no-build --configuration Release --output ${{ env.PUBLISH_DIR }}
+
+      # ── Copiar frontend → wwwroot del artefacto .NET ──────────
+      - name: Copy Next.js output to wwwroot
+        run: cp -r ${{ env.WEB_DIR }}/out ${{ env.PUBLISH_DIR }}/wwwroot
+
+      # ── Deploy a Azure App Service ─────────────────────────────
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.PUBLISH_DIR }}
