@@ -42,7 +42,7 @@
 | Tarea | Estado |
 |-------|--------|
 | F0-09 · Solución .NET 10 `AulaIA.Api` con Feature Folders | ✅ |
-| F0-10 · Proyecto Next.js `aulaia-web` | ⏳ |
+| F0-10 · Proyecto Next.js `aulaia-web` (output: export, SPA estático, 0 vulnerabilidades) | ✅ |
 | F0-11 · Proyecto Expo `aulaia-app` | ⏳ |
 | F0-12 · GitHub Actions CI/CD (backend + web) | ⏳ |
 
