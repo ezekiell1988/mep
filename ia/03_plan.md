@@ -86,14 +86,15 @@ mep/
 | Componente | Estado |
 |-----------|--------|
 | **Backend** | |
-| Auth0 JWT middleware + roles (docente/director/admin) | ⏳ |
-| Módulo Grupos: CRUD + endpoints | ⏳ |
-| Módulo Estudiantes: CRUD + importación CSV | ⏳ |
-| Generación de código QR (UUID) por estudiante | ⏳ |
-| Módulo Asistencia: registro QR + manual + estados | ⏳ |
-| Endpoint `/api/powersync/token` | ⏳ |
+| Auth0 JWT middleware + roles (docente/director/admin) | ✅ |
+| Módulo Grupos: CRUD + endpoints | ✅ |
+| Módulo Estudiantes: CRUD + QrCode único por alumno | ✅ |
+| Generación de código QR (UUID) por estudiante | ✅ |
+| Módulo Asistencia: registro QR + manual + estados | ✅ |
+| Endpoint `/api/powersync/token` | ✅ |
 | **Base de datos** | |
-| Migración EF Core: Institution, User, Group, Student, AttendanceRecord | ⏳ |
+| Migración EF Core: Institution, User, Group, Student, AttendanceRecord | ✅ |
+| Migración `AddStudentQrCode` — columna qr_code + índice único | ✅ |
 | **App Móvil (React Native / Expo)** | |
 | Autenticación con Auth0 (PKCE) | ⏳ |
 | Pantalla: lista de grupos del docente | ⏳ |

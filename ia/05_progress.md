@@ -56,11 +56,12 @@
 ### PC-05: Fase 1 — Core
 | Tarea | Estado |
 |-------|--------|
-| F1 · Auth0 JWT middleware en .NET (`AddAuthentication` + `AddAuthorization`) | ⏳ |
-| F1 · Módulo Grupos: CRUD + endpoints | ⏳ |
-| F1 · Módulo Estudiantes: CRUD + importación CSV | ⏳ |
-| F1 · Generación QR UUID por estudiante | ⏳ |
-| F1 · Módulo Asistencia: registro QR + manual | ⏳ |
-| F1 · Endpoint `/api/powersync/token` | ⏳ |
+| F1 · Auth0 JWT middleware en .NET (`AddAuthentication` + `AddAuthorization`) | ✅ |
+| F1 · `ICurrentUserService` — resuelve Auth0 sub → User de BD, scoped por request | ✅ |
+| F1 · Módulo Grupos: CRUD completo + endpoints con ownership por docente | ✅ |
+| F1 · Módulo Estudiantes: CRUD + ownership + QrCode único por alumno | ✅ |
+| F1 · Migración EF Core `AddStudentQrCode` — columna `qr_code` + índice único | ✅ |
+| F1 · Módulo Asistencia: GET por fecha (lista completa), POST upsert, POST scan QR | ✅ |
+| F1 · Endpoint `/api/powersync/token` — JWT HS256 firmado con sub del usuario | ✅ |
 | F1 · App móvil: auth Auth0 PKCE + pantallas grupos/estudiantes/lista | ⏳ |
 | F1 · App web: auth Auth0 + vistas grupos + descarga QRs PDF | ⏳ |

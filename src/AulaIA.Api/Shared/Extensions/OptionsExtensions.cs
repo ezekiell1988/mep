@@ -25,6 +25,12 @@ public static class OptionsExtensions
                 .BindConfiguration(StorageOptions.Section)
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
+
+            services
+                .AddOptions<PowerSyncOptions>()
+                .BindConfiguration(PowerSyncOptions.Section)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
         }
     }
 }
