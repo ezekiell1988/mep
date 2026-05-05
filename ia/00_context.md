@@ -1,6 +1,6 @@
 # 00 — Contexto del Proyecto
 
-> **Última actualización:** 2026-05-04
+> **Última actualización:** 2026-05-05
 > **Scope:** `/` (raíz del repositorio — código aún no iniciado; fase de planificación)
 
 ---
@@ -41,14 +41,14 @@
 
 | # | Módulo | Prioridad | Estado |
 |---|--------|-----------|--------|
-| 1 | Gestión de Grupos y Estudiantes | 🔴 Core — todo depende de este | ⏳ No iniciado |
-| 2 | Planeamiento Didáctico con IA | 🔴 Diferenciador principal | ⏳ No iniciado |
-| 3 | Asistencia con QR | 🔴 Módulo estrella (viralidad) | ⏳ No iniciado |
-| 4 | Trabajo Cotidiano y Tareas | 🟡 Alta prioridad | ⏳ No iniciado |
-| 5 | Gestión de Notas y Promedios | 🟡 Alta prioridad | ⏳ No iniciado |
-| 6 | Generador de Reportes e Informes | 🟡 Alta prioridad | ⏳ No iniciado |
-| 7 | Calendario Escolar Integrado | 🟢 Soporte | ⏳ No iniciado |
-| 8 | Adecuaciones Curriculares | 🟡 Diferenciador secundario | ⏳ No iniciado |
+| 1 | Gestión de Grupos y Estudiantes | 🔴 Core — prerequisito técnico de todo | ⏳ No iniciado |
+| 2 | Planeamiento Didáctico con IA | 🔴 **Prioridad #1 según Adriana — diferenciador principal** | ⏳ No iniciado |
+| 3 | Calendario Escolar Integrado | 🔴 Crítico — alimenta y reorganiza el planeamiento | ⏳ No iniciado |
+| 4 | Asistencia con QR | 🔴 Módulo estrella (viralidad móvil) | ⏳ No iniciado |
+| 5 | Adecuaciones Curriculares | 🔴 Diferenciador secundario + planeamiento individual | ⏳ No iniciado |
+| 6 | Trabajo Cotidiano y Tareas | 🟡 Alta prioridad | ⏳ No iniciado |
+| 7 | Gestión de Notas y Promedios | 🟡 Alta prioridad | ⏳ No iniciado |
+| 8 | Generador de Reportes e Informes | 🟡 Alta prioridad | ⏳ No iniciado |
 
 ---
 
@@ -60,7 +60,7 @@
 - **Ponderación de evaluación en secundaria (configurable):** Trabajo cotidiano 20% / Pruebas 45% / Trabajo extraclase 20% / Otros 15%.
 - **Calendario escolar MEP:** 200 días lectivos por año.
 - **Ciclos del sistema educativo:** I Ciclo (1°–3°) / II Ciclo (4°–6°) / III Ciclo — EGB (7°–9°) / Diversificado (10°–11°/12°).
-- **Plataformas del MEP a considerar para exportación:** SIMAR (notas y matrícula), SIRC (reportes de calificaciones). No hay API pública; la integración es por exportación de archivos.
+- **Plataforma del MEP para exportación:** SEA (Sistema de Evaluación Ágil) — `sea.mep.go.cr`. Sistema web oficial donde los docentes registran calificaciones por período, asignatura y grupo. El SEA permite **descargar un archivo** (Excel/CSV) para completar offline y luego **subirlo** de vuelta — ese archivo es el que AulaIA debe generar. No hay API pública. (Corrección confirmada por Adriana 2026-05-05. Manual oficial: `ia/assets/sea-manual-docente.pdf`)
 - **Offline-first obligatorio:** la app debe funcionar completamente sin internet para: asistencia (QR y manual), registro de notas, consulta de grupos y planeamientos guardados.
 - **Programa de estudio inicial (caso de uso base):** Artes Plásticas — III Ciclo (7°, 8°, 9°) — programa oficial del MEP.
 - **La IA no inventa contenido:** el generador de planeamientos está anclado al programa oficial del MEP; nunca debe generar aprendizajes esperados o indicadores que no existan en el programa.
@@ -76,6 +76,8 @@
 - **Referencia de dominio completa:** `ia/assets/investigacion_dominio.md`
 - **Visión de producto completa:** `ia/assets/vision_producto_integral.md`
 - **Requerimiento original:** `ia/assets/requerimiento.txt`
+- **Manual SEA rol docente (oficial MEP):** `ia/assets/sea-manual-docente.pdf`
+- **Manual SEA rol administrativo (oficial MEP):** `ia/assets/sea-manual-administrativo.pdf`
 
 ---
 

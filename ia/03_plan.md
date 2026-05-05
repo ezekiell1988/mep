@@ -1,7 +1,7 @@
 # 03 — Plan de Desarrollo
 
-> **Última actualización:** 2026-05-04
-> **Estado general:** ⏳ Fase 0 — No iniciada
+> **Última actualización:** 2026-05-05
+> **Estado general:** 🔄 Fase 1 — En progreso
 
 ---
 
@@ -110,11 +110,50 @@ mep/
 
 ---
 
-## Fase 2 — Notas, Promedios y Reportes Básicos ⏳ Pendiente
+## Fase 2 — Planeamiento Didáctico con IA + Calendario ⏳ Pendiente
+
+**Objetivo:** El módulo diferenciador #1 según retroalimentación de Adriana (2026-05-05). El docente genera un planeamiento completo, alineado al programa oficial del MEP y adaptado a su calendario institucional, en minutos.
+
+**Criterio de éxito:** Adriana genera el planeamiento de Artes Plásticas 7° para un trimestre completo — con actividades clase por clase, tareas y ejemplos listos para aplicar — en menos de 3 minutos, con terminología exacta del MEP y sin ediciones manuales necesarias.
+
+### Componentes
+
+| Componente | Estado |
+|-----------|--------|
+| **Calendario escolar** | |
+| Calendario MEP base cargado en el sistema (200 días, 3 trimestres) | ⏳ |
+| CRUD de eventos no lectivos: feriados, exámenes, consejo de profesores, FEA, semana del deporte, congresos | ⏳ |
+| Agregar actos cívicos e institucionales al calendario | ⏳ |
+| Cálculo automático de lecciones disponibles por período | ⏳ |
+| Reorganización automática del planeamiento al modificar el calendario | ⏳ |
+| **Base de conocimiento MEP** | |
+| Estructurar programa de Artes Plásticas 7°, 8°, 9° en JSON | ⏳ |
+| Cargar base de conocimiento en el sistema | ⏳ |
+| **Backend** | |
+| Módulo Planeamiento: LessonPlan CRUD | ⏳ |
+| Servicio de generación con Azure AI Foundry (GPT-5.5) | ⏳ |
+| Generación de actividades clase por clase + tareas + ejemplos listos para aplicar | ⏳ |
+| Soporte de plantilla MEP por defecto + plantilla institucional (upload DOCX/PDF) | ⏳ |
+| Sistema de caché con OutputCache (evitar llamadas duplicadas al LLM) | ⏳ |
+| Rate limiting en endpoint de generación (5 req/min) | ⏳ |
+| Generación de PDF y subida a Azure Blob Storage | ⏳ |
+| **App Web** | |
+| Formulario de parámetros del planeamiento | ⏳ |
+| Vista de calendario escolar personalizable | ⏳ |
+| Vista de planeamiento generado con editor básico | ⏳ |
+| Descarga en PDF y DOCX | ⏳ |
+| Historial de planeamientos generados | ⏳ |
+| **App Móvil** | |
+| Vista de planeamientos guardados (offline) | ⏳ |
+| Consulta de planeamiento por clase del día | ⏳ |
+
+---
+
+## Fase 3 — Notas, Promedios y Reportes Básicos ⏳ Pendiente
 
 **Objetivo:** El docente puede registrar toda la evaluación del período y generar el acta de notas para el MEP. Eliminar el doble trabajo con Excel.
 
-**Criterio de éxito:** Adriana cierra el I Trimestre usando solo la app para notas, genera el acta y la sube al SIMAR sin necesidad de Excel.
+**Criterio de éxito:** Adriana cierra el I Trimestre usando solo la app para notas, genera el acta y la exporta al SEA sin necesidad de Excel.
 
 ### Componentes
 
@@ -124,10 +163,8 @@ mep/
 | Módulo Notas: EvaluationActivity + Grade CRUD | ⏳ |
 | Cálculo de promedios con ponderación configurable | ⏳ |
 | Alertas de estudiantes en riesgo (< nota mínima) | ⏳ |
-| Calendario escolar: carga del MEP + días no lectivos | ⏳ |
 | Generación de reportes: acta de notas PDF + XLSX | ⏳ |
-| Exportación SIMAR (CSV en formato MEP) | ⏳ |
-| Módulo Calendario: lecciones disponibles por período | ⏳ |
+| Exportación SEA (archivo en formato MEP) | ⏳ |
 | **App Móvil** | |
 | Pantalla: actividades de evaluación por grupo | ⏳ |
 | Pantalla: libro de notas (tabla editable) | ⏳ |
@@ -137,38 +174,6 @@ mep/
 | Libro de notas completo (tipo spreadsheet) | ⏳ |
 | Configuración de ponderación por sección | ⏳ |
 | Generación y descarga de reportes (PDF/XLSX) | ⏳ |
-| Vista de calendario escolar | ⏳ |
-
----
-
-## Fase 3 — Planeamiento Didáctico con IA ⏳ Pendiente
-
-**Objetivo:** El módulo diferenciador principal. El docente genera un planeamiento completo alineado al programa oficial del MEP en minutos.
-
-**Criterio de éxito:** Adriana genera el planeamiento de Artes Plásticas 7° para un trimestre completo en menos de 3 minutos, con terminología exacta del MEP, sin ediciones manuales necesarias.
-
-### Componentes
-
-| Componente | Estado |
-|-----------|--------|
-| **Base de conocimiento MEP** | |
-| Estructurar programa de Artes Plásticas 7°, 8°, 9° en JSON | ⏳ |
-| Cargar base de conocimiento en el sistema | ⏳ |
-| **Backend** | |
-| Módulo Planeamiento: LessonPlan CRUD | ⏳ |
-| Servicio de generación con Azure AI Foundry (GPT-5.5) | ⏳ |
-| Sistema de caché con OutputCache (evitar llamadas duplicadas al LLM) | ⏳ |
-| Rate limiting en endpoint de generación (5 req/min) | ⏳ |
-| Generación de PDF y subida a Azure Blob Storage | ⏳ |
-| Soporte para plantilla institucional (upload DOCX/PDF) | ⏳ |
-| **App Web** | |
-| Formulario de parámetros del planeamiento | ⏳ |
-| Vista de planeamiento generado con editor básico | ⏳ |
-| Descarga en PDF y DOCX | ⏳ |
-| Historial de planeamientos generados | ⏳ |
-| **App Móvil** | |
-| Vista de planeamientos guardados (offline) | ⏳ |
-| Consulta de planeamiento por clase del día | ⏳ |
 
 ---
 
@@ -230,9 +235,9 @@ mep/
 
 | Fase | Nombre | Entregable clave | Estado |
 |------|--------|-----------------|--------|
-| 0 | Infraestructura Azure + Setup | Todos los recursos Azure `demo` creados; repos estructurados | ⏳ |
-| 1 | Core: Grupos + Asistencia QR | Adriana toma lista con QR en el aula | ⏳ |
-| 2 | Notas y Reportes básicos | Adriana cierra trimestre sin Excel | ⏳ |
-| 3 | Planeamiento con IA | Planeamiento MEP completo en minutos | ⏳ |
+| 0 | Infraestructura Azure + Setup | Todos los recursos Azure `demo` creados; repos estructurados | ✅ |
+| 1 | Core: Grupos + Asistencia QR | Adriana toma lista con QR en el aula | 🔄 |
+| 2 | Planeamiento con IA + Calendario | Planeamiento MEP completo en minutos, reorganizable por calendario | ⏳ |
+| 3 | Notas y Reportes básicos | Adriana cierra trimestre sin Excel; exporta al SEA | ⏳ |
 | 4 | Adecuaciones e Informes | Informes CAE generados automáticamente | ⏳ |
 | 5 | Escala + Nuevas materias | Container Apps + plan institucional | ⏳ |

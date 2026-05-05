@@ -1,7 +1,7 @@
 # 01 — Requisitos del Sistema
 
-> **Última actualización:** 2026-05-04
-> **Fuentes:** `ia/assets/requerimiento.txt`, `ia/assets/investigacion_dominio.md`, `ia/assets/vision_producto_integral.md`
+> **Última actualización:** 2026-05-05
+> **Fuentes:** `ia/assets/requerimiento.txt`, `ia/assets/investigacion_dominio.md`, `ia/assets/vision_producto_integral.md`, `ia/assets/20260505-Whatsapp.txt`, `ia/assets/sea-manual-docente.pdf`
 
 ---
 
@@ -20,7 +20,7 @@ Asistente pedagógico digital para docentes del MEP de Costa Rica que automatiza
 3. **Offline es obligatorio para operaciones de aula.** Tomar asistencia, registrar notas y consultar grupos/planeamientos guardados deben funcionar sin internet.
 4. **Las notas de menores de edad son datos sensibles.** No se exponen en URLs públicas, no se comparten sin autenticación, no se incluyen en logs.
 5. **La escala de calificación del MEP es 1–100.** Aprobatorio: 65 (primaria y III Ciclo), 70 (diversificado). No se puede cambiar por defecto; es configurable solo a nivel institucional si el director lo autoriza.
-6. **El sistema nunca sube datos automáticamente al SIMAR/SIRC.** La integración con plataformas del MEP es solo por exportación de archivos. El docente decide cuándo y qué exportar.
+6. **El sistema nunca sube datos automáticamente al SEA** (Sistema de Evaluación Ágil — `sea.mep.go.cr`). La integración con plataformas del MEP es solo por exportación de archivos. El docente decide cuándo y qué exportar.
 7. **Las adecuaciones curriculares son por estudiante, no por grupo.** Un plan de adecuación es individual y no debe aplicarse masivamente sin revisión del docente.
 8. **La ponderación de evaluación es configurable por institución**, pero el sistema provee la ponderación por defecto del MEP (Trabajo cotidiano 20% / Pruebas 45% / Trabajo extraclase 20% / Otros 15%).
 
@@ -88,11 +88,14 @@ El sistema debe generar:
 - Contenidos en tres dimensiones: conceptual, procedimental, actitudinal
 - Valores, actitudes y comportamientos éticos, estéticos y ciudadanos (ejes transversales)
 - Estrategias de mediación y aprendizaje (secuenciadas: activación → desarrollo → cierre)
+- **Actividades clase por clase** — secuencia detallada de cada lección dentro del período
 - Cronograma de lecciones (distribución por semana y por clase)
 - Recursos y materiales necesarios
 - Estrategias e instrumentos de evaluación
 - Evidencias de aprendizaje
 - Rúbricas o listas de cotejo listos para usar
+- **Tareas o prácticas sugeridas** — listas para asignar directamente
+- **Ejemplos listos para aplicar en el aula** — concretos y contextualizados
 - Anexos imprimibles
 
 #### RF-08 — Anclar al programa oficial del MEP
@@ -100,6 +103,7 @@ El sistema debe generar:
 - El planeamiento generado usa la terminología exacta del MEP.
 - El docente puede ver qué sección del programa corresponde a cada aprendizaje generado.
 - **Programa inicial cubierto:** Artes Plásticas — III Ciclo (7°, 8°, 9°).
+- **Meta a largo plazo:** base de conocimiento completa para todas las asignaturas y todos los niveles del MEP (I Ciclo, II Ciclo, III Ciclo, Diversificado). Cada nueva materia se incorpora en iteraciones posteriores.
 
 #### RF-09 — Plantilla institucional
 - Si el docente sube su plantilla, el planeamiento se genera respetando el formato de esa plantilla.
@@ -183,8 +187,15 @@ El docente crea actividades con:
 ### Módulo 6: Generador de Reportes e Informes
 
 #### RF-23 — Acta de notas
-- Genera acta de notas por sección y período en formato compatible con el MEP.
-- Exportable en PDF y Excel.
+- Genera el acta de notas por sección y período, equivalente al acta que produce el SEA y que el docente debe entregar firmada a la dirección del centro.
+- El acta incluye: período, institución, asignatura, grupo, lista de estudiantes con calificaciones finales.
+- Exportable en PDF (para imprimir y firmar).
+
+#### RF-23b — Informe descriptivo de logro
+- El SEA genera y envía por correo a cada estudiante un "Informe descriptivo de logro unificado".
+- AulaIA genera el equivalente: informe individual por estudiante con su desempeño en el período (notas, asistencia, observaciones del docente).
+- El docente puede revisarlo y enviarlo desde la app antes de subirlo al SEA.
+- Exportable en PDF.
 
 #### RF-24 — Reporte de asistencia
 - Genera reporte de ausencias por período: total de días, ausencias, porcentaje de asistencia.
@@ -196,25 +207,42 @@ El docente crea actividades con:
 - Incluye: tipo, ajustes aplicados, notas del período con criterios adaptados.
 - Exportable en PDF (para expediente del CAE).
 
-#### RF-26 — Exportación para SIMAR/SIRC
-- Genera archivo en el formato exacto que el SIMAR acepta para importación masiva de notas.
-- El docente descarga el archivo y lo sube manualmente al sistema del MEP.
+#### RF-26 — Exportación para el SEA
+- El SEA (Sistema de Evaluación Ágil — `sea.mep.go.cr`) permite al docente **descargar un archivo** con la plantilla de calificaciones por período + institución + asignatura + grupo, completarlo offline y **subirlo** de vuelta al sistema.
+- AulaIA genera ese mismo archivo ya pre-completado con las notas registradas en la app, eliminando el trabajo de transcripción manual.
+- El docente descarga el archivo desde AulaIA y lo sube manualmente al SEA. El sistema **nunca interactúa directamente con el SEA**.
+- **Flujo SEA confirmado (manual oficial, abril 2023):** período → nombramiento/institución → asignatura → grupo → ingreso de calificaciones por rubros.
+- **Los rubros y sus porcentajes los configura la dirección del centro** en el SEA-Institucional. AulaIA debe respetar esa configuración al generar el archivo.
+- El SEA maneja dos tipos de evaluación: **sumativa** (nota numérica 1–100) y **formativa/cualitativa** (observaciones por rubro). AulaIA debe soportar ambos.
+- El SEA también tiene un módulo de **Ampliación** (pruebas de recuperación). RF pendiente de detalle para Fase 3.
+- **Formato exacto del archivo:** confirmar con acceso real al SEA. El manual indica descarga directa desde la pantalla de calificaciones — presumiblemente Excel (.xlsx).
 
 ---
 
 ### Módulo 7: Calendario Escolar
 
-#### RF-27 — Calendario escolar integrado
-- El sistema incluye el calendario escolar oficial del MEP (200 días lectivos, tres trimestres).
-- Año lectivo: febrero–diciembre aproximadamente.
+> **Prioridad elevada** (retroalimentación Adriana 2026-05-05): el calendario es crítico porque alimenta y reorganiza automáticamente el planeamiento.
 
-#### RF-28 — Días no lectivos
-- El docente puede marcar días no lectivos adicionales (actividades institucionales, feriados locales).
-- El sistema excluye esos días del cálculo de lecciones disponibles.
+#### RF-27 — Cargar y personalizar el calendario escolar
+- El sistema incluye el calendario escolar oficial del MEP (200 días lectivos, tres trimestres, año lectivo febrero–diciembre).
+- El docente puede personalizar el calendario según su institución. Operaciones soportadas:
+  - **Eliminar feriados** o días no hábiles locales.
+  - **Agregar actos cívicos** o eventos especiales.
+  - **Marcar semanas de exámenes** (se excluyen como lecciones disponibles).
+  - **Marcar días de consejo de profesores.**
+  - **Marcar FEA** (Festivales de Expresión Artistica).
+  - **Marcar semana del deporte.**
+  - **Marcar congresos, capacitaciones y actividades institucionales.**
+  - **Ajustar la cantidad de lecciones por semana** para un período dado (ej. reducción por actividades).
+- Cada modificación al calendario **reorganiza automáticamente** el cronograma de todas las lecciones del planeamiento asociado.
 
-#### RF-29 — Cálculo automático de lecciones
-- Dado un período (inicio–fin) y la cantidad de lecciones semanales, el sistema calcula automáticamente cuántas lecciones hay disponibles, descontando días no lectivos.
-- Este cálculo alimenta el cronograma del planeamiento.
+#### RF-28 — Cálculo automático de lecciones disponibles
+- Dado un período (inicio–fin) y la cantidad de lecciones semanales configurada, el sistema calcula automáticamente cuántas lecciones hay disponibles, descontando todos los eventos marcados como no lectivos.
+- Este cálculo alimenta directamente el cronograma del planeamiento didáctico.
+
+#### RF-29 — Vista de calendario
+- El docente puede ver el calendario del período con los días lectivos, no lectivos y eventos resaltados por tipo.
+- Filtrable por grupo (para ver cuántas lecciones tiene cada sección en el período).
 
 ---
 

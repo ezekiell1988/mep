@@ -475,7 +475,7 @@ Auth0 devuelve Access Token (JWT) + Refresh Token
 |------------|-----------|--------|
 | `planeamientos` | PDFs generados por la IA | SAS token temporal (15 min) generado por el backend |
 | `reportes` | Actas de notas, asistencia, informes | SAS token temporal (15 min) |
-| `exportaciones` | CSV/XLSX para SIMAR | SAS token temporal (15 min) |
+| `exportaciones` | CSV/XLSX para el SEA (Sistema de Evaluaci\u00f3n de los Aprendizajes) | SAS token temporal (15 min) |
 | `adjuntos` | Archivos subidos por el docente | SAS token temporal (60 min) |
 | `plantillas` | Plantillas institucionales subidas | SAS token temporal (60 min) |
 

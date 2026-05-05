@@ -1,0 +1,53 @@
+[4/5/26, 7:00:28 p. m.] Ezequiel Baltodano C: Hola Adriana! 👋 Te cuento brevemente cómo vamos con el proyecto del asistente para docentes del MEP.
+
+La idea está bien definida: una app que genera planeamientos completos con IA, toma asistencia con QR y lleva el registro de notas, todo basado en los programas oficiales del MEP.
+
+El plan de trabajo está dividido en fases:
+
+Fase 0 (ahora): Montar toda la infraestructura técnica en la nube (Azure). Es el setup antes de escribir código de negocio.
+
+Fase 1: El módulo que más te va a interesar — grupos, estudiantes y la asistencia con QR. Esto sería lo primero que podrías usar en el aula.
+
+Fases siguientes: Notas, planeamientos con IA, adecuaciones curriculares y reportes exportables para el SIMAR.
+
+La idea es que lo más pronto posible tengas algo funcional para probarlo en el Colegio. ¿Lo ves bien así? ¿Alguna funcionalidad que quieras priorizar?
+
+[5/5/26, 7:43:01 a. m.] Adriana Guido Caruzo: La idea está bien definida: 
+
+1 que vea la plantilla del MEP y haga el play montado en esa plantilla 
+2 Que tenga en la base de datos todos los planes base  de todas las materias del MEP y todos los niveles 
+3 Que permita que se le dé un diagnóstico y un estudiante específico y haga un planteamiento individual según las necesidades de ese plan 
+4 Que tenga la opción de escoger hacer   un semanal, mensual, trimestral, semestral o anual
+5 Que se le pueda dar el calendario MEP pero se pueda modificar el eliminar fechas y adecuar según la institución 
+6 El plan sea muy específico con
+   • Aprendizajes esperados
+•⁠  ⁠Indicadores de evaluación
+•⁠  ⁠Estrategias de mediación
+•⁠  ⁠Actividades clase por clase
+•⁠  ⁠Recursos y materiales
+•⁠  ⁠Evidencias de aprendizaje
+•⁠  ⁠Instrumentos de evaluación
+•⁠  ⁠Anexos
+•⁠  ⁠Ejemplos listos para aplicar
+•⁠  ⁠Tareas o prácticas
+La aplicación no solo llenaría una plantilla, sino que desarrollaría el planeamiento de forma clara, detallada y aplicable, para que cualquier docente pudiera leerlo y ejecutarlo en el aula
+[5/5/26, 7:43:09 a. m.] Adriana Guido Caruzo: Esto es lo principal
+[5/5/26, 7:43:16 a. m.] Adriana Guido Caruzo: Lo del registro es aparte
+[5/5/26, 7:45:00 a. m.] Adriana Guido Caruzo: No SIMAR, si SEA
+[5/5/26, 7:48:40 a. m.] Adriana Guido Caruzo: Módulo de calendario
+
+La app debe permitir cargar el calendario MEP y modificarlo según cada institución.
+
+Debe poder:
+
+•⁠  ⁠Eliminar feriados.
+•⁠  ⁠Agregar actos cívicos.
+•⁠  ⁠Quitar semanas de exámenes.
+•⁠  ⁠Quitar congresos, capacitaciones o actividades institucionales.
+•⁠  ⁠Ajustar cantidad de lecciones por semana.
+•⁠  ⁠Reorganizar el planeamiento automáticamente.
+•⁠  ⁠⁠Quitar semana de exámenes 
+•⁠  ⁠⁠Consejo de profesores 
+•⁠  ⁠⁠FEA
+•⁠  ⁠⁠Semana del deporte
+[5/5/26, 7:52:56 a. m.] Adriana Guido Caruzo: https://www.facebook.com/share/p/1GxqnWdo9X/?mibextid=wwXIfr
