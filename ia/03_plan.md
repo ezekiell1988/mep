@@ -132,20 +132,21 @@ mep/
 | Cálculo automático de lecciones disponibles por período | ⏳ |
 | Reorganización automática del planeamiento al modificar el calendario | ⏳ |
 | **Base de conocimiento MEP** | |
-| Estructurar programa de Artes Plásticas 7°, 8°, 9° en JSON | ⏳ |
-| Cargar base de conocimiento en el sistema | ⏳ |
-| **Backend** | |
-| Módulo Planeamiento: LessonPlan CRUD | ⏳ |
-| Servicio de generación con Azure AI Foundry (GPT-5.5) | ⏳ |
-| Generación de actividades clase por clase + tareas + ejemplos listos para aplicar | ⏳ |
-| Soporte de plantilla MEP por defecto + plantilla institucional (upload DOCX/PDF) | ⏳ |
-| Sistema de caché con OutputCache (evitar llamadas duplicadas al LLM) | ⏳ |
-| Rate limiting en endpoint de generación (5 req/min) | ⏳ |
-| Generación de PDF y subida a Azure Blob Storage | ⏳ |
+| PDF programa Artes Plásticas subido → job extracción con GPT-5.5 | ⏳ |
+| Validación de unidades extraídas (admin) | ⏳ |
+| **Backend** ✅ | |
+| Entidades `CurriculumUnit` + `LessonPlan` + migración EF Core | ✅ |
+| Hangfire (queues: default, curriculum, planeamiento) + dashboard `/hangfire` | ✅ |
+| `CurriculumModule` — upload PDF → Blob → job extracción | ✅ |
+| `ExtractCurriculumJob` — PdfPig + GPT-5.5 → `curriculum_units` | ✅ |
+| `PlaneamientoAiService` — GPT-5.5 anclado al currículo validado | ✅ |
+| `PlaneamientoModule` — POST crear, GET estado, GET lista | ✅ |
+| `GenerarPlaneamientoJob` — Pending → Generating → Ready/Failed | ✅ |
+| App Service configurado (AI + Storage + todas las vars) | ✅ |
+| Migración aplicada a BD producción | ✅ |
 | **App Web** | |
 | Formulario de parámetros del planeamiento | ⏳ |
-| Vista de calendario escolar personalizable | ⏳ |
-| Vista de planeamiento generado con editor básico | ⏳ |
+| Vista planeamiento generado (render Markdown) | ⏳ |
 | Descarga en PDF y DOCX | ⏳ |
 | Historial de planeamientos generados | ⏳ |
 | **App Móvil** | |

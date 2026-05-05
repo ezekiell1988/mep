@@ -1,4 +1,5 @@
 using AulaIA.Api.Features.Asistencia;
+using AulaIA.Api.Features.Curriculum;
 using AulaIA.Api.Features.Estudiantes;
 using AulaIA.Api.Features.Grupos;
 using AulaIA.Api.Features.Notas;
@@ -13,6 +14,7 @@ builder.Services.AddAulaIAOptions();
 builder.AddAulaIAPersistence();
 builder.AddAulaIAAuth();
 builder.AddAulaIACors();
+builder.AddAulaIAHangfire();
 
 builder.Services.AddOpenApi();
 
@@ -22,6 +24,7 @@ builder.Services
     .AddAsistenciaModule()
     .AddNotasModule()
     .AddPlaneamientoModule()
+    .AddCurriculumModule()
     .AddReportesModule()
     .AddPowerSyncModule();
 
@@ -40,6 +43,7 @@ else
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAulaIAHangfire();
 
 // ── Endpoints ─────────────────────────────────────────────────────────────
 app.MapGet("/health", () => TypedResults.Ok(new { status = "healthy", version = "1.0.0" }))
@@ -51,6 +55,7 @@ app.MapGruposEndpoints()
    .MapAsistenciaEndpoints()
    .MapNotasEndpoints()
    .MapPlaneamientoEndpoints()
+   .MapCurriculumEndpoints()
    .MapReportesEndpoints()
    .MapPowerSyncEndpoints();
 

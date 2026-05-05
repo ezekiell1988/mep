@@ -10,4 +10,5 @@ public sealed class StorageOptions
     public string ContainerPlaneamientos { get; init; } = "planeamientos";
     public string ContainerReportes { get; init; } = "reportes";
     public string ContainerAdjuntos { get; init; } = "adjuntos";
+    public string ContainerCurriculum { get; init; } = "curriculum";
 }

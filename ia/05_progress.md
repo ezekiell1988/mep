@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
 > **Última actualización:** 2026-05-05
-> **Fase activa:** Fase 2 — Planeamiento Didáctico con IA + Calendario
+> **Fase activa:** Fase 2 — Planeamiento Didáctico con IA — Backend ✅ completo; pendiente App Web
 
 ---
 
@@ -86,11 +86,23 @@
 ### PC-06: Fase 2 — Planeamiento Didáctico con IA
 | Tarea | Estado |
 |-------|--------|
-| F2 · Programa de Artes Plásticas 7°, 8°, 9° estructurado en JSON | ⏳ |
-| F2 · Migración EF Core: LessonPlan, CalendarEvent | ⏳ |
-| F2 · Módulo Planeamiento: CRUD + servicio Azure AI Foundry | ⏳ |
-| F2 · Endpoint `/api/planeamiento/generar` — genera planeamiento con GPT-5.5 | ⏳ |
-| F2 · Calendario escolar MEP base + CRUD eventos no lectivos | ⏳ |
-| F2 · App web: formulario parámetros + vista planeamiento generado | ⏳ |
+| F2 · NuGet: Hangfire.AspNetCore 1.8.20 + Hangfire.PostgreSql 1.20.10 + Azure.AI.OpenAI 2.1.0 + PdfPig 0.1.9 | ✅ |
+| F2 · Entidades EF: `CurriculumUnit` (unidades del programa MEP, JSONB) + `LessonPlan` (planeamiento generado) | ✅ |
+| F2 · `AiOptions.cs` — config Endpoint/DeploymentName/ApiKey con validación en start | ✅ |
+| F2 · `StorageOptions` — container `curriculum` agregado | ✅ |
+| F2 · `HangfireExtensions.cs` — Hangfire con PostgreSQL + dashboard `/hangfire` (solo admin) | ✅ |
+| F2 · `HangfireAdminAuthFilter.cs` — dashboard protegido con rol admin Auth0 | ✅ |
+| F2 · Migración EF Core `AddCurriculumAndPlanning` — tablas `curriculum_units` + `lesson_plans` | ✅ |
+| F2 · `CurriculumModule.cs` — POST upload PDF → Blob → job, GET unidades validadas, POST validar (admin) | ✅ |
+| F2 · `ExtractCurriculumJob.cs` — queue "curriculum": descarga PDF → PdfPig → GPT-5.5 → BD | ✅ |
+| F2 · `PlaneamientoAiService.cs` — consulta curriculum validado → prompt GPT-5.5 → Markdown | ✅ |
+| F2 · `PlaneamientoModule.cs` — POST crear (encola job), GET por id, GET lista por docente | ✅ |
+| F2 · `GenerarPlaneamientoJob.cs` — queue "planeamiento": Pending→Generating→Ready/Failed | ✅ |
+| F2 · App Service `app-demo-api` — 10 variables de entorno configuradas (DB, Auth, Storage, PowerSync, AI) | ✅ |
+| F2 · `appsettings.Development.json` — credenciales AI Foundry + storage key completa | ✅ |
+| F2 · Migración aplicada a BD de producción | ✅ |
+| F2 · Subir PDF del programa MEP (Artes Plásticas 7°, 8°, 9°) y validar extracción | ⏳ |
+| F2 · App web: formulario parámetros del planeamiento | ⏳ |
+| F2 · App web: vista planeamiento generado (render Markdown) | ⏳ |
 | F2 · App web: descarga PDF/DOCX | ⏳ |
 | F2 · App móvil: vista planeamientos guardados (offline) | ⏳ |

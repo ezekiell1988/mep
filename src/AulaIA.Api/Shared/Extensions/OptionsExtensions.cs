@@ -31,6 +31,12 @@ public static class OptionsExtensions
                 .BindConfiguration(PowerSyncOptions.Section)
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
+
+            services
+                .AddOptions<AiOptions>()
+                .BindConfiguration(AiOptions.Section)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
         }
     }
 }
