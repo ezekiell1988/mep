@@ -63,5 +63,14 @@
 | F1 · Migración EF Core `AddStudentQrCode` — columna `qr_code` + índice único | ✅ |
 | F1 · Módulo Asistencia: GET por fecha (lista completa), POST upsert, POST scan QR | ✅ |
 | F1 · Endpoint `/api/powersync/token` — JWT HS256 firmado con sub del usuario | ✅ |
-| F1 · App móvil: auth Auth0 PKCE + pantallas grupos/estudiantes/lista | ⏳ |
+| F1 · App móvil: dependencias (react-native-auth0, @react-navigation, expo-camera, expo-secure-store, @powersync/react-native) | ✅ |
+| F1 · App móvil: `AuthContext.tsx` — Auth0 PKCE login/logout, token en SecureStore | ✅ |
+| F1 · App móvil: `api/client.ts` + `api/endpoints.ts` — wrapper tipado con Bearer token | ✅ |
+| F1 · App móvil: `LoginScreen` — botón Auth0, spinner | ✅ |
+| F1 · App móvil: `GruposScreen` — FlatList grupos, pull-to-refresh, logout | ✅ |
+| F1 · App móvil: `EstudiantesScreen` — lista alumnos, botón Tomar Lista Hoy | ✅ |
+| F1 · App móvil: `TomarListaScreen` — modo manual (ciclar estado) + modo QR (CameraView, cooldown 2s) | ✅ |
+| F1 · App móvil: `AppNavigator.tsx` + `App.tsx` — NavigationContainer + AuthProvider, TS 0 errores | ✅ |
+| F1 · App móvil: fixes RN best practices (Pressable, SafeAreaView edges, falsy &&, contentInsetAdjustmentBehavior) | ✅ |
+| F1 · App móvil: PowerSync offline (SQLite schema + PowerSyncContext + Connector) | ⏳ |
 | F1 · App web: auth Auth0 + vistas grupos + descarga QRs PDF | ⏳ |

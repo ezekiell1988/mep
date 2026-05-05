@@ -96,11 +96,11 @@ mep/
 | Migración EF Core: Institution, User, Group, Student, AttendanceRecord | ✅ |
 | Migración `AddStudentQrCode` — columna qr_code + índice único | ✅ |
 | **App Móvil (React Native / Expo)** | |
-| Autenticación con Auth0 (PKCE) | ⏳ |
-| Pantalla: lista de grupos del docente | ⏳ |
-| Pantalla: lista de estudiantes por grupo | ⏳ |
-| Modo tomar lista con QR (Expo Camera) | ⏳ |
-| Modo tomar lista manual | ⏳ |
+| Autenticación con Auth0 (PKCE) | ✅ |
+| Pantalla: lista de grupos del docente | ✅ |
+| Pantalla: lista de estudiantes por grupo | ✅ |
+| Modo tomar lista con QR (Expo Camera) | ✅ |
+| Modo tomar lista manual | ✅ |
 | Offline con PowerSync (SQLite local) | ⏳ |
 | **App Web (Next.js)** | |
 | Autenticación con Auth0 | ⏳ |

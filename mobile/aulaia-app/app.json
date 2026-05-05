@@ -25,6 +25,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      ["react-native-auth0", { "domain": "aulaia-mep.us.auth0.com" }],
+      "expo-web-browser",
+      ["expo-barcode-scanner", { "cameraPermission": "AulaIA necesita acceso a la cámara para escanear códigos QR de asistencia." }],
+      ["expo-camera", { "cameraPermission": "AulaIA necesita acceso a la cámara para escanear códigos QR de asistencia." }],
+      "expo-secure-store"
+    ],
+    "scheme": "aulaia"
   }
 }
