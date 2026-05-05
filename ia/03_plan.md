@@ -101,7 +101,12 @@ mep/
 | Pantalla: lista de estudiantes por grupo | ✅ |
 | Modo tomar lista con QR (Expo Camera) | ✅ |
 | Modo tomar lista manual | ✅ |
-| Offline con PowerSync (SQLite local) | ⏳ |
+| Offline con PowerSync (SQLite local) | ✅ |
+| **App Web (Next.js)** | |
+| Autenticación con Auth0 | 🔄 |
+| Vista de grupos y estudiantes | 🔄 |
+| Descarga / impresión de QRs (PDF con toda la sección) | 🔄 |
+| Vista historial de asistencia por sección | ⏳ |
 | **App Web (Next.js)** | |
 | Autenticación con Auth0 | ⏳ |
 | Vista de grupos y estudiantes | ⏳ |

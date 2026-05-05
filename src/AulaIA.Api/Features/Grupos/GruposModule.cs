@@ -59,11 +59,12 @@ public static class GruposModule
 
         var grupo = new Group
         {
-            Name        = request.Name,
-            Level       = request.Level,
-            Subject     = request.Subject,
-            SchoolYear  = request.SchoolYear,
-            TeacherId   = user.Id,
+            Name          = request.Name,
+            Level         = request.Level,
+            Subject       = request.Subject,
+            SchoolYear    = request.SchoolYear,
+            TeacherId     = user.Id,
+            TeacherSub    = currentUser.Auth0Sub,
             InstitutionId = user.InstitutionId
         };
 

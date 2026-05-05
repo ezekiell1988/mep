@@ -39,6 +39,13 @@ public sealed class GroupConfiguration : IEntityTypeConfiguration<Group>
         builder.Property(x => x.TeacherId)
                .HasColumnName("teacher_id");
 
+        builder.Property(x => x.TeacherSub)
+               .HasColumnName("teacher_sub")
+               .HasMaxLength(128)
+               .IsRequired()
+               .HasDefaultValue("")
+               .HasComment("Auth0 sub del docente — usado por PowerSync Sync Rules para filtrar sin casts de UUID.");
+
         builder.Property(x => x.InstitutionId)
                .HasColumnName("institution_id");
 

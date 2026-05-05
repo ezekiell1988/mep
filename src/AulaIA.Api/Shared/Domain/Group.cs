@@ -9,6 +9,8 @@ public sealed class Group
     public required string Subject { get; set; } // ej. "Matemáticas"
     public int SchoolYear { get; set; } = DateTime.UtcNow.Year;
     public Guid TeacherId { get; set; }
+    /// Auth0 sub del docente — columna de texto para Sync Rules de PowerSync (evita casts de UUID).
+    public string TeacherSub { get; set; } = "";
     public Guid InstitutionId { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;

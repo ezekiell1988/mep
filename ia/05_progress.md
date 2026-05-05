@@ -72,5 +72,10 @@
 | F1 · App móvil: `TomarListaScreen` — modo manual (ciclar estado) + modo QR (CameraView, cooldown 2s) | ✅ |
 | F1 · App móvil: `AppNavigator.tsx` + `App.tsx` — NavigationContainer + AuthProvider, TS 0 errores | ✅ |
 | F1 · App móvil: fixes RN best practices (Pressable, SafeAreaView edges, falsy &&, contentInsetAdjustmentBehavior) | ✅ |
-| F1 · App móvil: PowerSync offline (SQLite schema + PowerSyncContext + Connector) | ⏳ |
-| F1 · App web: auth Auth0 + vistas grupos + descarga QRs PDF | ⏳ |
+| F1 · Sync Rules YAML en PowerSync Cloud dashboard (tablas: groups, students, attendance_records filtradas por teacher_sub) | ✅ |
+| F1 · Endpoint `/api/powersync/crud` — recibe mutations de asistencia del Connector | ✅ |
+| F1 · App móvil: `powersync/schema.ts` — tablas SQLite locales | ✅ |
+| F1 · App móvil: `powersync/PowerSyncContext.tsx` — DB + Connector + Provider | ✅ |
+| F1 · App móvil: rewire GruposScreen + EstudiantesScreen → useQuery SQLite | ✅ |
+| F1 · App móvil: TomarListaScreen escribe en SQLite local (auto-sync) | ✅ |
+| F1 · App web: auth Auth0 + vistas grupos + descarga QRs PDF | 🔄 |

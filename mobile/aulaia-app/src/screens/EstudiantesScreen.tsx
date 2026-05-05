@@ -1,50 +1,43 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   View, Text, FlatList, Pressable,
-  StyleSheet, ActivityIndicator, RefreshControl,
+  StyleSheet, ActivityIndicator,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useAuth } from '../auth/AuthContext';
-import { getEstudiantes, Estudiante } from '../api/endpoints';
+import { useQuery } from '@powersync/react-native';
+import type { StudentRow } from '../powersync/schema';
 import { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Estudiantes'>;
 
 export default function EstudiantesScreen({ navigation, route }: Props) {
   const { grupo } = route.params;
-  const { accessToken } = useAuth();
-  const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    if (!accessToken) return;
-    try {
-      setError(null);
-      const data = await getEstudiantes(accessToken, grupo.id);
-      setEstudiantes(data);
-    } catch (e: any) {
-      setError(e.message ?? 'Error al cargar estudiantes');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [accessToken, grupo.id]);
-
-  useEffect(() => { load(); }, [load]);
-
-  const onRefresh = () => { setRefreshing(true); load(); };
+  // Lee del SQLite local: funciona offline y se actualiza en tiempo real al sincronizar.
+  const { data: rows, isLoading, error } = useQuery<StudentRow>(
+    'SELECT * FROM students WHERE group_id = ? ORDER BY full_name',
+    [grupo.id],
+  );
 
   const today = new Date().toISOString().split('T')[0];
 
-  if (loading) {
+  const renderItem = useCallback(
+    ({ item }: { item: StudentRow }) => (
+      <View style={styles.card}>
+        <Text style={styles.cardName}>{item.full_name}</Text>
+        <Text style={styles.cardCode}>Exp. {item.student_code}</Text>
+      </View>
+    ),
+    [],
+  );
+
+  if (isLoading) {
     return <View style={styles.center}><ActivityIndicator size="large" color="#1a56db" /></View>;
   }
 
   return (
     <View style={styles.container}>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={styles.error}>{String(error)}</Text> : null}
       <Pressable
         style={styles.tomarListaBtn}
         onPress={() => navigation.navigate('TomarLista', { grupo, date: today })}
@@ -52,18 +45,12 @@ export default function EstudiantesScreen({ navigation, route }: Props) {
         <Text style={styles.tomarListaText}>📋 Tomar Lista — Hoy</Text>
       </Pressable>
       <FlatList
-        data={estudiantes}
-        keyExtractor={e => e.studentId}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        data={rows}
+        keyExtractor={e => e.id}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={estudiantes.length === 0 ? styles.center : { paddingBottom: 24 }}
+        contentContainerStyle={rows.length === 0 ? styles.center : { paddingBottom: 24 }}
         ListEmptyComponent={<Text style={styles.empty}>No hay estudiantes en este grupo.</Text>}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.cardName}>{item.fullName}</Text>
-            <Text style={styles.cardCode}>Exp. {item.studentCode}</Text>
-          </View>
-        )}
+        renderItem={renderItem}
       />
     </View>
   );
@@ -80,3 +67,4 @@ const styles = StyleSheet.create({
   cardName:        { fontSize: 15, fontWeight: '500', color: '#111827' },
   cardCode:        { fontSize: 12, color: '#9ca3af', marginTop: 2 },
 });
+
