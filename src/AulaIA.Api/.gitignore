@@ -1,0 +1,29 @@
+## .NET / ASP.NET Core
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+
+## Publish output
+publish/
+out/
+
+## EF Core migrations backup
+*.bak
+
+## App secrets / environment overrides
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+secrets.json
+.env
+.env.*
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+
+## macOS
+.DS_Store

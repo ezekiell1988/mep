@@ -41,7 +41,7 @@
 ### PC-03: Repositorio y CI/CD
 | Tarea | Estado |
 |-------|--------|
-| F0-09 · Solución .NET 10 `AulaIA.Api` con Feature Folders | ⏳ |
+| F0-09 · Solución .NET 10 `AulaIA.Api` con Feature Folders | ✅ |
 | F0-10 · Proyecto Next.js `aulaia-web` | ⏳ |
 | F0-11 · Proyecto Expo `aulaia-app` | ⏳ |
 | F0-12 · GitHub Actions CI/CD (backend + web) | ⏳ |

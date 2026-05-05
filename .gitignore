@@ -1,1 +1,8 @@
 /credentials/
+# .NET build artifacts
+src/**/bin/
+src/**/obj/
+
+# User secrets
+src/**/appsettings.Development.json
+**/secrets.json

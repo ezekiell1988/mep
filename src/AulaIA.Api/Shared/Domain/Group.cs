@@ -1,0 +1,21 @@
+namespace AulaIA.Api.Shared.Domain;
+
+/// <summary>Grupo / sección de clase</summary>
+public sealed class Group
+{
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public required string Name { get; set; }
+    public required string Level { get; set; }   // ej. "7° Año"
+    public required string Subject { get; set; } // ej. "Matemáticas"
+    public int SchoolYear { get; set; } = DateTime.UtcNow.Year;
+    public Guid TeacherId { get; set; }
+    public Guid InstitutionId { get; set; }
+    public bool IsActive { get; set; } = true;
+    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+
+    public User? Teacher { get; init; }
+    public Institution? Institution { get; init; }
+    public ICollection<Student> Students { get; init; } = [];
+    public ICollection<AttendanceRecord> AttendanceRecords { get; init; } = [];
+    public ICollection<EvaluationActivity> EvaluationActivities { get; init; } = [];
+}
