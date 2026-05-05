@@ -57,25 +57,25 @@ mep/
 
 | # | Tarea | Estado |
 |---|-------|--------|
-| F0-01 | Crear Storage Account `stdemo` + contenedores (planeamientos, reportes, exportaciones, adjuntos, plantillas) | ⏳ |
-| F0-02 | Crear Key Vault `kv-demo` | ⏳ |
-| F0-03 | Crear PostgreSQL Flexible Server `psql-demo` + base de datos `aulaia` | ⏳ |
-| F0-04 | Crear App Service Plan `asp-demo` + App Service `app-demo-api` | ⏳ |
-| F0-05 | Habilitar Managed Identity en App Service + asignar roles a Key Vault, Blob Storage | ⏳ |
-| F0-06 | Crear Azure AI Foundry Hub + Project + deploy modelo GPT-5.5 | ⏳ |
-| F0-07 | Configurar Static Web App `swa-demo` | ⏳ |
-| F0-08 | Configurar PowerSync (Cloud Free tier) apuntando al PostgreSQL | ⏳ |
-| F0-09 | Crear solución .NET 10: `AulaIA.Api` con estructura Feature Folders | ⏳ |
-| F0-10 | Crear proyecto Next.js `aulaia-web` | ⏳ |
-| F0-11 | Crear proyecto Expo `aulaia-app` | ⏳ |
-| F0-12 | Configurar GitHub Actions CI/CD para backend y web | ⏳ |
-| F0-13 | Crear migración inicial EF Core (`InitialCreate`) con todas las entidades | ⏳ |
-| F0-14 | Configurar Auth0: tenant, aplicaciones (API, web, mobile), roles y claims | ⏳ |
-| F0-15 | Configurar DNS en Cloudflare: CNAME `mep.ezekl.com` → `swa-demo` y `api.mep.ezekl.com` → `app-demo-api` | ⏳ |
+| F0-01 | Storage Account `stdemomep` + 5 contenedores | ✅ |
+| F0-02 | Key Vault `kv-demomep` | ✅ |
+| F0-03 | PostgreSQL 16 en VM `demo-itqs` + DB `aulaia` | ✅ |
+| F0-04 | App Service Plan `asp-demomep` + App Service `app-demo-api` | ✅ |
+| F0-05 | Managed Identity asignada (roles KV/Storage pendientes — Fase 3) | ⚠️ |
+| F0-06 | AI Foundry GPT-5.5 configurado | ✅ |
+| F0-07 | Static Web App — cancelado (ADR-007: SPA en App Service único) | ❌ |
+| F0-08 | PowerSync Cloud conectado a PostgreSQL | ✅ |
+| F0-09 | Solución .NET 10 `AulaIA.Api` con Feature Folders | ✅ |
+| F0-10 | Proyecto Next.js `aulaia-web` (output: export, 0 vulnerabilidades) | ✅ |
+| F0-11 | Proyecto Expo `aulaia-app` (SDK 55, TypeScript) | ✅ |
+| F0-12 | GitHub Actions CI/CD — workflow unificado `deploy.yml` | ✅ |
+| F0-13 | Migración EF Core `InitialCreate` + seed data (20 instituciones, 2 usuarios) | ✅ |
+| F0-14 | Auth0: tenant `aulaia-mep`, API, apps web/móvil, roles, Action claim | ✅ |
+| F0-15 | DNS Cloudflare: `mep.ezekl.com` + `api.mep.ezekl.com` → `app-demo-api` | ✅ |
 
 ---
 
-## Fase 1 — Core: Grupos, Estudiantes y Asistencia QR ⏳ Pendiente
+## Fase 1 — Core: Grupos, Estudiantes y Asistencia QR 🔄 En progreso
 
 **Objetivo:** MVP mínimo viable para que Adriana pueda usar la app en el aula desde el primer día. El módulo estrella (QR) y el núcleo del sistema funcionan completamente.
 

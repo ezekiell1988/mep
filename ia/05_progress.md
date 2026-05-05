@@ -1,17 +1,17 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-04
-> **Fase activa:** Fase 0 — Infraestructura Azure y setup del proyecto
+> **Última actualización:** 2026-05-05
+> **Fase activa:** Fase 1 — Core: Grupos, Estudiantes y Asistencia QR
 
 ---
 
 ## ✅ Completado
 
-*(Nada completado aún — proyecto en fase de planificación)*
+**Fase 0 — Infraestructura Azure y setup del proyecto** (2026-05-05)
 
 ---
 
-## 🔄 En progreso — Fase 0
+## 🔄 En progreso — Fase 1
 
 > **Decisiones de diseño confirmadas (2026-05-04):**
 > - Stack definido: .NET 10 + EF Core 10 + PostgreSQL + PowerSync + Auth0 + Azure AI Foundry GPT-5.5
@@ -51,3 +51,16 @@
 |-------|--------|
 | F0-13 · Migración EF Core `InitialCreate` + seed data (20 instituciones MEP, usuarios admin/docente) | ✅ |
 | F0-14 · Auth0: tenant `aulaia-mep`, API, apps web/móvil, roles (admin/teacher/director), Action roles claim | ✅ |
+| F0-15 · DNS Cloudflare: `mep.ezekl.com` + `api.mep.ezekl.com` → `app-demo-api` (proxy ✅) | ✅ |
+
+### PC-05: Fase 1 — Core
+| Tarea | Estado |
+|-------|--------|
+| F1 · Auth0 JWT middleware en .NET (`AddAuthentication` + `AddAuthorization`) | ⏳ |
+| F1 · Módulo Grupos: CRUD + endpoints | ⏳ |
+| F1 · Módulo Estudiantes: CRUD + importación CSV | ⏳ |
+| F1 · Generación QR UUID por estudiante | ⏳ |
+| F1 · Módulo Asistencia: registro QR + manual | ⏳ |
+| F1 · Endpoint `/api/powersync/token` | ⏳ |
+| F1 · App móvil: auth Auth0 PKCE + pantallas grupos/estudiantes/lista | ⏳ |
+| F1 · App web: auth Auth0 + vistas grupos + descarga QRs PDF | ⏳ |
