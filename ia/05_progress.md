@@ -23,9 +23,9 @@
 ### PC-01: Infraestructura Azure
 | Tarea | Estado |
 |-------|--------|
-| F0-01 · Storage Account `stdemo` + 5 contenedores | ⏳ |
-| F0-02 · Key Vault `kv-demo` | ⏳ |
-| F0-03 · PostgreSQL Flexible Server `psql-demo` + DB `aulaia` | ⏳ |
+| F0-01 · Storage Account `stdemomep` + 5 contenedores | ✅ |
+| F0-02 · Key Vault `kv-demomep` | ✅ |
+| F0-03 · PostgreSQL 16 en VM `demo-itqs` (ver `credentials/db.txt`) + DB `aulaia` | ✅ |
 | F0-04 · App Service Plan `asp-demo` + App Service `app-demo-api` | ⏳ |
 | F0-05 · Managed Identity + roles (Key Vault, Blob Storage) | ⏳ |
 | F0-06 · AI Foundry Hub `aif-demo` + Project `aiproj-demo` + deploy GPT-5.5 | ⏳ |
