@@ -57,10 +57,17 @@ jobs:
       - name: Copy Next.js output to wwwroot
         run: cp -r ${{ env.WEB_DIR }}/out ${{ env.PUBLISH_DIR }}/wwwroot
 
-      # ── Deploy a Azure App Service ─────────────────────────────
-      - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ env.PUBLISH_DIR }}
+      # ── Empaquetar y desplegar vía Kudu ZipDeploy ────────────
+      - name: Zip artifact
+        run: cd ${{ env.PUBLISH_DIR }} && zip -r ../deploy.zip .
+
+      - name: Deploy to Azure App Service (Kudu ZipDeploy)
+        run: |
+          curl -X POST \
+            "https://app-demo-api.scm.azurewebsites.net/api/zipdeploy" \
+            --user "${{ secrets.AZURE_SCM_USERNAME }}:${{ secrets.AZURE_SCM_PASSWORD }}" \
+            --header "Content-Type: application/zip" \
+            --data-binary @deploy.zip \
+            --fail \
+            --silent \
+            --show-error
