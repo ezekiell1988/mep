@@ -12,6 +12,7 @@ env:
   WEB_DIR: "src/aulaia-web"
   PUBLISH_DIR: "publish"
   AZURE_WEBAPP_NAME: "app-demo-api"
+  AZURE_RESOURCE_GROUP: "rg-ezequiel"
 
 jobs:
   build-and-deploy:
@@ -62,10 +63,13 @@ jobs:
         run: cd ${{ env.PUBLISH_DIR }} && zip -r ../deploy.zip .
 
       - name: Deploy to Azure App Service (Kudu ZipDeploy)
+        env:
+          SCM_USER: ${{ secrets.AZURE_SCM_USERNAME }}
+          SCM_PASS: ${{ secrets.AZURE_SCM_PASSWORD }}
         run: |
           curl -X POST \
-            "https://app-demo-api.scm.azurewebsites.net/api/zipdeploy" \
-            --user "${{ secrets.AZURE_SCM_USERNAME }}:${{ secrets.AZURE_SCM_PASSWORD }}" \
+            "https://${{ env.AZURE_WEBAPP_NAME }}.scm.azurewebsites.net/api/zipdeploy" \
+            --user "${SCM_USER}:${SCM_PASS}" \
             --header "Content-Type: application/zip" \
             --data-binary @deploy.zip \
             --fail \
