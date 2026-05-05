@@ -1,6 +1,7 @@
 using AulaIA.Api.Shared.Domain;
 using AulaIA.Api.Shared.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace AulaIA.Api.Features.Grupos;
 
@@ -12,7 +13,7 @@ public static class GruposModule
     {
         var grupos = app.MapGroup("/api/grupos")
                         .WithTags("Grupos")
-                        .RequireAuthorization();
+                        .RequireAuthorization("teacher");
 
         grupos.MapGet("/", GetAllAsync).WithName("GetGrupos");
         grupos.MapGet("/{id:guid}", GetByIdAsync).WithName("GetGrupoById");
@@ -23,40 +24,47 @@ public static class GruposModule
         return app;
     }
 
-    private static async Task<IResult> GetAllAsync(AulaIADbContext db, CancellationToken ct)
+    private static async Task<IResult> GetAllAsync(
+        ICurrentUserService currentUser, AulaIADbContext db, CancellationToken ct)
     {
+        var user = await currentUser.ResolveAsync(ct);
+
         var grupos = await db.Groups
             .AsNoTracking()
-            .Where(g => g.IsActive)
+            .Where(g => g.TeacherId == user.Id && g.IsActive)
             .Select(g => new GrupoResponse(g.Id, g.Name, g.Level, g.Subject, g.SchoolYear, g.TeacherId))
             .ToListAsync(ct);
 
         return TypedResults.Ok(grupos);
     }
 
-    private static async Task<IResult> GetByIdAsync(Guid id, AulaIADbContext db, CancellationToken ct)
+    private static async Task<IResult> GetByIdAsync(
+        Guid id, ICurrentUserService currentUser, AulaIADbContext db, CancellationToken ct)
     {
+        var user = await currentUser.ResolveAsync(ct);
+
         var grupo = await db.Groups
             .AsNoTracking()
-            .Where(g => g.Id == id && g.IsActive)
+            .Where(g => g.Id == id && g.TeacherId == user.Id && g.IsActive)
             .Select(g => new GrupoResponse(g.Id, g.Name, g.Level, g.Subject, g.SchoolYear, g.TeacherId))
             .FirstOrDefaultAsync(ct);
 
-        return grupo is null
-            ? TypedResults.NotFound()
-            : TypedResults.Ok(grupo);
+        return grupo is null ? TypedResults.NotFound() : TypedResults.Ok(grupo);
     }
 
-    private static async Task<IResult> CreateAsync(CreateGrupoRequest request, AulaIADbContext db, CancellationToken ct)
+    private static async Task<IResult> CreateAsync(
+        CreateGrupoRequest request, ICurrentUserService currentUser, AulaIADbContext db, CancellationToken ct)
     {
+        var user = await currentUser.ResolveAsync(ct);
+
         var grupo = new Group
         {
-            Name = request.Name,
-            Level = request.Level,
-            Subject = request.Subject,
-            SchoolYear = request.SchoolYear,
-            TeacherId = request.TeacherId,
-            InstitutionId = request.InstitutionId
+            Name        = request.Name,
+            Level       = request.Level,
+            Subject     = request.Subject,
+            SchoolYear  = request.SchoolYear,
+            TeacherId   = user.Id,
+            InstitutionId = user.InstitutionId
         };
 
         db.Groups.Add(grupo);
@@ -66,22 +74,28 @@ public static class GruposModule
             new GrupoResponse(grupo.Id, grupo.Name, grupo.Level, grupo.Subject, grupo.SchoolYear, grupo.TeacherId));
     }
 
-    private static async Task<IResult> UpdateAsync(Guid id, UpdateGrupoRequest request, AulaIADbContext db, CancellationToken ct)
+    private static async Task<IResult> UpdateAsync(
+        Guid id, UpdateGrupoRequest request, ICurrentUserService currentUser, AulaIADbContext db, CancellationToken ct)
     {
-        var grupo = await db.Groups.FindAsync([id], ct);
+        var user = await currentUser.ResolveAsync(ct);
+
+        var grupo = await db.Groups.FirstOrDefaultAsync(g => g.Id == id && g.TeacherId == user.Id, ct);
         if (grupo is null) return TypedResults.NotFound();
 
-        grupo.Name = request.Name;
-        grupo.Level = request.Level;
+        grupo.Name    = request.Name;
+        grupo.Level   = request.Level;
         grupo.Subject = request.Subject;
 
         await db.SaveChangesAsync(ct);
         return TypedResults.NoContent();
     }
 
-    private static async Task<IResult> DeleteAsync(Guid id, AulaIADbContext db, CancellationToken ct)
+    private static async Task<IResult> DeleteAsync(
+        Guid id, ICurrentUserService currentUser, AulaIADbContext db, CancellationToken ct)
     {
-        var grupo = await db.Groups.FindAsync([id], ct);
+        var user = await currentUser.ResolveAsync(ct);
+
+        var grupo = await db.Groups.FirstOrDefaultAsync(g => g.Id == id && g.TeacherId == user.Id, ct);
         if (grupo is null) return TypedResults.NotFound();
 
         grupo.IsActive = false;
@@ -93,11 +107,12 @@ public static class GruposModule
 public sealed record GrupoResponse(Guid Id, string Name, string Level, string Subject, int SchoolYear, Guid TeacherId);
 
 public sealed record CreateGrupoRequest(
-    string Name,
-    string Level,
-    string Subject,
-    int SchoolYear,
-    Guid TeacherId,
-    Guid InstitutionId);
+    [property: Required, StringLength(100, MinimumLength = 2)] string Name,
+    [property: Required, StringLength(50)]                     string Level,
+    [property: Required, StringLength(100)]                    string Subject,
+    [property: Range(2020, 2100)]                              int SchoolYear);
 
-public sealed record UpdateGrupoRequest(string Name, string Level, string Subject);
+public sealed record UpdateGrupoRequest(
+    [property: Required, StringLength(100, MinimumLength = 2)] string Name,
+    [property: Required, StringLength(50)]                     string Level,
+    [property: Required, StringLength(100)]                    string Subject);

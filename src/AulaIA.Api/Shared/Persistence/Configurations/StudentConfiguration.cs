@@ -26,6 +26,12 @@ public sealed class StudentConfiguration : IEntityTypeConfiguration<Student>
                .IsRequired()
                .HasComment("Número de expediente MEP");
 
+        builder.Property(x => x.QrCode)
+               .HasColumnName("qr_code")
+               .HasMaxLength(32)
+               .IsRequired()
+               .HasComment("UUID sin guiones — payload del código QR para asistencia");
+
         builder.Property(x => x.GroupId)
                .HasColumnName("group_id");
 
@@ -42,6 +48,11 @@ public sealed class StudentConfiguration : IEntityTypeConfiguration<Student>
         builder.HasIndex(x => new { x.StudentCode, x.GroupId })
                .IsUnique()
                .HasDatabaseName("ix_students_code_group");
+
+        // QR único globalmente — el scanner resuelve estudiante sin saber el grupo
+        builder.HasIndex(x => x.QrCode)
+               .IsUnique()
+               .HasDatabaseName("ix_students_qr_code");
 
         builder.HasIndex(x => x.GroupId)
                .HasDatabaseName("ix_students_group_id");
