@@ -35,8 +35,8 @@
 ### PC-02: DNS y Dominio
 | Tarea | Estado |
 |-------|--------|
-| F0-15 · CNAME `mep.ezekl.com` → `app-demo-api` en Cloudflare (web + api unificados) | ⏳ |
-| F0-15 · CNAME `api.mep.ezekl.com` → `app-demo-api` en Cloudflare | ⏳ |
+| F0-15 · CNAME `mep.ezekl.com` → `app-demo-api` en Cloudflare (web + api unificados) | ✅ |
+| F0-15 · CNAME `api.mep.ezekl.com` → `app-demo-api` en Cloudflare | ✅ |
 
 ### PC-03: Repositorio y CI/CD
 | Tarea | Estado |
