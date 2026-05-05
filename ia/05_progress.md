@@ -49,5 +49,5 @@
 ### PC-04: Base de datos y Auth
 | Tarea | Estado |
 |-------|--------|
-| F0-13 · Migración EF Core `InitialCreate` | ⏳ |
+| F0-13 · Migración EF Core `InitialCreate` + seed data (20 instituciones MEP, usuarios admin/docente) | ✅ |
 | F0-14 · Auth0: tenant, apps, roles, claims, callbacks | ⏳ |
