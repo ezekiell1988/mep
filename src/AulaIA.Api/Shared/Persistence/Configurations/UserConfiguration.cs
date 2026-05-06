@@ -70,7 +70,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             new User
             {
                 Id            = Users.Ezequiel,
-                Auth0Sub      = "auth0|PLACEHOLDER_EZEQUIEL",   // actualizar tras F0-14
+                Auth0Sub      = "auth0|69fae47c268da9d7e46c6d4b",   // actualizar tras F0-14
                 Email         = "ezekiell1988@hotmail.com",
                 FullName      = "Ezequiel Baltodano",
                 Role          = UserRole.Admin,

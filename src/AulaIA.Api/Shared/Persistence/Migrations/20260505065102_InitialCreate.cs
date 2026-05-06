@@ -216,7 +216,7 @@ namespace AulaIA.Api.Shared.Persistence.Migrations
             migrationBuilder.InsertData(
                 table: "users",
                 columns: new[] { "id", "auth0_sub", "created_at", "email", "full_name", "institution_id", "role" },
-                values: new object[] { new Guid("bb000001-0000-0000-0000-000000000001"), "auth0|PLACEHOLDER_EZEQUIEL", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "ezekiell1988@hotmail.com", "Ezequiel Baltodano", new Guid("aa000001-0000-0000-0000-000000000001"), "Admin" });
+                values: new object[] { new Guid("bb000001-0000-0000-0000-000000000001"), "auth0|69fae47c268da9d7e46c6d4b", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "ezekiell1988@hotmail.com", "Ezequiel Baltodano", new Guid("aa000001-0000-0000-0000-000000000001"), "Admin" });
 
             migrationBuilder.InsertData(
                 table: "users",

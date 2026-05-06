@@ -558,7 +558,7 @@ namespace AulaIA.Api.Shared.Persistence.Migrations
                         new
                         {
                             Id = new Guid("bb000001-0000-0000-0000-000000000001"),
-                            Auth0Sub = "auth0|PLACEHOLDER_EZEQUIEL",
+                            Auth0Sub = "auth0|69fae47c268da9d7e46c6d4b",
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "ezekiell1988@hotmail.com",
                             FullName = "Ezequiel Baltodano",

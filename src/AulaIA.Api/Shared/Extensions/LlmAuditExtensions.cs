@@ -1,6 +1,10 @@
 using AulaIA.Api.Shared.Options;
+using AulaIA.Api.Shared.Persistence;
 using AulaIA.Api.Shared.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Runtime.InteropServices;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace AulaIA.Api.Shared.Extensions;
@@ -81,6 +85,76 @@ public static class LlmAuditExtensions
                 return Results.NoContent();
             });
 
+            // ── Auth0 test — requiere token válido ──────────────────────────
+            group.MapGet("/auth-test", (HttpContext ctx, ILlmAuditService audit) =>
+            {
+                var principal = ctx.User;
+                var sub = principal.FindFirstValue("sub")
+                       ?? principal.FindFirstValue(ClaimTypes.NameIdentifier)
+                       ?? "(no sub)";
+                var claims = principal.Claims
+                    .Select(c => new { type = c.Type, value = c.Value })
+                    .ToList();
+
+                audit.LogEvent(
+                    "Auth0",
+                    "auth-test ejecutado",
+                    $"✅ sub={sub} | total_claims={claims.Count} | roles=[{string.Join(",", principal.FindAll(ClaimTypes.Role).Select(c => c.Value))}]",
+                    new { sub, claimCount = claims.Count });
+
+                return Results.Ok(new { sub, claims });
+            }).RequireAuthorization();
+
+            // ── User lookup — busca el usuario en BD por email o sub ────────
+            group.MapGet("/user-lookup", async (string? email, string? sub, AulaIADbContext db, ILlmAuditService audit) =>
+            {
+                var query = db.Users.AsNoTracking();
+                if (!string.IsNullOrEmpty(email))
+                    query = query.Where(u => u.Email == email);
+                else if (!string.IsNullOrEmpty(sub))
+                    query = query.Where(u => u.Auth0Sub == sub);
+                else
+                    return Results.BadRequest("Requiere ?email= o ?sub=");
+
+                var users = await query
+                    .Select(u => new { u.Id, u.Auth0Sub, u.Email, u.FullName, Role = u.Role.ToString() })
+                    .ToListAsync();
+
+                audit.LogEvent("UserLookup", $"Búsqueda por {(email is not null ? $"email={email}" : $"sub={sub}")}", $"{users.Count} resultado(s)");
+
+                return Results.Ok(users);
+            });
+
+            // ── Patch auth0Sub — solo dev, une BD con el sub real del token ─
+            group.MapPatch("/user-fix-sub", async (string email, string newSub, AulaIADbContext db, ILlmAuditService audit) =>
+            {
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
+                if (user is null) return Results.NotFound($"No existe usuario con email={email}");
+
+                var oldSub = user.Auth0Sub;
+                user.Auth0Sub = newSub;
+                await db.SaveChangesAsync();
+
+                audit.LogEvent("UserFixSub", $"Auth0Sub actualizado para {email}",
+                    $"old={oldSub} → new={newSub}");
+
+                return Results.Ok(new { email, oldSub, newSub });
+            });
+
+            return app;
+        }
+
+        public WebApplication LogStartupFacts()
+        {
+            var audit = app.Services.GetRequiredService<ILlmAuditService>();
+            audit.LogStartup("AulaIA.Api", [
+                $"Framework: {RuntimeInformation.FrameworkDescription}",
+                $"Environment: {app.Environment.EnvironmentName}",
+                $"Auth0 Authority: {app.Configuration["Auth:Authority"]}",
+                $"Auth0 Audience: {app.Configuration["Auth:Audience"]}",
+                $"Módulos registrados: Grupos, Estudiantes, Asistencia, Notas, Planeamiento, Curriculum, Reportes, PowerSync",
+                $"Diag endpoints: GET /api/diag/audit, GET /api/diag/context, GET /api/diag/auth-test, DELETE /api/diag/audit, POST /api/diag/audit-event"
+            ]);
             return app;
         }
     }
