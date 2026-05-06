@@ -37,7 +37,7 @@ export default function GruposPage() {
   if (isLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div role="status" aria-label="Cargando grupos" className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -50,16 +50,26 @@ export default function GruposPage() {
           <h1 className="text-2xl font-bold text-gray-900">Mis Grupos</h1>
           {user?.name && <p className="text-sm text-gray-500 mt-1">{user.name}</p>}
         </div>
-        <button
-          onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-          className="text-sm text-red-500 hover:text-red-700 transition-colors"
-        >
-          Cerrar sesión
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => router.push('/planeamiento')}
+            className="text-sm border border-blue-300 text-blue-600 hover:bg-blue-50 font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            <span aria-hidden="true">📋</span> Planeamientos
+          </button>
+          <button
+            type="button"
+            onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+            className="text-sm text-red-500 hover:text-red-700 transition-colors"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </div>
 
       {error !== null ? (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6">{error}</div>
+        <div role="alert" className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6">{error}</div>
       ) : null}
 
       {grupos.length === 0 && !error ? (
@@ -74,10 +84,11 @@ export default function GruposPage() {
               <p className="text-sm text-gray-500 mt-0.5">{g.subject} · {g.level} · {g.schoolYear}</p>
             </div>
             <button
+              type="button"
               onClick={() => router.push(`/qrs?groupId=${g.id}&groupName=${encodeURIComponent(g.name)}&level=${encodeURIComponent(g.level)}`)}
               className="text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium px-4 py-2 rounded-lg transition-colors"
             >
-              🖨 Imprimir QRs
+              <span aria-hidden="true">🖨</span> Imprimir QRs
             </button>
           </div>
         ))}

@@ -38,3 +38,46 @@ export interface Estudiante {
 export const getGrupos    = (token: string) => apiFetch<Grupo[]>('/api/grupos', token);
 export const getEstudiantes = (token: string, groupId: string) =>
   apiFetch<Estudiante[]>(`/api/grupos/${groupId}/estudiantes`, token);
+
+// ─── Planeamiento ────────────────────────────────────────────────────────────
+
+export interface CrearPlaneamientoRequest {
+  groupId: string;
+  asignatura: string;
+  nivel: number;
+  trimestre: number;
+  anioLectivo: number;
+  fechaInicio: string; // "YYYY-MM-DD"
+  fechaFin: string;    // "YYYY-MM-DD"
+  leccionesPorSemana: number;
+}
+
+export interface PlaneamientoResponse {
+  id: string;
+  status: 'Pending' | 'Generating' | 'Ready' | 'Failed';
+  contenido: string | null;
+}
+
+export interface PlaneamientoListItem {
+  id: string;
+  asignatura: string;
+  nivel: number;
+  trimestre: number;
+  status: string;
+  createdAt: string;
+}
+
+export const crearPlaneamiento = (token: string, body: CrearPlaneamientoRequest) =>
+  apiFetch<PlaneamientoResponse>('/api/planeamiento', token, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+export const getPlaneamiento = (token: string, id: string) =>
+  apiFetch<PlaneamientoResponse>(`/api/planeamiento/${id}`, token);
+
+export const listPlaneamientos = (token: string, groupId?: string) =>
+  apiFetch<PlaneamientoListItem[]>(
+    groupId ? `/api/planeamiento?groupId=${groupId}` : '/api/planeamiento',
+    token,
+  );
