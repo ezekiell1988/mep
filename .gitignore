@@ -7,3 +7,6 @@ src/**/obj/
 # User secrets
 src/**/appsettings.Development.json
 **/secrets.json
+
+# Test config con credenciales reales (la plantilla sin secretos sí se versiona)
+src/**/appsettings.test.json

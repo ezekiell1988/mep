@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-05
-> **Fase activa:** Fase 2 — Planeamiento Didáctico con IA — Backend ✅ completo; pendiente App Web
+> **Última actualización:** 2026-05-06
+> **Fase activa:** Fase 2 — Planeamiento Didáctico con IA — Backend ✅ completo; Tests integración ✅; pendiente App Web
 
 ---
 
@@ -106,3 +106,17 @@
 | F2 · App web: vista planeamiento generado (render Markdown) | ⏳ |
 | F2 · App web: descarga PDF/DOCX | ⏳ |
 | F2 · App móvil: vista planeamientos guardados (offline) | ⏳ |
+
+### PC-07: Tests de Integración — `AulaIA.Tests`
+| Tarea | Estado |
+|-------|--------|
+| Tests · Proyecto `AulaIA.Tests` — xUnit + FluentAssertions + net10.0 | ✅ |
+| Tests · `appsettings.test.template.json` — plantilla con placeholders (versionada) | ✅ |
+| Tests · `appsettings.test.json` — valores reales (gitignoreado) | ✅ |
+| Tests · `Infrastructure/TestConfig.cs` — lee config de archivo + env vars | ✅ |
+| Tests · `Infrastructure/Auth0TokenHelper.cs` — obtiene token M2M de Auth0 (Client Credentials) | ✅ |
+| Tests · `Infrastructure/ApiClient.cs` — `HttpClient` con Bearer token; `CreateAsync()` + `CreateAnonymous()` | ✅ |
+| Tests · `Infrastructure/IntegrationTestBase.cs` — base con `IAsyncLifetime`, helpers `AssertStatusAsync` / `ReadJsonAsync` | ✅ |
+| Tests · `SanityTests.cs` — GET /health → 200, GET /api/grupos sin token → 401, con token → 200 | ✅ |
+| Tests · `CurriculumTests.cs` — upload PDF (202+jobId), upload no-PDF (400), poll extracción, validar unidad, listar curriculum | ✅ |
+| Tests · `PlaneamientoTests.cs` — listar (200), crear sin body (400), id inexistente (404), flujo completo Pending→Ready, leer PDF | ✅ |
