@@ -1,13 +1,15 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Pressable, Text, ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../auth/AuthContext';
 import LoginScreen from '../screens/LoginScreen';
 import GruposScreen from '../screens/GruposScreen';
 import EstudiantesScreen from '../screens/EstudiantesScreen';
 import TomarListaScreen from '../screens/TomarListaScreen';
+import PlaneamientosScreen from '../screens/PlaneamientosScreen';
+import PlaneamientoDetalleScreen from '../screens/PlaneamientoDetalleScreen';
 import { RootStackParamList } from './types';
-import { ActivityIndicator, View } from 'react-native';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -31,7 +33,22 @@ export default function AppNavigator() {
           headerTitleStyle: { fontWeight: '700' },
         }}
       >
-        <Stack.Screen name="Grupos" component={GruposScreen} options={{ title: 'Mis Grupos' }} />
+        <Stack.Screen
+          name="Grupos"
+          component={GruposScreen}
+          options={({ navigation }) => ({
+            title: 'Mis Grupos',
+            headerRight: () => (
+              <Pressable
+                onPress={() => navigation.navigate('Planeamientos')}
+                accessibilityLabel="Ver planeamientos"
+                style={{ marginRight: 4, paddingHorizontal: 8, paddingVertical: 4 }}
+              >
+                <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>Planeamientos</Text>
+              </Pressable>
+            ),
+          })}
+        />
         <Stack.Screen
           name="Estudiantes"
           component={EstudiantesScreen}
@@ -41,6 +58,18 @@ export default function AppNavigator() {
           name="TomarLista"
           component={TomarListaScreen}
           options={{ title: 'Tomar Lista' }}
+        />
+        <Stack.Screen
+          name="Planeamientos"
+          component={PlaneamientosScreen}
+          options={{ title: 'Planeamientos' }}
+        />
+        <Stack.Screen
+          name="PlaneamientoDetalle"
+          component={PlaneamientoDetalleScreen}
+          options={({ route }) => ({
+            title: `${route.params.asignatura} ${route.params.nivel}° — T${route.params.trimestre}`,
+          })}
         />
       </Stack.Navigator>
     </NavigationContainer>

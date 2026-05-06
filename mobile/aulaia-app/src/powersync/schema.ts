@@ -42,7 +42,27 @@ const attendance_records = new Table(
   { indexes: { by_group_date: ['group_id', 'date'] } },
 );
 
-export const AppSchema = new Schema({ groups, students, attendance_records });
+const lesson_plans = new Table(
+  {
+    group_id:             column.text,
+    teacher_sub:          column.text,
+    asignatura:           column.text,
+    nivel:                column.integer,
+    trimestre:            column.integer,
+    anio_lectivo:         column.integer,
+    fecha_inicio:         column.text,    // 'YYYY-MM-DD'
+    fecha_fin:            column.text,    // 'YYYY-MM-DD'
+    lecciones_por_semana: column.integer,
+    contenido_generado:   column.text,    // Markdown — puede ser null mientras genera
+    status:               column.text,    // 'Pending' | 'Generating' | 'Ready' | 'Failed'
+    error_message:        column.text,
+    created_at:           column.text,
+    generated_at:         column.text,
+  },
+  { indexes: { by_teacher: ['teacher_sub'], by_group: ['group_id'] } },
+);
+
+export const AppSchema = new Schema({ groups, students, attendance_records, lesson_plans });
 
 // Tipos TypeScript derivados del schema para usar en las pantallas
 export type GroupRow = {
@@ -74,4 +94,22 @@ export type AttendanceRow = {
   status: string;
   notes: string | null;
   created_at: string;
+};
+
+export type LessonPlanRow = {
+  id: string;
+  group_id: string;
+  teacher_sub: string;
+  asignatura: string;
+  nivel: number;
+  trimestre: number;
+  anio_lectivo: number;
+  fecha_inicio: string;
+  fecha_fin: string;
+  lecciones_por_semana: number;
+  contenido_generado: string | null;
+  status: string;
+  error_message: string | null;
+  created_at: string;
+  generated_at: string | null;
 };

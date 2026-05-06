@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
 > **Última actualización:** 2026-05-06
-> **Fase activa:** Fase 2 — Planeamiento Didáctico con IA — Backend ✅ completo; Schema curricular ✅ normalizado; Tests integración ✅; pendiente App Web
+> **Fase activa:** Fase 3 — Notas y Trabajo Cotidiano (Fase 2 completa ✅)
 
 ---
 
@@ -109,10 +109,10 @@
 | F2 · `ExtractCurriculumJob` — crea encabezado `CurriculumExtraction` antes de insertar units; `ModelUsed` tomado de `AiOptions.DeploymentChat` | ✅ |
 | F2 · `ILlmAuditService` — `LogError` incluye cadena completa de `InnerException` | ✅ |
 | F2 · Skill `mep-db-access` — documentación psql + queries para `curriculum_extractions` y `curriculum_units` | ✅ |
-| F2 · App web: formulario parámetros del planeamiento | ⏳ |
-| F2 · App web: vista planeamiento generado (render Markdown) | ⏳ |
-| F2 · App web: descarga PDF/DOCX | ⏳ |
-| F2 · App móvil: vista planeamientos guardados (offline) | ⏳ |
+| F2 · App web: formulario parámetros del planeamiento | ✅ |
+| F2 · App web: vista planeamiento generado (render Markdown + polling) | ✅ |
+| F2 · App web: descarga .md + imprimir/PDF | ✅ |
+| F2 · App móvil: vista planeamientos guardados (offline) | ✅ |
 
 ### PC-07: Tests de Integración — `AulaIA.Tests`
 | Tarea | Estado |
