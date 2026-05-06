@@ -1,6 +1,6 @@
 ---
 name: mep-dotnet-ai-runtime-audit
-description: "Instrumentación de apps del proyecto MEP (AulaIA) en runtime para que un LLM pueda observar su comportamiento real: startup facts, decisiones de configuración, flujo de endpoints y errores. Cubre: ILlmAuditService (escribe llm-audit.md), endpoints /diag/context y /diag/audit (solo Development), adaptado para AulaIA.Api (WebApplication estándar), aulaia-web (Next.js) y aulaia-app (React Native/Expo). Triggers: 'quiero que el LLM vea los logs', 'analiza lo que pasó en startup', 'revisar comportamiento del servidor en runtime', 'debug con IA', 'instrumentar AulaIA para LLM'."
+description: "Instrumentación de apps del proyecto MEP (AulaIA) en runtime para que un LLM pueda observar su comportamiento real: startup facts, decisiones de configuración, flujo de endpoints y errores. Cubre: ILlmAuditService (escribe llm-audit.md), endpoints /diag/context y /diag/audit (solo Development), adaptado para AulaIA.Api (WebApplication estándar), aulaia-web (Next.js) y aulaia-app (React Native/Expo). También documenta la relación con AulaIA.Tests: qué tests puede correr un LLM autónomamente vs. cuáles requieren observabilidad del audit log para interpretar resultados. Triggers: 'quiero que el LLM vea los logs', 'analiza lo que pasó en startup', 'revisar comportamiento del servidor en runtime', 'debug con IA', 'instrumentar AulaIA para LLM', 'qué tests puede correr el LLM solo'."
 ---
 
 # mep-dotnet-ai-runtime-audit — Instrumentación AulaIA en runtime para LLMs
@@ -18,7 +18,7 @@ AulaIA.Api (runtime :8000)
   └── POST /diag/audit-event ─────► recibe eventos desde aulaia-web o aulaia-app
 ```
 
-> Implementaciones de referencia: [`reference/aulaia-api.md`](reference/aulaia-api.md) · [`reference/aulaia-web.md`](reference/aulaia-web.md) · [`reference/aulaia-app.md`](reference/aulaia-app.md)
+> Implementaciones de referencia: [`reference/aulaia-api.md`](reference/aulaia-api.md) · [`reference/aulaia-web.md`](reference/aulaia-web.md) · [`reference/aulaia-app.md`](reference/aulaia-app.md) · [`reference/aulaia-tests.md`](reference/aulaia-tests.md)
 
 > Puerto API en dev: **http://localhost:8000**  
 > Los endpoints `/diag/*` **solo existen en Development** (`IsDevelopment()`).  
@@ -265,3 +265,50 @@ Expo app (__DEV__)
 ```
 
 > Implementación detallada: [`reference/aulaia-app.md`](reference/aulaia-app.md)
+
+---
+
+## Relación con AulaIA.Tests
+
+`AulaIA.Tests` (xUnit) y `mep-dotnet-ai-runtime-audit` son complementarios. Tienen roles distintos:
+
+| Herramienta | Rol | Puede un LLM correrlo autónomamente |
+|-------------|-----|-------------------------------------|
+| `AulaIA.Tests` — `SanityTests` | Verifica contratos HTTP básicos (200, 401, 404) | ✅ Sí — rápidos, deterministas |
+| `AulaIA.Tests` — validaciones de body (400, schema) | Verifica que el servidor rechaza input inválido | ✅ Sí — sin dependencias externas |
+| `AulaIA.Tests` — `FlujoCompleto_*` (Curriculum, Planeamiento) | Verifica el ciclo completo incluyendo Hangfire + GPT-5.5 | ⚠️ Solo si el job tiene audit instrumentation; si falla sin logs es ciego |
+| `mep-dotnet-ai-runtime-audit` | Explica *por qué* falló un job en background | ✅ Sí — leer `llm-audit.md` o `GET /diag/audit` |
+
+### Protocolo combinado para tests con jobs en background
+
+Cuando un `FlujoCompleto_*` falla por timeout del polling:
+
+1. **No relanzar el test** directamente — el log ya tiene la evidencia.
+2. Leer `src/AulaIA.Api/logs/llm-audit.md` para buscar errores del job:
+   ```
+   Lee src/AulaIA.Api/logs/llm-audit.md — busca eventos [ERROR] o [EVENT] del job 
+   que corrió entre las {hora_inicio} y {hora_fin} del test fallido
+   ```
+3. Si **no hay ningún evento del job** en el log → el job nunca fue instrumentado con `ILlmAuditService`. Agregar `LogEvent`/`LogError` al job antes de reintentar.
+4. Si **hay un `[ERROR]`** → leer el mensaje + exception y corregir la causa raíz.
+
+### Jobs que deben estar instrumentados (obligatorio)
+
+Todo `BackgroundJob` que haga I/O externo debe tener al menos:
+
+```csharp
+// Al inicio del job
+audit.LogEvent("NombreJob", "Iniciando", $"blobUrl={blobUrl}");
+
+// Al completar
+audit.LogEvent("NombreJob", "Completado", $"✅ {units.Count} unidades guardadas");
+
+// En el catch
+audit.LogError("NombreJob", "Falló la ejecución", ex);
+```
+
+Jobs críticos actuales:
+- `ExtractCurriculumJob` — descarga PDF → GPT-5.5 → `curriculum_units` (**pendiente instrumentar**)
+- `GenerarPlaneamientoJob` — curriculum validado → GPT-5.5 → `lesson_plans` (**pendiente instrumentar**)
+
+> Referencia de integración con tests: [`reference/aulaia-tests.md`](reference/aulaia-tests.md)
