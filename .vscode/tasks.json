@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "1. Web — Instalar dependencias (npm install)",
+      "type": "shell",
+      "command": "npm install",
+      "options": { "cwd": "${workspaceFolder}/src/aulaia-web" },
+      "group": "build",
+      "presentation": { "reveal": "silent", "panel": "dedicated" }
+    },
+    {
+      "label": "2. Web — Compilar SPA estático (next build → out/)",
+      "type": "shell",
+      "command": "npm run build",
+      "options": { "cwd": "${workspaceFolder}/src/aulaia-web" },
+      "dependsOn": "1. Web — Instalar dependencias (npm install)",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "3. API — Compilar backend .NET (dotnet build)",
+      "type": "dotnet",
+      "task": "build",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "4. Web — Copiar SPA a wwwroot del backend (out/ → wwwroot/)",
+      "type": "shell",
+      "command": "cp -r ${workspaceFolder}/src/aulaia-web/out/. ${workspaceFolder}/src/AulaIA.Api/wwwroot/",
+      "dependsOn": "2. Web — Compilar SPA estático (next build → out/)",
+      "group": "build",
+      "presentation": { "reveal": "silent", "panel": "dedicated" }
+    },
+    {
+      "label": "5. Full Stack — Build completo: Web → wwwroot + API (default)",
+      "dependsOn": [
+        "2. Web — Compilar SPA estático (next build → out/)",
+        "4. Web — Copiar SPA a wwwroot del backend (out/ → wwwroot/)",
+        "3. API — Compilar backend .NET (dotnet build)"
+      ],
+      "dependsOrder": "sequence",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ]
+}

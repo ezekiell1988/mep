@@ -15,7 +15,6 @@ namespace AulaIA.Api.Features.Curriculum.Jobs;
 public sealed class ExtractCurriculumJob(
     AulaIADbContext db,
     IOptions<AiOptions> aiOpts,
-    IOptions<StorageOptions> storageOpts,
     ILogger<ExtractCurriculumJob> logger)
 {
     private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };

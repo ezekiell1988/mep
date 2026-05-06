@@ -1,4 +1,6 @@
-const API_BASE = 'https://api.mep.ezekl.com';
+// Dev: Next.js proxy reescribe /api/* → http://localhost:8000/api/*
+// Prod: SPA servido por .NET en el mismo origen → /api/* va directo al backend
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 async function apiFetch<T>(path: string, token: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {

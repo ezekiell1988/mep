@@ -1,0 +1,54 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "1. Web — Next.js dev con proxy /api → :8000",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/aulaia-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "serverReadyAction": {
+        "pattern": "ready started server on .+, url: (https?://.+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "2. API — Backend .NET en http://localhost:8000",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/src/AulaIA.Api/AulaIA.Api.csproj",
+      "launchSettingsProfile": "http",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "3. API — Producción local: SPA + API en http://localhost:3000",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/src/AulaIA.Api/AulaIA.Api.csproj",
+      "launchSettingsProfile": "production",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "3b. API — Backend .NET en https://localhost:8000",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/src/AulaIA.Api/AulaIA.Api.csproj",
+      "launchSettingsProfile": "https",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "4. Full Stack — Web :3000 + API :8000 (dev)",
+      "configurations": ["1. Web — Next.js dev con proxy /api → :8000", "2. API — Backend .NET en http://localhost:8000"],
+      "stopAll": true
+    }
+  ]
+}

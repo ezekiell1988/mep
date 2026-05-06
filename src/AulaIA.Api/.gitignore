@@ -25,5 +25,8 @@ secrets.json
 .idea/
 *.sln.iml
 
+## LLM Audit logs (dev-only, no committear)
+logs/
+
 ## macOS
 .DS_Store

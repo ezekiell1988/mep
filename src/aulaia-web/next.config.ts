@@ -1,14 +1,30 @@
 import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
 
-const nextConfig: NextConfig = {
-  // ADR-007: SPA estático servido por .NET 10 desde wwwroot/
-  output: "export",
-  // Rutas relativas para que funcione desde cualquier subpath cuando .NET sirve los assets
-  trailingSlash: true,
-  // Sin image optimization (no hay servidor Next.js en prod)
-  images: {
-    unoptimized: true,
-  },
-};
+export default function config(phase: string): NextConfig {
+  const base: NextConfig = {
+    trailingSlash: true,
+    images: { unoptimized: true },
+  };
 
-export default nextConfig;
+  if (phase === PHASE_DEVELOPMENT_SERVER) {
+    // En dev: proxy /api/* → .NET en 5070 para que el browser vea todo en :3000.
+    // No se usa output:export en dev (incompatible con rewrites).
+    return {
+      ...base,
+      async rewrites() {
+        return {
+          beforeFiles: [
+            {
+              source: "/api/:path*",
+              destination: "http://localhost:8000/api/:path*",
+            },
+          ],
+        };
+      },
+    };
+  }
+
+  // En build: SPA estático para wwwroot/ (ADR-007)
+  return { ...base, output: "export" };
+}
