@@ -3,9 +3,11 @@ using System.Text.Json;
 using AulaIA.Api.Shared.Domain;
 using AulaIA.Api.Shared.Options;
 using AulaIA.Api.Shared.Persistence;
+using AulaIA.Api.Shared.Services;
 using Azure.AI.OpenAI;
 using Azure.Storage.Blobs;
 using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OpenAI.Chat;
 using UglyToad.PdfPig;
@@ -15,6 +17,8 @@ namespace AulaIA.Api.Features.Curriculum.Jobs;
 public sealed class ExtractCurriculumJob(
     AulaIADbContext db,
     IOptions<AiOptions> aiOpts,
+    IOptions<StorageOptions> storageOpts,
+    ILlmAuditService audit,
     ILogger<ExtractCurriculumJob> logger)
 {
     private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
@@ -23,35 +27,92 @@ public sealed class ExtractCurriculumJob(
     [AutomaticRetry(Attempts = 2)]
     public async Task ExecuteAsync(string blobUrl, string asignatura, string ciclo, CancellationToken ct)
     {
-        logger.LogInformation("Iniciando extracción de currículo: {Asignatura} — {BlobUrl}", asignatura, blobUrl);
+        audit.LogEvent("ExtractCurriculumJob", "Iniciando",
+            $"asignatura={asignatura} ciclo={ciclo}",
+            new { blobUrl });
 
-        var pdfText = await DownloadAndExtractTextAsync(blobUrl, ct);
-        if (string.IsNullOrWhiteSpace(pdfText))
+        try
         {
-            logger.LogWarning("PDF vacío o sin texto extraíble: {BlobUrl}", blobUrl);
-            return;
-        }
+            var pdfText = await DownloadAndExtractTextAsync(blobUrl, ct);
+            if (string.IsNullOrWhiteSpace(pdfText))
+            {
+                audit.LogEvent("ExtractCurriculumJob", "PDF sin texto",
+                    "⚠️ PdfPig no extrajo texto — puede ser PDF escaneado sin OCR",
+                    new { blobUrl });
+                logger.LogWarning("PDF vacío o sin texto extraíble: {BlobUrl}", blobUrl);
+                return;
+            }
 
-        var units = await ExtractUnitsWithAiAsync(pdfText, asignatura, ciclo, ct);
-        if (units.Count == 0)
+            audit.LogEvent("ExtractCurriculumJob", "PDF extraído",
+                $"✅ {pdfText.Length:N0} caracteres — enviando a GPT-5.5");
+
+            var (units, tokensUsed) = await ExtractUnitsWithAiAsync(pdfText, asignatura, ciclo, ct);
+
+            if (units.Count == 0)
+            {
+                audit.LogEvent("ExtractCurriculumJob", "Sin unidades",
+                    "⚠️ GPT-5.5 no encontró unidades curriculares en el documento — " +
+                    "verificar que el PDF es el programa oficial del MEP y no otro documento");
+                logger.LogWarning("La IA no extrajo unidades del programa: {Asignatura}", asignatura);
+                return;
+            }
+
+            // Eliminar extracción previa no validada para esta asignatura/ciclo (re-extracción)
+            var extraccionPrevia = await db.CurriculumExtractions
+                .Where(e => e.Asignatura == asignatura && e.Ciclo == ciclo)
+                .Where(e => !e.Units.Any(u => u.ValidatedAt != null))
+                .FirstOrDefaultAsync(ct);
+            if (extraccionPrevia is not null)
+                db.CurriculumExtractions.Remove(extraccionPrevia); // cascade borra las units
+
+            // Crear encabezado de extracción
+            var extraction = new CurriculumExtraction
+            {
+                Asignatura = asignatura,
+                Ciclo = ciclo,
+                PdfSourceUrl = blobUrl,
+                ModelUsed = aiOpts.Value.DeploymentChat,
+                TotalTokensUsed = tokensUsed
+            };
+            db.CurriculumExtractions.Add(extraction);
+
+            // Deduplicar por (Nivel, Trimestre, UnidadNumero) por si GPT devuelve duplicados
+            var seen = new HashSet<(int, int, int)>();
+            foreach (var unit in units)
+            {
+                if (!seen.Add((unit.Nivel, unit.Trimestre, unit.UnidadNumero)))
+                    continue;
+                unit.ExtractionId = extraction.Id;
+                db.CurriculumUnits.Add(unit);
+            }
+
+            extraction.UnidadCount = seen.Count;
+            await db.SaveChangesAsync(ct);
+
+            audit.LogEvent("ExtractCurriculumJob", "Completado",
+                $"✅ {seen.Count} unidades guardadas en curriculum_units (tokens: {tokensUsed:N0})",
+                new { asignatura, ciclo, count = seen.Count, tokensUsed, extractionId = extraction.Id });
+
+            logger.LogInformation("Extracción completada: {Count} unidades guardadas para {Asignatura}", seen.Count, asignatura);
+        }
+        catch (Exception ex)
         {
-            logger.LogWarning("La IA no extrajo unidades del programa: {Asignatura}", asignatura);
-            return;
+            audit.LogError("ExtractCurriculumJob", $"Falló la extracción para {asignatura}", ex);
+            logger.LogError(ex, "Error en ExtractCurriculumJob para {Asignatura}", asignatura);
+            throw;
         }
-
-        foreach (var unit in units)
-        {
-            unit.PdfSourceUrl = blobUrl;
-            db.CurriculumUnits.Add(unit);
-        }
-
-        await db.SaveChangesAsync(ct);
-        logger.LogInformation("Extracción completada: {Count} unidades guardadas para {Asignatura}", units.Count, asignatura);
     }
 
     private async Task<string> DownloadAndExtractTextAsync(string blobUrl, CancellationToken ct)
     {
-        var blobClient = new BlobClient(new Uri(blobUrl));
+        // Usar connection string para acceder al container privado
+        var blobUri = new Uri(blobUrl);
+        var blobName = string.Join("/", blobUri.AbsolutePath.TrimStart('/').Split('/').Skip(1));
+        var blobClient = new BlobClient(
+            storageOpts.Value.ConnectionString,
+            storageOpts.Value.ContainerCurriculum,
+            blobName);
+
         var response = await blobClient.DownloadContentAsync(ct);
         var bytes = response.Value.Content.ToArray();
 
@@ -63,7 +124,7 @@ public sealed class ExtractCurriculumJob(
         return sb.ToString();
     }
 
-    private async Task<List<CurriculumUnit>> ExtractUnitsWithAiAsync(
+    private async Task<(List<CurriculumUnit> Units, int TokensUsed)> ExtractUnitsWithAiAsync(
         string pdfText, string asignatura, string ciclo, CancellationToken ct)
     {
         var opts = aiOpts.Value;
@@ -98,8 +159,8 @@ public sealed class ExtractCurriculumJob(
             - El campo "trimestre" es el período lectivo (1, 2, 3).
             """;
 
-        // El texto del PDF puede ser largo; tomamos los primeros 120k caracteres para no superar el contexto
-        var truncatedText = pdfText.Length > 120_000 ? pdfText[..120_000] : pdfText;
+        // El texto del PDF puede ser largo; tomamos los primeros 350k caracteres (~87k tokens) para no superar el contexto
+        var truncatedText = pdfText.Length > 350_000 ? pdfText[..350_000] : pdfText;
 
         var messages = new List<ChatMessage>
         {
@@ -109,11 +170,12 @@ public sealed class ExtractCurriculumJob(
 
         var chatResult = await chatClient.CompleteChatAsync(messages, cancellationToken: ct);
         var json = chatResult.Value.Content[0].Text.Trim();
+        var totalTokens = chatResult.Value.Usage?.TotalTokenCount ?? 0;
 
         try
         {
             var extracted = JsonSerializer.Deserialize<List<ExtractedUnit>>(json, JsonOpts) ?? [];
-            return extracted.Select(e => new CurriculumUnit
+            return (extracted.Select(e => new CurriculumUnit
             {
                 Asignatura = asignatura,
                 Ciclo = ciclo,
@@ -127,12 +189,14 @@ public sealed class ExtractCurriculumJob(
                 ContenidoProcedimental = e.ContenidoProcedimental,
                 ContenidoActitudinal = e.ContenidoActitudinal,
                 EstrategiasSugeridas = e.EstrategiasSugeridas
-            }).ToList();
+            }).ToList(), totalTokens);
         }
         catch (JsonException ex)
         {
-            logger.LogError(ex, "Error parseando JSON de la IA. Respuesta recibida: {Json}", json[..Math.Min(500, json.Length)]);
-            return [];
+            var preview = json[..Math.Min(500, json.Length)];
+            audit.LogError("ExtractCurriculumJob", $"JSON inválido devuelto por GPT-5.5. Preview: {preview}", ex);
+            logger.LogError(ex, "Error parseando JSON de la IA. Respuesta recibida: {Json}", preview);
+            return ([], totalTokens);
         }
     }
 

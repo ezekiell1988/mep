@@ -73,9 +73,21 @@ internal sealed class LlmAuditService(IOptions<LlmAuditOptions> options) : ILlmA
     public void LogError(string category, string message, Exception? ex = null)
     {
         var exInfo = ex is not null
-            ? $"\nException: `{ex.GetType().Name}` — {ex.Message}"
+            ? $"\nException: `{ex.GetType().Name}` — {ex.Message}{BuildInnerChain(ex.InnerException)}"
             : string.Empty;
         Write($"\n## [ERROR] {category} — {DateTimeOffset.UtcNow:O}\n❌ {message}{exInfo}\n");
+    }
+
+    private static string BuildInnerChain(Exception? inner)
+    {
+        if (inner is null) return string.Empty;
+        var sb = new System.Text.StringBuilder();
+        while (inner is not null)
+        {
+            sb.Append($"\n  → [{inner.GetType().Name}] {inner.Message}");
+            inner = inner.InnerException;
+        }
+        return sb.ToString();
     }
 
     public void Clear()

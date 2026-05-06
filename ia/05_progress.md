@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
 > **Última actualización:** 2026-05-06
-> **Fase activa:** Fase 2 — Planeamiento Didáctico con IA — Backend ✅ completo; Tests integración ✅; pendiente App Web
+> **Fase activa:** Fase 2 — Planeamiento Didáctico con IA — Backend ✅ completo; Schema curricular ✅ normalizado; Tests integración ✅; pendiente App Web
 
 ---
 
@@ -101,7 +101,14 @@
 | F2 · App Service `app-demo-api` — 10 variables de entorno configuradas (DB, Auth, Storage, PowerSync, AI) | ✅ |
 | F2 · `appsettings.Development.json` — credenciales AI Foundry + storage key completa | ✅ |
 | F2 · Migración aplicada a BD de producción | ✅ |
-| F2 · Subir PDF del programa MEP (Artes Plásticas 7°, 8°, 9°) y validar extracción | ⏳ |
+| F2 · Subir PDFs MEP Artes Plásticas (III Ciclo: 7 unidades, I y II Ciclo: 14 unidades) — pipeline completo validado | ✅ |
+| F2 · Refactor schema curricular: tabla `curriculum_extractions` (encabezado por PDF) + FK `curriculum_units.ExtractionId` | ✅ |
+| F2 · `CurriculumExtraction` — entidad encabezado: `Asignatura`, `Ciclo`, `PdfSourceUrl`, `ModelUsed`, `TotalTokensUsed`, `UnidadCount`, `ExtractedAt` | ✅ |
+| F2 · Migración `AddCurriculumExtractionHeader` — crea `curriculum_extractions`, agrega FK cascade, elimina columnas repetidas de `curriculum_units` | ✅ |
+| F2 · Migración `AddModelUsedToExtraction` — columna `ModelUsed` varchar(100) en `curriculum_extractions` | ✅ |
+| F2 · `ExtractCurriculumJob` — crea encabezado `CurriculumExtraction` antes de insertar units; `ModelUsed` tomado de `AiOptions.DeploymentChat` | ✅ |
+| F2 · `ILlmAuditService` — `LogError` incluye cadena completa de `InnerException` | ✅ |
+| F2 · Skill `mep-db-access` — documentación psql + queries para `curriculum_extractions` y `curriculum_units` | ✅ |
 | F2 · App web: formulario parámetros del planeamiento | ⏳ |
 | F2 · App web: vista planeamiento generado (render Markdown) | ⏳ |
 | F2 · App web: descarga PDF/DOCX | ⏳ |

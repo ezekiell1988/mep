@@ -14,7 +14,6 @@ public sealed class CurriculumUnitConfiguration : IEntityTypeConfiguration<Curri
         builder.Property(x => x.Asignatura).HasMaxLength(100).IsRequired();
         builder.Property(x => x.Ciclo).HasMaxLength(50).IsRequired();
         builder.Property(x => x.UnidadNombre).HasMaxLength(200).IsRequired();
-        builder.Property(x => x.PdfSourceUrl).HasMaxLength(500);
         builder.Property(x => x.ValidatedBy).HasMaxLength(128);
 
         // JSONB columns

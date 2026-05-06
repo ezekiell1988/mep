@@ -138,7 +138,9 @@ mep/
 | Entidades `CurriculumUnit` + `LessonPlan` + migración EF Core | ✅ |
 | Hangfire (queues: default, curriculum, planeamiento) + dashboard `/hangfire` | ✅ |
 | `CurriculumModule` — upload PDF → Blob → job extracción | ✅ |
-| `ExtractCurriculumJob` — PdfPig + GPT-5.5 → `curriculum_units` | ✅ |
+| `ExtractCurriculumJob` — PdfPig + GPT-5.5 → `curriculum_extractions` (encabezado) + `curriculum_units` (detalle, FK) | ✅ |
+| Schema curricular normalizado: encabezado `curriculum_extractions` con `ModelUsed`, `TotalTokensUsed`, `UnidadCount`, `PdfSourceUrl` | ✅ |
+| PDFs MEP cargados: III Ciclo (7 unidades, 82.678 tokens) + I y II Ciclo (14 unidades, 85.618 tokens) | ✅ |
 | `PlaneamientoAiService` — GPT-5.5 anclado al currículo validado | ✅ |
 | `PlaneamientoModule` — POST crear, GET estado, GET lista | ✅ |
 | `GenerarPlaneamientoJob` — Pending → Generating → Ready/Failed | ✅ |

@@ -3,8 +3,15 @@ namespace AulaIA.Api.Shared.Domain;
 public sealed class CurriculumUnit
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+
+    // FK al encabezado de extracción
+    public Guid ExtractionId { get; set; }
+    public CurriculumExtraction? Extraction { get; set; }
+
+    // Desnormalizado de Extraction para facilitar queries sin join
     public required string Asignatura { get; set; }
     public required string Ciclo { get; set; }
+
     public int Nivel { get; set; }          // 7, 8, 9, 10, 11...
     public int Trimestre { get; set; }      // 1, 2, 3
     public int UnidadNumero { get; set; }
@@ -18,8 +25,6 @@ public sealed class CurriculumUnit
     public List<string> ContenidoActitudinal { get; set; } = [];
     public List<string> EstrategiasSugeridas { get; set; } = [];
 
-    public string? PdfSourceUrl { get; set; }
-    public DateTimeOffset ExtractedAt { get; set; } = DateTimeOffset.UtcNow;
     public string? ValidatedBy { get; set; }     // Auth0 sub del admin que validó
     public DateTimeOffset? ValidatedAt { get; set; }
 }

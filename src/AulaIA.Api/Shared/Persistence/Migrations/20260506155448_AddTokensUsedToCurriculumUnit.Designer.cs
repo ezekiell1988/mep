@@ -3,6 +3,7 @@ using System;
 using AulaIA.Api.Shared.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AulaIA.Api.Shared.Persistence.Migrations
 {
     [DbContext(typeof(AulaIADbContext))]
-    partial class AulaIADbContextModelSnapshot : ModelSnapshot
+    [Migration("20260506155448_AddTokensUsedToCurriculumUnit")]
+    partial class AddTokensUsedToCurriculumUnit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,46 +75,6 @@ namespace AulaIA.Api.Shared.Persistence.Migrations
                     b.ToTable("attendance_records", (string)null);
                 });
 
-            modelBuilder.Entity("AulaIA.Api.Shared.Domain.CurriculumExtraction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Asignatura")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Ciclo")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTimeOffset>("ExtractedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ModelUsed")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("PdfSourceUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int>("TotalTokensUsed")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UnidadCount")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("curriculum_extractions", (string)null);
-                });
-
             modelBuilder.Entity("AulaIA.Api.Shared.Domain.CurriculumUnit", b =>
                 {
                     b.Property<Guid>("Id")
@@ -148,14 +111,21 @@ namespace AulaIA.Api.Shared.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb");
 
-                    b.Property<Guid>("ExtractionId")
-                        .HasColumnType("uuid");
+                    b.Property<DateTimeOffset>("ExtractedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.PrimitiveCollection<string>("IndicadoresEvaluacion")
                         .IsRequired()
                         .HasColumnType("jsonb");
 
                     b.Property<int>("Nivel")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PdfSourceUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("TokensUsed")
                         .HasColumnType("integer");
 
                     b.Property<int>("Trimestre")
@@ -177,8 +147,6 @@ namespace AulaIA.Api.Shared.Persistence.Migrations
                         .HasColumnType("character varying(128)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ExtractionId");
 
                     b.HasIndex("Asignatura", "Nivel", "Trimestre", "UnidadNumero")
                         .IsUnique();
@@ -786,17 +754,6 @@ namespace AulaIA.Api.Shared.Persistence.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("AulaIA.Api.Shared.Domain.CurriculumUnit", b =>
-                {
-                    b.HasOne("AulaIA.Api.Shared.Domain.CurriculumExtraction", "Extraction")
-                        .WithMany("Units")
-                        .HasForeignKey("ExtractionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Extraction");
-                });
-
             modelBuilder.Entity("AulaIA.Api.Shared.Domain.EvaluationActivity", b =>
                 {
                     b.HasOne("AulaIA.Api.Shared.Domain.Group", "Group")
@@ -884,11 +841,6 @@ namespace AulaIA.Api.Shared.Persistence.Migrations
                         .HasConstraintName("fk_users_institution");
 
                     b.Navigation("Institution");
-                });
-
-            modelBuilder.Entity("AulaIA.Api.Shared.Domain.CurriculumExtraction", b =>
-                {
-                    b.Navigation("Units");
                 });
 
             modelBuilder.Entity("AulaIA.Api.Shared.Domain.EvaluationActivity", b =>
