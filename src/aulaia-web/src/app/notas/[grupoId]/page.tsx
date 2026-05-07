@@ -29,6 +29,12 @@ function badge(promedio: number | null, nivel: string | null) {
   return { text: `${promedio}`, cls: 'bg-red-100 text-red-700 font-semibold' };
 }
 
+// Estudiante en riesgo: tiene promedio y está bajo el umbral
+function isRiesgo(promedio: number | null, nivel: string | null) {
+  if (promedio === null) return false;
+  return promedio < umbral(nivel);
+}
+
 export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: string }> }) {
   const { grupoId } = use(params);
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
@@ -48,6 +54,30 @@ export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: 
   const [actividadActiva, setActividadActiva] = useState<string | null>(null);
   // notas en edición: studentId → score
   const [draft, setDraft] = useState<Record<string, string>>({});
+  const [descargando, setDescargando] = useState<'xlsx' | 'pdf' | null>(null);
+
+  const descargar = useCallback(async (formato: 'xlsx' | 'pdf') => {
+    setDescargando(formato);
+    try {
+      const token = await getAccessTokenSilently();
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/grupos/${grupoId}/reportes/notas/${formato}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `acta-notas-${nombre}.${formato}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al descargar');
+    } finally {
+      setDescargando(null);
+    }
+  }, [getAccessTokenSilently, grupoId, nombre]);
   const [guardando, setGuardando] = useState(false);
 
   // Modal nueva actividad
@@ -158,13 +188,31 @@ export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: 
           <h1 className="text-2xl font-bold text-gray-900">Libro de Notas</h1>
           <p className="text-sm text-gray-500 mt-0.5">{nombre} · {asignatura} · {nivel}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowModal(true)}
-          className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-        >
-          + Nueva actividad
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => descargar('xlsx')}
+            disabled={descargando !== null}
+            className="text-sm border border-green-300 text-green-700 hover:bg-green-50 font-medium px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+          >
+            {descargando === 'xlsx' ? 'Generando…' : '↓ XLSX (SEA)'}
+          </button>
+          <button
+            type="button"
+            onClick={() => descargar('pdf')}
+            disabled={descargando !== null}
+            className="text-sm border border-red-300 text-red-700 hover:bg-red-50 font-medium px-3 py-2 rounded-lg transition-colors disabled:opacity-60"
+          >
+            {descargando === 'pdf' ? 'Generando…' : '↓ PDF'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowModal(true)}
+            className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            + Nueva actividad
+          </button>
+        </div>
       </div>
 
       {error ? (
@@ -220,10 +268,14 @@ export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: 
             <tbody className="divide-y divide-gray-100">
               {resumen.estudiantes.map((est: ResumenEstudianteResponse, i: number) => {
                 const b = badge(est.promedio, nivel);
+                const riesgo = isRiesgo(est.promedio, nivel);
                 return (
-                  <tr key={est.studentId} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
+                  <tr key={est.studentId} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} ${riesgo ? 'ring-1 ring-inset ring-red-200' : ''}`}>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <p className="font-medium text-gray-900">{est.fullName}</p>
+                      <p className="font-medium text-gray-900">
+                        {riesgo && <span aria-label="En riesgo" title="Promedio bajo el umbral de aprobación" className="mr-1 text-red-500">⚠</span>}
+                        {est.fullName}
+                      </p>
                       <p className="text-xs text-gray-400">{est.studentCode}</p>
                     </td>
                     {actividades.map(a => {

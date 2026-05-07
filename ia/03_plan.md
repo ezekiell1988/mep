@@ -1,7 +1,7 @@
 # 03 — Plan de Desarrollo
 
-> **Última actualización:** 2026-05-05
-> **Estado general:** 🔄 Fase 1 — En progreso
+> **Última actualización:** 2026-05-06
+> **Estado general:** 🔄 Fase 3 — En progreso
 
 ---
 
@@ -11,7 +11,7 @@ El proyecto se construye en 5 fases progresivas. Las primeras dos fases producen
 
 ---
 
-## Fase 0 — Infraestructura Azure y Setup del Proyecto ⏳ Pendiente
+## Fase 0 — Infraestructura Azure y Setup del Proyecto ✅ Completada (2026-05-05)
 
 **Objetivo:** Dejar toda la infraestructura cloud aprovisionada y el repositorio estructurado antes de escribir una sola línea de código de negocio.
 
@@ -115,7 +115,7 @@ mep/
 
 ---
 
-## Fase 2 — Planeamiento Didáctico con IA + Calendario 🔄 En progreso
+## Fase 2 — Planeamiento Didáctico con IA + Calendario ✅ Completada (2026-05-06)
 
 **Objetivo:** El módulo diferenciador #1 según retroalimentación de Adriana (2026-05-05). El docente genera un planeamiento completo, alineado al programa oficial del MEP y adaptado a su calendario institucional, en minutos.
 
@@ -147,17 +147,17 @@ mep/
 | App Service configurado (AI + Storage + todas las vars) | ✅ |
 | Migración aplicada a BD producción | ✅ |
 | **App Web** | |
-| Formulario de parámetros del planeamiento | ⏳ |
-| Vista planeamiento generado (render Markdown) | ⏳ |
-| Descarga en PDF y DOCX | ⏳ |
-| Historial de planeamientos generados | ⏳ |
+| Formulario de parámetros del planeamiento | ✅ |
+| Vista planeamiento generado (render Markdown + polling) | ✅ |
+| Descarga .md + imprimir/PDF | ✅ |
+| Historial de planeamientos generados | ✅ |
 | **App Móvil** | |
-| Vista de planeamientos guardados (offline) | ⏳ |
+| Vista de planeamientos guardados (offline) | ✅ |
 | Consulta de planeamiento por clase del día | ⏳ |
 
 ---
 
-## Fase 3 — Notas, Promedios y Reportes Básicos ⏳ Pendiente
+## Fase 3 — Notas, Promedios y Reportes Básicos 🔄 En progreso (2026-05-06)
 
 **Objetivo:** El docente puede registrar toda la evaluación del período y generar el acta de notas para el MEP. Eliminar el doble trabajo con Excel.
 
@@ -168,20 +168,22 @@ mep/
 | Componente | Estado |
 |-----------|--------|
 | **Backend** | |
-| Módulo Notas: EvaluationActivity + Grade CRUD | ⏳ |
-| Cálculo de promedios con ponderación configurable | ⏳ |
-| Alertas de estudiantes en riesgo (< nota mínima) | ⏳ |
-| Generación de reportes: acta de notas PDF + XLSX | ⏳ |
-| Exportación SEA (archivo en formato MEP) | ⏳ |
+| Módulo Notas: EvaluationActivity + Grade CRUD | ✅ |
+| Cálculo de promedios con ponderación configurable | ✅ |
+| Alertas de estudiantes en riesgo (< nota mínima) — indicador ⚠ en App Web | ✅ |
+| Generación de reportes: acta de notas PDF landscape (QuestPDF) | ✅ |
+| Exportación SEA — acta XLSX compatible SEA (ClosedXML) | ✅ |
 | **App Móvil** | |
-| Pantalla: actividades de evaluación por grupo | ⏳ |
-| Pantalla: libro de notas (tabla editable) | ⏳ |
-| Alertas visuales de estudiantes en riesgo | ⏳ |
-| Offline: notas y actividades sincronizadas con PowerSync | ⏳ |
+| Pantalla: actividades de evaluación por grupo | ✅ |
+| Pantalla: libro de notas (tabla offline, badge promedio verde/rojo) | ✅ |
+| Alertas visuales de estudiantes en riesgo (badge rojo bajo umbral) | ✅ |
+| Offline: notas y actividades sincronizadas con PowerSync | ✅ |
+| PowerSync Sync Rules: `evaluation_activities` + `grades` en bucket | ⚠️ Acción manual |
 | **App Web** | |
-| Libro de notas completo (tipo spreadsheet) | ⏳ |
+| Libro de notas completo (actividades × alumnos, edición inline) | ✅ |
+| Botones descarga `↓ XLSX (SEA)` y `↓ PDF` con autenticación Bearer | ✅ |
 | Configuración de ponderación por sección | ⏳ |
-| Generación y descarga de reportes (PDF/XLSX) | ⏳ |
+| Tests de integración: módulo Notas | ⏳ |
 
 ---
 
@@ -244,8 +246,8 @@ mep/
 | Fase | Nombre | Entregable clave | Estado |
 |------|--------|-----------------|--------|
 | 0 | Infraestructura Azure + Setup | Todos los recursos Azure `demo` creados; repos estructurados | ✅ |
-| 1 | Core: Grupos + Asistencia QR | Adriana toma lista con QR en el aula | 🔄 |
-| 2 | Planeamiento con IA + Calendario | Planeamiento MEP completo en minutos, reorganizable por calendario | ⏳ |
-| 3 | Notas y Reportes básicos | Adriana cierra trimestre sin Excel; exporta al SEA | ⏳ |
+| 1 | Core: Grupos + Asistencia QR | Adriana toma lista con QR en el aula | ✅ |
+| 2 | Planeamiento con IA + Calendario | Planeamiento MEP completo en minutos, reorganizable por calendario | ✅ |
+| 3 | Notas y Reportes básicos | Adriana cierra trimestre sin Excel; exporta al SEA | 🔄 |
 | 4 | Adecuaciones e Informes | Informes CAE generados automáticamente | ⏳ |
 | 5 | Escala + Nuevas materias | Container Apps + plan institucional | ⏳ |

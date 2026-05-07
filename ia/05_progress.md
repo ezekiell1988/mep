@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
 > **Última actualización:** 2026-05-06
-> **Fase activa:** Fase 3 — Notas y Trabajo Cotidiano (Fase 2 completa ✅)
+> **Fase activa:** Fase 3 — Notas y Trabajo Cotidiano 🔄 (Fase 2 completa ✅)
 
 ---
 
@@ -13,7 +13,11 @@
 
 ---
 
-## 🔄 En progreso — Fase 2
+## ✅ Completado — Fase 2 (2026-05-06)
+
+---
+
+## 🔄 En progreso — Fase 3
 
 > **Decisiones de diseño confirmadas (2026-05-04):**
 > - Stack definido: .NET 10 + EF Core 10 + PostgreSQL + PowerSync + Auth0 + Azure AI Foundry GPT-5.5
@@ -130,3 +134,34 @@
 | Tests · `SanityTests.cs` — GET /health → 200, GET /api/grupos sin token → 401, con token → 200 | ✅ |
 | Tests · `CurriculumTests.cs` — upload PDF (202+jobId), upload no-PDF (400), poll extracción, validar unidad, listar curriculum | ✅ |
 | Tests · `PlaneamientoTests.cs` — listar (200), crear sin body (400), id inexistente (404), flujo completo Pending→Ready, leer PDF | ✅ |
+
+### PC-08: Fase 3 — Notas y Promedios
+| Tarea | Estado |
+|-------|--------|
+| F3 · Backend: `GET /api/grupos/{id}/notas/resumen` — promedio ponderado MEP por alumno | ✅ |
+| F3 · Backend: `DELETE /api/grupos/{id}/actividades/{actId}` — eliminar actividad + cascade | ✅ |
+| F3 · App Web: `/notas/[grupoId]` — libro de notas con tabla editable (actividades × alumnos) | ✅ |
+| F3 · App Web: modal "Nueva actividad" (nombre, tipo, maxScore, porcentaje, fecha) | ✅ |
+| F3 · App Web: panel inline ingreso de notas por actividad + guardar | ✅ |
+| F3 · App Web: badge promedio verde/rojo con umbral MEP (65/70 según nivel) | ✅ |
+| F3 · App Web: botón "📊 Notas" en cada tarjeta de grupo | ✅ |
+| F3 · PowerSync schema: tablas `evaluation_activities` + `grades` + tipos `EvaluationActivityRow` / `GradeRow` | ✅ |
+| F3 · PowerSync Sync Rules: agregar `evaluation_activities` y `grades` al bucket `teacher_data` | ⚠️ Acción manual pendiente |
+| F3 · App Móvil: `NotasScreen` — lista offline alumnos × notas, scroll horizontal, badge promedio verde/rojo | ✅ |
+| F3 · App Móvil: botón "Notas" en header de `EstudiantesScreen` | ✅ |
+| F3 · App Móvil: ruta `Notas` registrada en `AppNavigator` + `RootStackParamList` | ✅ |
+| F3 · NuGet: `ClosedXML 0.104.2` + `QuestPDF 2025.4.0` (build 0 errores) | ✅ |
+| F3 · `ActaNotasService` — genera XLSX (compatible SEA) y PDF landscape con ClosedXML + QuestPDF | ✅ |
+| F3 · Endpoints `GET /api/grupos/{id}/reportes/notas/xlsx` y `.../notas/pdf` | ✅ |
+| F3 · App Web: botones `↓ XLSX (SEA)` y `↓ PDF` en libro de notas (descarga directa) | ✅ |
+| F3 · App Web: alerta de riesgo ⚠ en filas de estudiantes bajo el umbral MEP (65/70) | ✅ |
+
+### PC-09: Mantenimiento de Dependencias (2026-05-06)
+| Tarea | Estado |
+|-------|--------|
+| NuGet: `ClosedXML` → 0.105.0, `Hangfire.AspNetCore` → 1.8.23, `Hangfire.PostgreSql` → 1.21.1 | ✅ |
+| NuGet: `Microsoft.AspNetCore.OpenApi` → 10.0.7, `PdfPig` → 0.1.14 (build 0 errores) | ✅ |
+| Web: `next` + `eslint-config-next` → 16.2.5, `react` + `react-dom` → 19.2.6 (0 vulnerabilidades) | ✅ |
+| Mobile: `expo` → 55.0.23, `expo-camera/status-bar/web-browser` → latest patch, `react` → 19.2.6 | ✅ |
+| Mobile: `react-native-screens` → 4.24.0, `react-native-safe-area-context` → 5.7.0 (TS 0 errores) | ✅ |
+| Saltados intencionalmente: `typescript 6.x`, `eslint 10.x`, `@types/node 25.x`, `react-native 0.85.x`, `QuestPDF 2026.x` | ⚠️ Revisar en próximo ciclo |
