@@ -218,7 +218,50 @@ mep/
 
 ---
 
-## Fase 5 — Escala: Container Apps + Nuevas Materias ⏳ Pendiente
+## Fase 5 — Monetización: Suscripciones y Referidos ⏳ Pendiente
+
+**Objetivo:** Activar el modelo de negocio antes del lanzamiento público. Sin esta fase no hay ingresos ni tracking del acuerdo con Adriana.
+
+**Criterio de éxito:** Un docente nuevo puede registrarse, usar el trial de 30 días, enviar un SINPE al número de AulaIA, presionar "Ya pagué" y el admin aprueba la suscripción en menos de 24 horas. Adriana ve en su panel la comisión generada por ese referido.
+
+**Disparador:** Completar antes de cualquier comunicación pública del producto (antes de que Adriana lo comparta en sus grupos de WhatsApp).
+
+**Método de pago:** SINPE Móvil con verificación manual por admin. Sin pasarela de pago automática ni API bancaria. Ver RF-36 en `01_requirements.md`.
+
+### Componentes
+
+| Componente | Estado |
+|-----------|--------|
+| **Backend — Suscripciones** | |
+| Entidades `Subscription` + `PaymentRequest` + migración EF Core | ⏳ |
+| `SubscriptionsModule` — activar trial, POST solicitar pago (genera `reference_code`), GET estado | ⏳ |
+| `PaymentsModule` (admin) — GET pendientes, POST aprobar, POST rechazar | ⏳ |
+| Middleware de plan: verifica `subscription.plan` en cada request protegido por tier | ⏳ |
+| Job diario `CheckExpiredSubscriptionsJob` (Hangfire) — degrada a Basic si `current_period_end` vencido | ⏳ |
+| Notificaciones email: trial por vencer (7d, 3d, 0d), pago aprobado, pago rechazado, suscripción por vencer (7d, 0d) | ⏳ |
+| Upload de comprobante SINPE → Azure Blob Storage (contenedor `pagos`, privado) | ⏳ |
+| Job diario `UpdateExchangeRateJob` (Hangfire) — consulta API BCCR (indicador 318, venta USD) y guarda TC en `exchange_rates` | ⏳ |
+| `AppSettings`: `SinpeNumber` configurable sin redeployar | ⏳ |
+| **Backend — Referidos** | |
+| Entidades `ReferralCode` + `Commission` + migración EF Core | ⏳ |
+| `ReferralsModule` — generar código, GET panel de referidos, GET comisiones | ⏳ |
+| Job mensual `CalculateCommissionsJob` (Hangfire) — calcula comisión neta (el admin ingresa costo infra Azure del mes) | ⏳ |
+| Tracking de `?ref=CODIGO` en registro y campo `referred_by_code` en `users` | ⏳ |
+| **App Web** | |
+| Página de precios con los tres planes | ⏳ |
+| Pantalla de pago SINPE: número destino, monto, código de referencia, instrucciones paso a paso | ⏳ |
+| Botón "Ya pagué" + upload opcional de comprobante (imagen/PDF) | ⏳ |
+| Paywalls inline: banner con descripción del plan requerido + instrucciones SINPE | ⏳ |
+| Banner trial: días restantes + progress bar + CTA "Activar suscripción" | ⏳ |
+| Panel admin — pestaña Pagos: lista pendientes, aprobar/rechazar con nota, historial | ⏳ |
+| Panel admin — pestaña Suscripciones: activas, por vencer, historial | ⏳ |
+| Panel admin — pestaña Cierre mensual: ingresar costo infra, ejecutar `CalculateCommissionsJob`, exportar reporte | ⏳ |
+| Panel de referidos en perfil del usuario: lista referidos, comisiones por mes, estado de pago | ⏳ |
+| Campo código de referido en formulario de registro | ⏳ |
+
+---
+
+## Fase 6 — Escala: Container Apps + Nuevas Materias ⏳ Pendiente
 
 **Objetivo:** Migrar la infraestructura a Container Apps, agregar nuevas materias al programa MEP y abrir la plataforma a instituciones completas.
 
@@ -253,4 +296,5 @@ mep/
 | 2 | Planeamiento con IA + Calendario | Planeamiento MEP completo en minutos, reorganizable por calendario | ✅ |
 | 3 | Notas y Reportes básicos | Adriana cierra trimestre sin Excel; exporta al SEA | 🔄 |
 | 4 | Adecuaciones e Informes | Informes CAE generados automáticamente | ⏳ |
-| 5 | Escala + Nuevas materias | Container Apps + plan institucional | ⏳ |
+| 5 | Monetización: Pagos + Referidos | Trial, Stripe, paywalls, panel de comisiones Adriana | ⏳ |
+| 6 | Escala + Nuevas materias | Container Apps + plan institucional | ⏳ |

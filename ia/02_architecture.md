@@ -1,7 +1,7 @@
 # 02 — Arquitectura del Sistema
 
-> **Última actualización:** 2026-05-04
-> **Scope:** AulaIA — arquitectura completa (Fases 1–2)
+> **Última actualización:** 2026-05-07
+> **Scope:** AulaIA — arquitectura completa (Fases 1–5)
 
 ---
 
@@ -218,7 +218,24 @@ builder.Services
     .AddNotasModule()
     .AddPlaneamientoModule()
     .AddReportesModule()
-    .AddPowerSyncModule();
+    .AddPowerSyncModule()
+    .AddSuscripcionesModule()
+    .AddPagosAdminModule()
+    .AddReferidosModule();
+
+// Hangfire jobs
+builder.Services.AddHangfire(cfg => cfg.UsePostgreSqlStorage(connStr));
+builder.Services.AddHangfireServer();
+RecurringJob.AddOrUpdate<UpdateExchangeRateJob>("bccr-tc", j => j.Execute(CancellationToken.None), Cron.Daily(6));      // 6am hora CR
+RecurringJob.AddOrUpdate<CheckExpiredSubscriptionsJob>("check-subs", j => j.Execute(CancellationToken.None), Cron.Daily(7));
+RecurringJob.AddOrUpdate<CalculateCommissionsJob>("commissions", j => j.Execute(CancellationToken.None), Cron.Monthly(1, 8)); // día 1 a las 8am
+
+// Hangfire jobs
+builder.Services.AddHangfire(...);
+builder.Services.AddHangfireServer();
+RecurringJob.AddOrUpdate<UpdateExchangeRateJob>("bccr-tc", j => j.Execute(CancellationToken.None), Cron.Daily(6));   // 6am CR
+RecurringJob.AddOrUpdate<CheckExpiredSubscriptionsJob>("check-subs", j => j.Execute(CancellationToken.None), Cron.Daily(7));
+RecurringJob.AddOrUpdate<CalculateCommissionsJob>("commissions", j => j.Execute(CancellationToken.None), Cron.Monthly(1, 8)); // día 1 a las 8am
 
 var app = builder.Build();
 
@@ -278,6 +295,55 @@ Student
   ├── id_number (cédula/expediente)
   ├── qr_code (uuid único — no expone datos personales)
   └── group_id (FK → Group)
+
+Subscription
+  ├── id (uuid)
+  ├── user_id (FK → User)
+  ├── plan (basic | professional | institutional)
+  ├── status (trialing | active | past_due | cancelled)
+  ├── trial_ends_at
+  ├── current_period_end
+  ├── activated_by_admin_id (FK → User, nullable)
+  └── activated_at
+
+PaymentRequest
+  ├── id (uuid)
+  ├── user_id (FK → User)
+  ├── plan
+  ├── amount_usd
+  ├── amount_crc                    ← calculado con exchange_rates.sell_rate del día
+  ├── exchange_rate_used            ← auditoría
+  ├── reference_code (unique)       ← formato AUI-YYYYMMDD-XXXX
+  ├── status (pending | approved | rejected)
+  ├── screenshot_url (nullable)
+  ├── admin_note (nullable)
+  ├── created_at
+  ├── reviewed_at
+  └── reviewed_by (FK → User, nullable)
+
+ExchangeRate
+  ├── id (uuid)
+  ├── date (unique — clave natural; un registro por día hábil)
+  ├── sell_rate (DECIMAL — tipo de cambio de venta BCCR USD→CRC)
+  └── fetched_at
+
+ReferralCode
+  ├── id (uuid)
+  ├── user_id (FK → User)
+  ├── code (8 chars, unique)
+  └── created_at
+
+Commission
+  ├── id (uuid)
+  ├── referrer_user_id (FK → User)
+  ├── referred_user_id (FK → User)
+  ├── month (DateOnly — primer día del mes)
+  ├── subscription_amount_usd
+  ├── infra_deduction_usd
+  ├── commission_amount_usd
+  ├── status (pending | paid)
+  ├── paid_at (nullable)
+  └── sinpe_confirmation (nullable)
 
 Accommodation (adecuación curricular)
   ├── id (uuid)
@@ -475,9 +541,10 @@ Auth0 devuelve Access Token (JWT) + Refresh Token
 |------------|-----------|--------|
 | `planeamientos` | PDFs generados por la IA | SAS token temporal (15 min) generado por el backend |
 | `reportes` | Actas de notas, asistencia, informes | SAS token temporal (15 min) |
-| `exportaciones` | CSV/XLSX para el SEA (Sistema de Evaluaci\u00f3n de los Aprendizajes) | SAS token temporal (15 min) |
+| `exportaciones` | CSV/XLSX para el SEA | SAS token temporal (15 min) |
 | `adjuntos` | Archivos subidos por el docente | SAS token temporal (60 min) |
 | `plantillas` | Plantillas institucionales subidas | SAS token temporal (60 min) |
+| `pagos` | Comprobantes SINPE subidos por usuarios | SAS token temporal (5 min) — solo admin puede leer |
 
 **Regla:** El cliente **nunca** recibe credenciales permanentes de Azure. Solo recibe URLs firmadas (SAS) con expiración corta.
 
@@ -588,4 +655,6 @@ GitHub (main branch)
 | ADR-004 | App Service (F1–2) → Container Apps (F3+) | `06_decisions.md` |
 | ADR-005 | PowerSync para sincronización offline | `06_decisions.md` |
 | ADR-006 | Auth0 para autenticación | `06_decisions.md` |
-| — | Cloudflare DNS/CDN para `mep.ezekl.com` | Sin ADR formal — dominio ya existe en Cloudflare |
+| ADR-007 | Next.js SPA servido desde App Service único (sin Static Web App) | `06_decisions.md` |
+| ADR-008 | Modelo de comisiones para Adriana Guido (20% neto, 12 meses) | `06_decisions.md` |
+| ADR-009 | SINPE Móvil con verificación manual; TC del BCCR vía job Hangfire | `06_decisions.md` |

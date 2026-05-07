@@ -575,3 +575,196 @@ az webapp config ssl bind \
 - `https://mep.ezekl.com` resuelve al frontend Next.js con SSL válido.
 - `https://api.mep.ezekl.com` resuelve al backend .NET 10 con SSL válido.
 - Cloudflare activo como proxy (protección DDoS + caché de borde).
+
+---
+
+## TASK-F5-01: Migración EF Core — entidades de monetización
+
+**Estado:** ⏳ Pendiente
+**Módulo:** Fase 5 — Monetización
+**Prerequisitos:** Fase 4 completada
+
+**Contexto:** Agregar las 5 tablas nuevas del módulo de pagos/suscripciones/referidos a la BD mediante una sola migración `AddMonetizacion`.
+
+**Pasos:**
+
+1. Crear entidades en `Shared/Domain/`:
+   - `Subscription.cs` — ver entidad en `02_architecture.md`
+   - `PaymentRequest.cs` — incluye `ExchangeRateUsed` (decimal)
+   - `ExchangeRate.cs` — índice único en `Date`
+   - `ReferralCode.cs`
+   - `Commission.cs`
+
+2. Registrar en `AulaIADbContext` y configurar relaciones EF (FK, índices únicos).
+
+3. Generar y aplicar la migración:
+```bash
+cd src/AulaIA.Api
+dotnet ef migrations add AddMonetizacion
+dotnet ef database update
+```
+
+**Resultado esperado:** 5 tablas nuevas en la BD. Build sin errores.
+
+**Patrón de referencia:** PATTERN-01 (entidades con cascade delete) en `09_patterns.md`.
+
+---
+
+## TASK-F5-02: Job `UpdateExchangeRateJob` — tipo de cambio BCCR
+
+**Estado:** ⏳ Pendiente
+**Módulo:** Fase 5 — Monetización
+**Prerequisitos:** TASK-F5-01
+
+**Contexto:** SINPE Móvil opera solo en CRC. El job consulta el API SOAP del BCCR (indicador 318 — venta USD) una vez por día hábil a las 6am hora CR y guarda el resultado en `exchange_rates`. El token BCCR es gratuito.
+
+**Pasos:**
+
+1. Registrarse en `https://gee.bccr.fi.cr` para obtener token BCCR y guardarlo en Key Vault.
+
+2. Crear `SinpeOptions.cs`:
+```csharp
+public class SinpeOptions
+{
+    public const string Section = "Sinpe";
+    [Required] public string SinpeNumber { get; init; } = default!;
+    [Required] public string BccrEmail { get; init; } = default!;
+    [Required] public string BccrApiToken { get; init; } = default!;
+}
+```
+
+3. Implementar `UpdateExchangeRateJob` siguiendo **PATTERN-05** de `09_patterns.md`.
+
+4. Registrar el job en `Program.cs` como job diario a las 6am CR.
+
+5. Agregar a `appsettings.Development.json` (valores de prueba del BCCR):
+```json
+"Sinpe": {
+  "SinpeNumber": "88001234",
+  "BccrEmail": "dev@example.com",
+  "BccrApiToken": "TOKEN_BCCR_DEV"
+}
+```
+
+**Resultado esperado:** Al ejecutar el job manualmente, se inserta un registro en `exchange_rates` con el TC de venta del día. Log visible en `llm-audit.md`.
+
+**Patrón de referencia:** PATTERN-05 (`UpdateExchangeRateJob` BCCR) y PATTERN-03 (`ILlmAuditService`) en `09_patterns.md`.
+
+---
+
+## TASK-F5-03: Módulo Suscripciones — backend
+
+**Estado:** ⏳ Pendiente
+**Módulo:** Fase 5 — Monetización
+**Prerequisitos:** TASK-F5-01, TASK-F5-02
+
+**Contexto:** Endpoints para el flujo de pago SINPE: crear solicitud (genera `reference_code`, calcula `amount_crc` con TC del día), subir comprobante, consultar estado.
+
+**Endpoints a implementar:**
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/api/suscripciones/estado` | Estado actual del plan del usuario autenticado |
+| `POST` | `/api/suscripciones/solicitud-pago` | Crea `PaymentRequest`, devuelve `reference_code` + `amount_crc` + `sinpe_number` |
+| `POST` | `/api/suscripciones/solicitud-pago/{id}/comprobante` | Sube captura de pantalla a Blob `pagos` |
+
+**Lógica de `POST /solicitud-pago`:**
+1. Leer TC del día de `exchange_rates` (fallback: último disponible).
+2. Calcular `amount_crc = round(amount_usd × sell_rate, 0)`.
+3. Generar `reference_code = $"AUI-{today:yyyyMMdd}-{Random4Chars()}"`.
+4. Insertar `PaymentRequest` con `status = pending`.
+5. Devolver: `{ referenceCode, amountUsd, amountCrc, sinpeNumber, instructions }`.
+
+**Resultado esperado:** Un docente puede crear una solicitud de pago y recibir las instrucciones SINPE con el monto en colones.
+
+---
+
+## TASK-F5-04: Módulo Pagos — panel admin backend
+
+**Estado:** ⏳ Pendiente
+**Módulo:** Fase 5 — Monetización
+**Prerequisitos:** TASK-F5-03
+
+**Endpoints a implementar (todos requieren rol `admin`):**
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/api/admin/pagos/pendientes` | Lista de `PaymentRequest` con `status = pending` |
+| `POST` | `/api/admin/pagos/{id}/aprobar` | Aprueba pago → activa `Subscription` 30 días; notifica usuario |
+| `POST` | `/api/admin/pagos/{id}/rechazar` | Rechaza con nota → notifica usuario |
+| `GET` | `/api/admin/suscripciones` | Lista de suscripciones activas con fecha de vencimiento |
+| `GET` | `/api/admin/pagos/historial` | Historial completo para reporte mensual |
+
+**Lógica de `POST /aprobar`:**
+1. Verificar que `PaymentRequest.status == pending`.
+2. Crear o actualizar `Subscription`: `status = active`, `current_period_end = today + 30 days`.
+3. Actualizar `PaymentRequest`: `status = approved`, `reviewed_by`, `reviewed_at`.
+4. Enviar email de confirmación al usuario.
+
+---
+
+## TASK-F5-05: Jobs de mantenimiento de suscripciones
+
+**Estado:** ⏳ Pendiente
+**Módulo:** Fase 5 — Monetización
+**Prerequisitos:** TASK-F5-04
+
+**Jobs a implementar:**
+
+1. **`CheckExpiredSubscriptionsJob`** (Hangfire diario, 7am CR):
+   - Consulta `Subscription` donde `current_period_end < today` y `status = active`.
+   - Degrada a `status = past_due`.
+   - Envía push/email al usuario.
+
+2. **`SendRenewalRemindersJob`** (Hangfire diario, 8am CR):
+   - Consulta suscripciones con `current_period_end` a 7 días y a 3 días.
+   - Envía notificación con instrucciones SINPE para renovar.
+
+3. **`CalculateCommissionsJob`** (Hangfire mensual, día 1, 8am CR):
+   - Solo se ejecuta si el admin ingresó el costo de infraestructura Azure del mes anterior en el panel.
+   - Calcula comisión: `20% × (subscription_amount - infra_share)` por referido activo en el mes.
+   - Inserta registros en `commissions` con `status = pending`.
+   - El admin marca como `paid` después de hacer el SINPE al referidor.
+
+---
+
+## TASK-F5-06: Módulo Referidos — backend
+
+**Estado:** ⏳ Pendiente
+**Módulo:** Fase 5 — Monetización
+**Prerequisitos:** TASK-F5-01
+
+**Endpoints a implementar:**
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/api/referidos/mi-codigo` | Devuelve el código del usuario (lo crea si no existe) |
+| `GET` | `/api/referidos/panel` | Lista de referidos + comisiones por mes del usuario autenticado |
+| `GET` | `/api/admin/referidos` | Vista completa admin de todos los referidores |
+| `POST` | `/api/admin/comisiones/{id}/marcar-pagado` | Marca comisión como pagada (admin hace el SINPE al referidor manualmente) |
+
+**Lógica de registro con referido:**
+- Al crear un usuario (`POST /api/auth/register`), si el body incluye `referralCode` o la URL tiene `?ref=CODE`, guardar `referred_by_code` en `User`. No editable después.
+
+---
+
+## TASK-F5-07: UI Web — flujo de pago SINPE y panel admin
+
+**Estado:** ⏳ Pendiente
+**Módulo:** Fase 5 — Monetización
+**Prerequisitos:** TASK-F5-03, TASK-F5-04
+
+**Páginas/componentes a crear en `aulaia-web/src/app/`:**
+
+| Ruta | Descripción |
+|------|-------------|
+| `/suscripcion` | Página de precios (3 planes) con CTA "Suscribirse" |
+| `/suscripcion/pagar` | Pantalla SINPE: número destino, monto CRC, código referencia, instrucciones, botón "Ya pagué" + upload comprobante |
+| `/admin/pagos` | Panel admin: pestañas Pendientes / Historial / Suscripciones activas |
+| `/admin/cierre-mensual` | Ingresar costo infra Azure del mes + ejecutar job comisiones |
+| `/perfil/referidos` | Panel de referidos y comisiones del docente |
+
+**Componente banner trial** (global, en layout principal):
+- Muestra días restantes del trial con progress bar.
+- CTA "Activar suscripción" → redirige a `/suscripcion`.
+- Se oculta cuando `status = active`.

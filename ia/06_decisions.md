@@ -4,6 +4,82 @@
 
 ---
 
+## ADR-008: Modelo de compensación para Adriana Guido (socia comercial)
+
+**Fecha:** 2026-05-07
+**Estado:** ✅ Decidido
+**Decidido por:** Ezequiel Baltodano (dev principal)
+
+### Contexto
+Adriana Guido es docente de Artes Plásticas con 24 años de experiencia y plaza en el Colegio de Aserrí. Su rol en el proyecto es comercial y pedagógico: ventas por su red de contactos docentes, validación pedagógica del producto y cara educativa del proyecto. Se necesita definir un modelo de compensación que reconozca su aporte sin comprometer la viabilidad financiera del proyecto, dado que el 100% del riesgo financiero (desarrollo + infraestructura Azure) lo asume Ezequiel.
+
+### Opciones evaluadas
+
+| Opción | Pros | Contras |
+|--------|------|---------|
+| **Equity (co-fundadora formal)** | Alineación a largo plazo | Difícil de revertir si deja de aportar; equity en etapa temprana sin producto validado es riesgoso; no hay mecanismo claro de vesting real en una relación informal |
+| **Comisión por referidos** | Proporcional al aporte real; sin comprometer propiedad; escala solo si ella genera usuarios | No incentiva tareas no directamente ligadas a referidos (validación, retroalimentación) |
+| **Salario fijo** | Claridad | El proyecto no genera ingresos todavía; es inviable en fase inicial |
+
+### Decisión
+**Comisión del 20% de la suscripción mensual de cada usuario que Adriana refiera directamente, durante 12 meses desde la suscripción del usuario.**
+
+Reglas adicionales:
+- Los costos de infraestructura Azure se descuentan de los ingresos brutos **antes** de calcular la base de comisión.
+  - Ejemplo: $500 ingresos − $150 Azure = $350 base → comisión = $70.
+- Un usuario "referido por Adriana" se define por un link de referido único o por declaración explícita del docente al registrarse.
+- Después de 12 meses, el usuario pasa a ser cuenta sin comisión continua. Si el usuario sube de plan, el nuevo precio aplica durante los 12 meses.
+- Adriana recibe cuenta Profesional gratuita de por vida.
+- Este acuerdo debe formalizarse por escrito antes del primer cobro real a usuarios.
+- Si en el futuro ella mantiene contribución activa sostenida (+12 meses, +100 referidos), se puede convertir parte de las comisiones acumuladas en equity minoritario como reconocimiento formal — requiere nuevo ADR.
+
+### Consecuencias
+- ✅ La compensación es proporcional al aporte real y verificable.
+- ✅ Ezequiel conserva el 100% de la propiedad del producto y la infraestructura.
+- ✅ No hay equity que recuperar si la relación no funciona en los primeros meses.
+- ✅ El modelo escala: si Adriana refiere 100 usuarios a $15/mes = $1,500 brutos → ~$300/mes para ella.
+- ⚠️ No cubre el valor de su retroalimentación pedagógica directamente. Esto se cubre con la cuenta gratuita y el reconocimiento público como Directora Pedagógica.
+- ⚠️ Requiere un sistema de tracking de referidos antes de lanzamiento (link único por usuario o campo en registro).
+
+---
+
+## ADR-009: Pasarela de pagos — SINPE Móvil con verificación manual
+
+**Fecha:** 2026-05-07
+**Estado:** ✅ Decidido
+**Decidido por:** Ezequiel Baltodano (dev principal)
+
+### Contexto
+El producto necesita cobrar suscripciones mensuales a docentes costarricenses. Se evaluaron pasarelas de pago automáticas vs. el sistema local SINPE Móvil.
+
+### Opciones evaluadas
+
+| Opción | Pros | Contras |
+|--------|------|---------|
+| **Stripe** | Automatización total, renovación sin intervención | No confirma disponibilidad para cuentas CR; comisiones 2.9% + $0.30/tx; los docentes no tienen tarjeta de crédito internacional |
+| **PayPal** | Disponible en CR | Comisiones altas; no todos los docentes tienen cuenta; flujo engorroso |
+| **SINPE Móvil + verificación manual** | Nativo de CR, todos los bancos participan, sin comisiones, todos los docentes saben usarlo | Sin API pública; requiere verificación manual por admin; no escala automáticamente |
+
+### Decisión
+**SINPE Móvil con verificación manual por administrador.**
+
+- No existe API oficial de SINPE Móvil; toda verificación es manual.
+- El flujo: usuario paga → sube comprobante → admin verifica → activa suscripción.
+- El sistema genera un `reference_code` único por solicitud (formato `AUI-YYYYMMDD-XXXX`) para que el admin identifique cada pago en su app bancaria.
+- El número SINPE de AulaIA se configura en `AppSettings` sin redeployar. El tipo de cambio USD/CRC se obtiene automáticamente del API oficial del BCCR mediante el job `UpdateExchangeRateJob` (Hangfire, diario).
+- Este modelo es viable para la fase inicial (< 200 usuarios). Si el volumen crece, evaluar agregadores de pago costarricenses que soporten SINPE (ej. CincoDigitos, Kushki CR) — requerirá un nuevo ADR.
+
+### Consecuencias
+- ✅ Cero comisiones por transacción — 100% del precio llega al negocio.
+- ✅ Universal en Costa Rica — cualquier docente con cualquier banco puede pagar.
+- ✅ Sin dependencias de terceros ni cuentas de pasarela de pago.
+- ✅ Implementación simple: solo lógica de BD y notificaciones.
+- ⚠️ El admin debe verificar cada pago manualmente — carga operativa que crece con el volumen.
+- ⚠️ Sin renovación automática — el docente debe recordar pagar cada mes y el admin aprobarlo.
+- ⚠️ Riesgo de churn por fricción de renovación manual. Mitigación: notificaciones proactivas 7 días antes del vencimiento.
+
+---
+
 ## ADR-007: Frontend Next.js como SPA estático servido por .NET 10
 
 **Fecha:** 2026-05-05

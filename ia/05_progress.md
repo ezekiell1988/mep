@@ -25,6 +25,12 @@
 
 ---
 
+## ⏳ Pendiente — Fase 5 — Monetización: Suscripciones, SINPE Móvil y Referidos
+
+> Detalles de componentes en `03_plan.md` — Fase 5.
+
+---
+
 ## 🔄 Historial — Fase 3
 
 > **Decisiones de diseño confirmadas (2026-05-04):**

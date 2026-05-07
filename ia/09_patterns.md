@@ -144,3 +144,106 @@ db.Grades.Add(new Grade
 ```
 
 **Regla:** Siempre poblar `GroupId` desde el parámetro de ruta `grupoId` — nunca derivarlo de la actividad en memoria (evita inconsistencias en updates concurrentes).
+
+---
+
+## PATTERN-05: Job Hangfire — Tipo de cambio USD/CRC del API BCCR
+
+**Contexto:** SINPE Móvil opera exclusivamente en CRC. Para mostrar el equivalente en colones del precio en USD y registrar el `amount_crc` de cada `PaymentRequest`, el sistema consulta el tipo de cambio de venta oficial del Banco Central de Costa Rica (BCCR) mediante su API SOAP pública (sin costo, requiere token gratuito). El job se ejecuta una vez por día hábil a las 6am hora CR con Hangfire.
+
+```csharp
+// Features/Jobs/UpdateExchangeRateJob.cs
+public class UpdateExchangeRateJob(AulaIADbContext db, IOptions<SinpeOptions> opts, ILogger<UpdateExchangeRateJob> log)
+{
+    // Endpoint SOAP público del BCCR:
+    // https://gee.bccr.fi.cr/Indicadores/Suscripciones/WS/wsindicadoreseconomicos.asmx
+    // Indicador 318 = tipo de cambio de VENTA del USD (el que usa quien paga en USD → CRC)
+    // Indicador 317 = tipo de cambio de COMPRA (no usar para SINPE)
+    private const string BccrSoapUrl = "https://gee.bccr.fi.cr/Indicadores/Suscripciones/WS/wsindicadoreseconomicos.asmx";
+
+    public async Task Execute(CancellationToken ct)
+    {
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(
+            DateTime.UtcNow,
+            TimeZoneInfo.FindSystemTimeZoneById("America/Costa_Rica")));
+
+        // Idempotente: no duplicar si ya existe registro del día
+        if (await db.ExchangeRates.AnyAsync(e => e.Date == today, ct))
+        {
+            log.LogInformation("TC ya registrado para {Date}", today);
+            return;
+        }
+
+        var soapEnvelope = $"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                           xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+              <soap:Body>
+                <ObtenerIndicadoresEconomicos xmlns="http://ws.sdde.bccr.fi.cr">
+                  <Indicador>318</Indicador>
+                  <FechaInicio>{today:dd/MM/yyyy}</FechaInicio>
+                  <FechaFinal>{today:dd/MM/yyyy}</FechaFinal>
+                  <Nombre>AulaIA</Nombre>
+                  <SubNiveles>N</SubNiveles>
+                  <CorreoElectronico>{opts.Value.BccrEmail}</CorreoElectronico>
+                  <Token>{opts.Value.BccrApiToken}</Token>
+                </ObtenerIndicadoresEconomicos>
+              </soap:Body>
+            </soap:Envelope>
+            """;
+
+        using var http = new HttpClient();
+        using var content = new StringContent(soapEnvelope, Encoding.UTF8, "text/xml");
+        content.Headers.Add("SOAPAction", "\"\"");
+
+        var response = await http.PostAsync(BccrSoapUrl, content, ct);
+        response.EnsureSuccessStatusCode();
+
+        var xml = await response.Content.ReadAsStringAsync(ct);
+        var doc = XDocument.Parse(xml);
+        XNamespace ns = "http://ws.sdde.bccr.fi.cr";
+
+        // El BCCR devuelve el valor en el nodo <NUM_VALOR> del XML anidado
+        var valorStr = doc.Descendants("NUM_VALOR").FirstOrDefault()?.Value
+            ?? throw new InvalidOperationException("BCCR no devolvió NUM_VALOR");
+        var sellRate = decimal.Parse(valorStr, CultureInfo.InvariantCulture);
+
+        db.ExchangeRates.Add(new ExchangeRate
+        {
+            Date = today,
+            SellRate = sellRate,
+            FetchedAt = DateTimeOffset.UtcNow
+        });
+        await db.SaveChangesAsync(ct);
+        log.LogInformation("TC BCCR actualizado: {Rate} CRC/USD para {Date}", sellRate, today);
+    }
+}
+```
+
+**Fallback — si el job falla (fin de semana, feriado, error de red):**
+```csharp
+// Servicio que resuelve el TC del día para crear un PaymentRequest
+public async Task<decimal> GetCurrentSellRateAsync(CancellationToken ct)
+    => await db.ExchangeRates
+           .OrderByDescending(e => e.Date)
+           .Select(e => e.SellRate)
+           .FirstOrDefaultAsync(ct)
+       ?? throw new InvalidOperationException("No hay tipo de cambio disponible");
+```
+
+**AppSettings.json correspondiente:**
+```json
+"Sinpe": {
+  "SinpeNumber": "88001234",
+  "BccrEmail": "correo@registrado.bccr.fi.cr",
+  "BccrApiToken": "TOKEN-OBTENIDO-EN-GEE-BCCR"
+}
+```
+
+**Reglas:**
+- El job es idempotente: si ya existe un registro para el día, no hace nada.
+- Usar siempre **indicador 318** (venta), no 317 (compra) — SINPE cobra al usuario que convierte USD a CRC.
+- Guardar `exchange_rate_used` en `PaymentRequest` en el momento de creación, no calcularlo despues (auditoría).
+- El token BCCR es gratuito; registrarse en `https://gee.bccr.fi.cr` con el correo del proyecto.
+- Configurar las credenciales BCCR en Key Vault, no en `appsettings.json`.
