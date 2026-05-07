@@ -81,3 +81,73 @@ export const listPlaneamientos = (token: string, groupId?: string) =>
     groupId ? `/api/planeamiento?groupId=${groupId}` : '/api/planeamiento',
     token,
   );
+
+// ─── Notas ────────────────────────────────────────────────────────────────────
+
+export interface ActividadResponse {
+  id: string;
+  name: string;
+  type: string;
+  maxScore: number;
+  percentage: number;
+  dueDate: string | null;
+}
+
+export interface CrearActividadRequest {
+  name: string;
+  type: string;
+  maxScore: number;
+  percentage: number;
+  dueDate: string | null;
+}
+
+export interface SaveCalificacionRequest {
+  studentId: string;
+  score: number;
+  comments: string | null;
+}
+
+export interface NotaActividadItem {
+  actividadId: string;
+  nombre: string;
+  tipo: string;
+  maxScore: number;
+  porcentaje: number;
+  nota: number | null;
+  comentario: string | null;
+}
+
+export interface ResumenEstudianteResponse {
+  studentId: string;
+  fullName: string;
+  studentCode: string;
+  promedio: number | null;
+  notas: NotaActividadItem[];
+}
+
+export interface ResumenGrupoResponse {
+  groupId: string;
+  totalActividades: number;
+  estudiantes: ResumenEstudianteResponse[];
+}
+
+export const getActividades = (token: string, groupId: string) =>
+  apiFetch<ActividadResponse[]>(`/api/grupos/${groupId}/actividades`, token);
+
+export const crearActividad = (token: string, groupId: string, body: CrearActividadRequest) =>
+  apiFetch<ActividadResponse>(`/api/grupos/${groupId}/actividades`, token, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+export const eliminarActividad = (token: string, groupId: string, actividadId: string) =>
+  apiFetch<void>(`/api/grupos/${groupId}/actividades/${actividadId}`, token, { method: 'DELETE' });
+
+export const saveCalificaciones = (token: string, groupId: string, actividadId: string, body: SaveCalificacionRequest[]) =>
+  apiFetch<void>(`/api/grupos/${groupId}/actividades/${actividadId}/calificaciones`, token, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+export const getResumenNotas = (token: string, groupId: string) =>
+  apiFetch<ResumenGrupoResponse>(`/api/grupos/${groupId}/notas/resumen`, token);

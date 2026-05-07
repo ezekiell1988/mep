@@ -9,6 +9,7 @@ import EstudiantesScreen from '../screens/EstudiantesScreen';
 import TomarListaScreen from '../screens/TomarListaScreen';
 import PlaneamientosScreen from '../screens/PlaneamientosScreen';
 import PlaneamientoDetalleScreen from '../screens/PlaneamientoDetalleScreen';
+import NotasScreen from '../screens/NotasScreen';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -52,7 +53,18 @@ export default function AppNavigator() {
         <Stack.Screen
           name="Estudiantes"
           component={EstudiantesScreen}
-          options={({ route }) => ({ title: route.params.grupo.name })}
+          options={({ route, navigation }) => ({
+            title: route.params.grupo.name,
+            headerRight: () => (
+              <Pressable
+                onPress={() => navigation.navigate('Notas', { grupo: route.params.grupo })}
+                accessibilityLabel="Ver notas del grupo"
+                style={{ marginRight: 4, paddingHorizontal: 8, paddingVertical: 4 }}
+              >
+                <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>Notas</Text>
+              </Pressable>
+            ),
+          })}
         />
         <Stack.Screen
           name="TomarLista"
@@ -69,6 +81,13 @@ export default function AppNavigator() {
           component={PlaneamientoDetalleScreen}
           options={({ route }) => ({
             title: `${route.params.asignatura} ${route.params.nivel}° — T${route.params.trimestre}`,
+          })}
+        />
+        <Stack.Screen
+          name="Notas"
+          component={NotasScreen}
+          options={({ route }) => ({
+            title: `Notas · ${route.params.grupo.name}`,
           })}
         />
       </Stack.Navigator>

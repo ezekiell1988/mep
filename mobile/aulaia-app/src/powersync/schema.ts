@@ -62,7 +62,32 @@ const lesson_plans = new Table(
   { indexes: { by_teacher: ['teacher_sub'], by_group: ['group_id'] } },
 );
 
-export const AppSchema = new Schema({ groups, students, attendance_records, lesson_plans });
+const evaluation_activities = new Table(
+  {
+    group_id:   column.text,
+    name:       column.text,
+    type:       column.text,    // 'Prueba Escrita' | 'Trabajo Cotidiano' | 'Proyecto' | etc.
+    max_score:  column.real,
+    percentage: column.real,
+    due_date:   column.text,    // 'YYYY-MM-DD' o null
+    created_at: column.text,
+  },
+  { indexes: { by_group: ['group_id'] } },
+);
+
+const grades = new Table(
+  {
+    activity_id: column.text,
+    student_id:  column.text,
+    score:       column.real,
+    comments:    column.text,
+    created_at:  column.text,
+    updated_at:  column.text,
+  },
+  { indexes: { by_activity: ['activity_id'], by_student: ['student_id'] } },
+);
+
+export const AppSchema = new Schema({ groups, students, attendance_records, lesson_plans, evaluation_activities, grades });
 
 // Tipos TypeScript derivados del schema para usar en las pantallas
 export type GroupRow = {
@@ -112,4 +137,25 @@ export type LessonPlanRow = {
   error_message: string | null;
   created_at: string;
   generated_at: string | null;
+};
+
+export type EvaluationActivityRow = {
+  id: string;
+  group_id: string;
+  name: string;
+  type: string;
+  max_score: number;
+  percentage: number;
+  due_date: string | null;
+  created_at: string;
+};
+
+export type GradeRow = {
+  id: string;
+  activity_id: string;
+  student_id: string;
+  score: number;
+  comments: string | null;
+  created_at: string;
+  updated_at: string;
 };

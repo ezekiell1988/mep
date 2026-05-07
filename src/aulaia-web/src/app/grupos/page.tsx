@@ -83,13 +83,22 @@ export default function GruposPage() {
               <p className="font-semibold text-gray-900">{g.name}</p>
               <p className="text-sm text-gray-500 mt-0.5">{g.subject} · {g.level} · {g.schoolYear}</p>
             </div>
-            <button
-              type="button"
-              onClick={() => router.push(`/qrs?groupId=${g.id}&groupName=${encodeURIComponent(g.name)}&level=${encodeURIComponent(g.level)}`)}
-              className="text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium px-4 py-2 rounded-lg transition-colors"
-            >
-              <span aria-hidden="true">🖨</span> Imprimir QRs
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => router.push(`/notas/${g.id}?nombre=${encodeURIComponent(g.name)}&nivel=${encodeURIComponent(g.level)}&asignatura=${encodeURIComponent(g.subject)}`)}
+                className="text-sm bg-green-50 hover:bg-green-100 text-green-700 font-medium px-4 py-2 rounded-lg transition-colors"
+              >
+                <span aria-hidden="true">📊</span> Notas
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push(`/qrs?groupId=${g.id}&groupName=${encodeURIComponent(g.name)}&level=${encodeURIComponent(g.level)}`)}
+                className="text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium px-4 py-2 rounded-lg transition-colors"
+              >
+                <span aria-hidden="true">🖨</span> Imprimir QRs
+              </button>
+            </div>
           </div>
         ))}
       </div>

@@ -113,6 +113,9 @@
 | F2 · App web: vista planeamiento generado (render Markdown + polling) | ✅ |
 | F2 · App web: descarga .md + imprimir/PDF | ✅ |
 | F2 · App móvil: vista planeamientos guardados (offline) | ✅ |
+| F2 · `LessonPlanConfiguration` — `HasColumnName` explícito para todas las columnas (snake_case) | ✅ |
+| F2 · Migración `RenameLessonPlanColumns` — renombra columnas PascalCase → snake_case en `lesson_plans` | ✅ |
+| F2 · PowerSync Sync Rules — tabla `lesson_plans` agregada (`WHERE group_id = bucket.group_id`) | ✅ |
 
 ### PC-07: Tests de Integración — `AulaIA.Tests`
 | Tarea | Estado |
