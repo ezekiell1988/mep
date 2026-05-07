@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
 > **Última actualización:** 2026-05-07
-> **Fase activa:** Fase 2 — Módulo Calendario (pendiente) + Fase 4 — Adecuaciones ⏳
+> **Fase activa:** Fase 4 — Adecuaciones Curriculares e Informes ⏳
 
 ---
 
@@ -11,17 +11,13 @@
 
 **Fase 1 — Core: Grupos, Estudiantes y Asistencia QR** (2026-05-05)
 
+**Fase 2 — Planeamiento Didáctico con IA + Calendario** (2026-05-07)
+
 **Fase 3 — Notas, Promedios y Reportes Básicos** (2026-05-07)
 
 ---
 
-## 🔄 En progreso — Fase 2 (pendiente: Módulo Calendario)
-
-> El resto de Fase 2 estaba marcado erróneamente como completado. Los ítems de backend/web/móvil del planeamiento están ✅. El sub-módulo Calendario está pendiente.
-
----
-
-## ⏳ Pendiente — Fase 4
+## 🔄 En progreso — Fase 4
 
 ---
 

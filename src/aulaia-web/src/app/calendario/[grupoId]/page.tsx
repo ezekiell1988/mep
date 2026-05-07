@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect, useState, useCallback, use } from 'react';
+import { useEffect, useState, useCallback, useMemo, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   getCalendario,
@@ -120,7 +120,8 @@ export default function CalendarioPage({ params }: { params: Promise<{ grupoId: 
     }
   };
 
-  const handleDelete = async (id: string) => {
+  // useCallback: referencia estable para los botones de eliminar en la lista
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm('¿Eliminar este evento del calendario?')) return;
     try {
       const token = await getAccessTokenSilently();
@@ -129,7 +130,7 @@ export default function CalendarioPage({ params }: { params: Promise<{ grupoId: 
     } catch (e) {
       setError(String(e));
     }
-  };
+  }, [getAccessTokenSilently, grupoId, reload]);
 
   const handleCalcLecciones = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,42 +147,47 @@ export default function CalendarioPage({ params }: { params: Promise<{ grupoId: 
   };
 
   // ── Construir grilla mensual ──────────────────────────────────────────────
-  const daysInMonth  = new Date(viewYear, viewMonth, 0).getDate();
-  const firstDayOfWeek = new Date(viewYear, viewMonth - 1, 1).getDay(); // 0=Dom
-  // Ajustar a lunes como inicio de semana
-  const offset = (firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1);
+  const daysInMonth    = new Date(viewYear, viewMonth, 0).getDate();
+  const firstDayOfWeek = new Date(viewYear, viewMonth - 1, 1).getDay();
+  const offset         = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
 
-  // Mapa: "YYYY-MM-DD" → eventos de ese día
-  const eventsByDate = new Map<string, CalendarEventResponse[]>();
-  for (const evt of events) {
-    const start = new Date(evt.date + 'T00:00:00');
-    const end   = evt.endDate ? new Date(evt.endDate + 'T00:00:00') : start;
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const key = d.toISOString().slice(0, 10);
-      const existing = eventsByDate.get(key);
-      if (existing) {
-        existing.push(evt);
-      } else {
-        eventsByDate.set(key, [evt]);
+  // useMemo: evitar reconstruir el mapa en cada render salvo que events cambie
+  const eventsByDate = useMemo(() => {
+    const map = new Map<string, CalendarEventResponse[]>();
+    for (const evt of events) {
+      const start = new Date(evt.date + 'T00:00:00');
+      const end   = evt.endDate ? new Date(evt.endDate + 'T00:00:00') : start;
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const key = d.toISOString().slice(0, 10);
+        const existing = map.get(key);
+        if (existing) {
+          existing.push(evt);
+        } else {
+          map.set(key, [evt]);
+        }
       }
     }
-  }
+    return map;
+  }, [events]);
 
   const todayIso = todayStr();
 
-  function prevMonth() {
+  // useCallback: instancias estables para prevMonth/nextMonth
+  const prevMonth = useCallback(() => {
     if (viewMonth === 1) { setViewYear(y => y - 1); setViewMonth(12); }
     else setViewMonth(m => m - 1);
-  }
-  function nextMonth() {
+  }, [viewMonth]);
+
+  const nextMonth = useCallback(() => {
     if (viewMonth === 12) { setViewYear(y => y + 1); setViewMonth(1); }
     else setViewMonth(m => m + 1);
-  }
+  }, [viewMonth]);
 
-  const eventsThisMonth = events.filter(e => {
-    const m = parseInt(e.date.split('-')[1], 10);
-    return m === viewMonth;
-  });
+  // useMemo: evitar re-filtrar en cada render salvo que events o viewMonth cambien
+  const eventsThisMonth = useMemo(() =>
+    events.filter(e => parseInt(e.date.split('-')[1], 10) === viewMonth),
+    [events, viewMonth]
+  );
 
   if (isLoading) return <div className="p-8 text-gray-500">Cargando...</div>;
 
@@ -290,7 +296,7 @@ export default function CalendarioPage({ params }: { params: Promise<{ grupoId: 
                         <p className="text-sm text-gray-800 font-medium truncate">{evt.title}</p>
                         <p className="text-xs text-gray-500">
                           {evt.date}{evt.endDate && evt.endDate !== evt.date ? ` → ${evt.endDate}` : ''}
-                          {evt.isNational && ' · 🔒 Nacional'}
+                          {evt.isNational ? ' · 🔒 Nacional' : null}
                         </p>
                       </div>
                     </div>
