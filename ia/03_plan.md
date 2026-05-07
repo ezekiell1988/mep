@@ -1,7 +1,7 @@
 # 03 — Plan de Desarrollo
 
-> **Última actualización:** 2026-05-07
-> **Estado general:** 🔄 Fase 4 — Adecuaciones Curriculares e Informes (parcialmente completada)
+> **Última actualización:** 2026-05-07 (rev 2)
+> **Estado general:** ⏳ Fase 5 — Monetización: Suscripciones, SINPE Móvil y Referidos
 
 ---
 
@@ -185,7 +185,7 @@ mep/
 
 ---
 
-## Fase 4 — Adecuaciones Curriculares e Informes Completos 🔄 En progreso
+## Fase 4 — Adecuaciones Curriculares e Informes Completos ✅ Completada (2026-05-07)
 
 **Objetivo:** Completar el sistema con el módulo de atención a la diversidad y todos los informes institucionales que el docente debe entregar.
 
@@ -203,18 +203,18 @@ mep/
 | `InformeAdecuacionService` — PDF QuestPDF para expediente CAE (datos generales, estrategias, propuesta IA, firmas) | ✅ |
 | `AdecuacionesModule` — 6 endpoints: list, get, upsert, delete, generar, informe PDF | ✅ |
 | Registrado en `Program.cs` (`AddAdecuacionesModule` + `MapAdecuacionesEndpoints`) | ✅ |
-| Integración de adecuaciones en planeamiento generado | ⏳ |
+| Integración de adecuaciones en planeamiento generado | ✅ |
 | Reporte de asistencia por período (PDF/XLSX) | ✅ |
-| Informe docente para dirección | ⏳ |
+| Informe docente para dirección | ✅ |
 | **App Web** | |
 | Tipos + funciones en `api.ts` (`listAdecuaciones`, `upsertAdecuacion`, `generarPropuestaAdecuacion`, `getInformeAdecuacionUrl`, etc.) | ✅ |
 | `/adecuaciones/[grupoId]/page.tsx` — tabla de alumnos + panel lateral + polling + descarga PDF | ✅ |
 | A11y auditada y corregida (`role="dialog"`, `htmlFor`/`id`, `scope="col"`, `aria-live`, emojis ocultos) | ✅ |
 | Botón `♿ Adecuaciones` en tarjetas de grupos (`/grupos`) | ✅ |
-| Dashboard del docente: resumen del período | ⏳ |
+| Dashboard del docente: resumen del período | ✅ |
 | **App Móvil** | |
-| Perfil del estudiante con indicador de adecuación activa | ⏳ |
-| Notificaciones push: alertas de rendimiento | ⏳ |
+| Perfil del estudiante con indicador de adecuación activa | ✅ |
+| Notificaciones push: alertas de rendimiento | ✅ |
 
 ---
 
@@ -295,6 +295,6 @@ mep/
 | 1 | Core: Grupos + Asistencia QR | Adriana toma lista con QR en el aula | ✅ |
 | 2 | Planeamiento con IA + Calendario | Planeamiento MEP completo en minutos, reorganizable por calendario | ✅ |
 | 3 | Notas y Reportes básicos | Adriana cierra trimestre sin Excel; exporta al SEA | ✅ |
-| 4 | Adecuaciones e Informes | Informes CAE generados automáticamente | 🔄 |
+| 4 | Adecuaciones e Informes | Informes CAE generados automáticamente | ✅ |
 | 5 | Monetización: Pagos + Referidos | Trial, Stripe, paywalls, panel de comisiones Adriana | ⏳ |
 | 6 | Escala + Nuevas materias | Container Apps + plan institucional | ⏳ |

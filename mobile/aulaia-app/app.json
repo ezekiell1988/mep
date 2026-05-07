@@ -31,7 +31,12 @@
       "expo-web-browser",
       ["expo-barcode-scanner", { "cameraPermission": "AulaIA necesita acceso a la cámara para escanear códigos QR de asistencia." }],
       ["expo-camera", { "cameraPermission": "AulaIA necesita acceso a la cámara para escanear códigos QR de asistencia." }],
-      "expo-secure-store"
+      "expo-secure-store",
+      ["expo-notifications", {
+        "icon": "./assets/icon.png",
+        "color": "#1a56db",
+        "sounds": []
+      }]
     ],
     "scheme": "aulaia"
   }

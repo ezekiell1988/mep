@@ -10,7 +10,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace('/grupos');
+      router.replace('/dashboard');
     }
   }, [isAuthenticated, isLoading, router]);
 

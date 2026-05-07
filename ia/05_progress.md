@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-07 (rev 2)
-> **Fase activa:** Fase 4 — Adecuaciones Curriculares e Informes 🔄
+> **Última actualización:** 2026-05-07 (rev 3)
+> **Fase activa:** Fase 5 — Monetización: Suscripciones, SINPE Móvil y Referidos ⏳
 
 ---
 
@@ -15,9 +15,11 @@
 
 **Fase 3 — Notas, Promedios y Reportes Básicos** (2026-05-07)
 
+**Fase 4 — Adecuaciones Curriculares e Informes Completos** (2026-05-07)
+
 ---
 
-## 🔄 En progreso — Fase 4
+## ✅ Completado — Fase 4 (detalle)
 
 ### PC-11: Fase 4 — Adecuaciones Curriculares
 | Tarea | Estado |
@@ -38,7 +40,7 @@
 | F4 · App Web: A11y auditada (`role="dialog"`, `aria-modal`, `aria-labelledby`, `htmlFor`/`id`, `scope="col"`, `aria-live="polite"`, emojis `aria-hidden`) | ✅ |
 | F4 · App Web: patrón `reloadTrigger`/`reload` + `cancelled` flag (consistente con `calendario/[grupoId]`) | ✅ |
 | F4 · App Web: botón `♿ Adecuaciones` en tarjetas de `/grupos` | ✅ |
-| F4 · Integración de adecuaciones en planeamiento generado | ⏳ |
+| F4 · Integración de adecuaciones en planeamiento generado | ✅ |
 | F4 · Reporte de asistencia por período (PDF/XLSX) | ✅ |
 | F4 · `ReporteAsistenciaService` — PDF landscape (tabla coloreada P/A/T/J, % asistencia semáforo) + XLSX (zebra, freeze rows+cols, colores semáforo) | ✅ |
 | F4 · Endpoints `GET /api/grupos/{id}/reportes/asistencia/pdf?from=&to=` y `.../xlsx?from=&to=` en `ReportesModule` | ✅ |
@@ -50,9 +52,22 @@
 | F4 · App Web: botón **↓ Informe Dirección** en `/notas/[grupoId]` (descarga autenticada, período feb-hoy) | ✅ |
 | F4 · App Web: fix build `output: export` — server wrapper `page.tsx` con `generateStaticParams([{ grupoId: '_' }])` + `<Suspense>` para las 4 rutas `[grupoId]` | ✅ |
 | F4 · Frontend build: 0 errores (`npm run build` → `out/`) | ✅ |
-| F4 · Dashboard docente: resumen del período | ⏳ |
-| F4 · App móvil: indicador de adecuación activa en perfil del estudiante | ⏳ |
-| F4 · App móvil: notificaciones push alertas de rendimiento | ⏳ |
+| F4 · Dashboard docente: resumen del período | ✅ |
+| F4 · `DashboardModule` — `GET /api/docente/resumen` (totalGrupos, totalEstudiantes, estudiantesEnRiesgo, planeamientosPendientes, planeamientosListos, adecuacionesActivas, proximosEventos 14d) | ✅ |
+| F4 · App Web: `/dashboard` — 6 stat cards + sección próximos eventos + header usuario + cerrar sesión | ✅ |
+| F4 · App Web: `DashboardClient` — patrón IIFE+cancelled (consistente con calendario), `<button>` nativo en cards clickeables (axe fix) | ✅ |
+| F4 · `getDocenteResumen()` + tipos `DocenteResumenResponse`/`ProximoEvento` en `api.ts` | ✅ |
+| F4 · App móvil: indicador de adecuación activa en perfil del estudiante | ✅ |
+| F4 · `EstudiantesScreen` — badge `♿ AS/ANS/AA` por alumno (query PowerSync `accommodations`) | ✅ |
+| F4 · PowerSync schema: tabla `accommodations` + `AccommodationRow` type | ✅ |
+| F4 · App móvil: notificaciones push alertas de rendimiento | ✅ |
+| F4 · `useRendimientoNotifications` hook — promedio por alumno < 65 → notificación local push por grupo (deduplicado por día) | ✅ |
+| F4 · `expo-notifications` instalado + plugin configurado en `app.json` | ✅ |
+| F4 · `GruposScreen` — hook `useRendimientoNotifications()` activado | ✅ |
+| F4 · Tests integración: `DashboardTests.cs` (3 tests) + `AdecuacionesTests.cs` (6 tests) | ✅ |
+| F4 · Suite completa 32/32 tests ✅ | ✅ |
+
+---
 
 ---
 

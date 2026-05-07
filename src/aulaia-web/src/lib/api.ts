@@ -351,3 +351,24 @@ export const getReporteAsistenciaUrl = (groupId: string, from: string, to: strin
 
 export const getInformeDirectorUrl = (groupId: string, from: string, to: string) =>
   `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/grupos/${groupId}/reportes/informe-director?from=${from}&to=${to}`;
+
+// ── Dashboard docente ─────────────────────────────────────────────────────
+
+export interface ProximoEvento {
+  fecha: string;
+  titulo: string;
+  tipo: string;
+}
+
+export interface DocenteResumenResponse {
+  totalGrupos: number;
+  totalEstudiantes: number;
+  estudiantesEnRiesgo: number;
+  planeamientosPendientes: number;
+  planeamientosListos: number;
+  adecuacionesActivas: number;
+  proximosEventos: ProximoEvento[];
+}
+
+export const getDocenteResumen = (token: string) =>
+  apiFetch<DocenteResumenResponse>('/api/docente/resumen', token);

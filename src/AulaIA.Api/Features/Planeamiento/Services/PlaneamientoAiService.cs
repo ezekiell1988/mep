@@ -33,6 +33,14 @@ public sealed class PlaneamientoAiService(
                 $"No hay programa de {plan.Asignatura} {plan.Nivel}° validado para el Trimestre {plan.Trimestre}.");
         }
 
+        // Adecuaciones curriculares activas del grupo (Ley 7600)
+        var accommodations = await db.Accommodations
+            .Include(a => a.Student)
+            .Where(a => a.GroupId == plan.GroupId
+                     && a.Status == AccommodationStatus.Ready)
+            .OrderBy(a => a.Type)
+            .ToListAsync(ct);
+
         var curriculumContext = BuildCurriculumContext(units);
         var totalLecciones = plan.LeccionesPorSemana *
             (int)Math.Ceiling((plan.FechaFin.DayNumber - plan.FechaInicio.DayNumber) / 7.0);
@@ -42,6 +50,14 @@ public sealed class PlaneamientoAiService(
             new Uri(opts.Endpoint),
             new Azure.AzureKeyCredential(opts.ApiKey ?? ""));
         var chatClient = azureClient.GetChatClient(opts.DeploymentName);
+
+        var accommodationRules = accommodations.Count > 0
+            ? $"""
+              - Sección "Consideraciones para Adecuaciones Curriculares" — OBLIGATORIA si hay estudiantes con adecuación.
+                Incluye una tabla con columnas: Estudiante | Tipo | Ajuste en Mediación | Ajuste en Evaluación.
+                Usa los datos concretos de cada adecuación activa. Marco legal: Ley 7600.
+              """
+            : "";
 
         var systemPrompt = $"""
             Eres un asistente experto en planificación didáctica del sistema educativo de Costa Rica (MEP).
@@ -57,8 +73,18 @@ public sealed class PlaneamientoAiService(
             - Sección "Estrategias de Mediación" — tabla semana por semana con: Semana | Fecha | Lección # | Actividad de Inicio | Desarrollo | Cierre | Recursos.
             - Sección "Evaluación" — instrumentos y criterios.
             - Sección "Tareas Sugeridas" — lista de tareas listas para asignar.
+            {accommodationRules}
             - Idioma: español formal de Costa Rica. Terminología exacta del MEP.
             """;
+
+        var accommodationContext = accommodations.Count > 0
+            ? "\n\nADECUACIONES CURRICULARES ACTIVAS EN ESTE GRUPO (Ley 7600):\n" +
+              string.Join("\n", accommodations.Select(a =>
+                  $"- {a.Student?.FullName ?? "Estudiante"} (Exp. {a.Student?.StudentCode}): " +
+                  $"{a.Type} — Diagnóstico: {a.Diagnostico}" +
+                  (a.EstrategiasMediacion is not null ? $" | Mediación: {a.EstrategiasMediacion}" : "") +
+                  (a.EstrategiasEvaluacion is not null ? $" | Evaluación: {a.EstrategiasEvaluacion}" : "")))
+            : "";
 
         var userMessage = $"""
             Genera el planeamiento con los siguientes parámetros:
@@ -71,7 +97,7 @@ public sealed class PlaneamientoAiService(
             - Total de lecciones estimadas: {totalLecciones}
 
             PROGRAMA OFICIAL DEL MEP (usar EXACTAMENTE este contenido):
-            {curriculumContext}
+            {curriculumContext}{accommodationContext}
             """;
 
         var messages = new List<ChatMessage>

@@ -1,5 +1,6 @@
 using AulaIA.Api.Features.Adecuaciones;
 using AulaIA.Api.Features.Asistencia;
+using AulaIA.Api.Features.Dashboard;
 using AulaIA.Api.Features.Calendario;
 using AulaIA.Api.Features.Curriculum;
 using AulaIA.Api.Features.Estudiantes;
@@ -65,6 +66,7 @@ app.MapGruposEndpoints()
    .MapReportesEndpoints()
    .MapCalendarioEndpoints()
    .MapAdecuacionesEndpoints()
+   .MapDashboardEndpoints()
    .MapPowerSyncEndpoints();
 
 app.LogStartupFacts();

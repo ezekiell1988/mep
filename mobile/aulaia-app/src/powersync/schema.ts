@@ -87,7 +87,19 @@ const grades = new Table(
   { indexes: { by_activity: ['activity_id'], by_student: ['student_id'] } },
 );
 
-export const AppSchema = new Schema({ groups, students, attendance_records, lesson_plans, evaluation_activities, grades });
+const accommodations = new Table(
+  {
+    student_id:   column.text,
+    group_id:     column.text,
+    type:         column.text,    // 'AS' | 'ANS' | 'AA'
+    diagnostico:  column.text,
+    status:       column.text,    // 'Draft' | 'Pending' | 'Generating' | 'Ready' | 'Failed'
+    created_at:   column.text,
+  },
+  { indexes: { by_student: ['student_id'], by_group: ['group_id'] } },
+);
+
+export const AppSchema = new Schema({ groups, students, attendance_records, lesson_plans, evaluation_activities, grades, accommodations });
 
 // Tipos TypeScript derivados del schema para usar en las pantallas
 export type GroupRow = {
@@ -158,4 +170,14 @@ export type GradeRow = {
   comments: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type AccommodationRow = {
+  id: string;
+  student_id: string;
+  group_id: string;
+  type: string;
+  diagnostico: string;
+  status: string;
+  created_at: string;
 };

@@ -10,6 +10,7 @@ import { useAuth } from '../auth/AuthContext';
 import type { GroupRow } from '../powersync/schema';
 import { RootStackParamList } from '../navigation/types';
 import { Grupo } from '../api/endpoints';
+import { useRendimientoNotifications } from '../lib/useRendimientoNotifications';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Grupos'>;
 
@@ -27,6 +28,9 @@ function rowToGrupo(row: GroupRow): Grupo {
 
 export default function GruposScreen({ navigation }: Props) {
   const { logout } = useAuth();
+
+  // Notificaciones de alerta de rendimiento: se disparan cuando hay estudiantes con promedio < 65
+  useRendimientoNotifications();
 
   // useQuery suscribe al SQLite local y se actualiza automáticamente cuando PowerSync sincroniza.
   const { data: rows, isLoading, error } = useQuery<GroupRow>(
