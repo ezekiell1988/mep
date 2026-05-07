@@ -35,6 +35,8 @@ public sealed class ApiClient : IAsyncDisposable
     public Task<HttpResponseMessage> PostAsJsonAsync<T>(string url, T body) =>
         _http.PostAsJsonAsync(url, body);
 
+    public Task<HttpResponseMessage> DeleteAsync(string url) => _http.DeleteAsync(url);
+
     public ValueTask DisposeAsync()
     {
         _http.Dispose();

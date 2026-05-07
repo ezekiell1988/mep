@@ -3,6 +3,7 @@ namespace AulaIA.Api.Shared.Domain;
 public sealed class Grade
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid GroupId { get; set; }
     public Guid ActivityId { get; set; }
     public Guid StudentId { get; set; }
     public decimal Score { get; set; }

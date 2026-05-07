@@ -106,3 +106,41 @@ audit.LogEvent("NombreJob", "Completado",
 // En el catch:
 audit.LogError("NombreJob", $"❌ Falló para {asignatura}", ex);
 ```
+
+---
+
+## PATTERN-04: Desnormalización `group_id` para PowerSync (offline-first)
+
+**Contexto:** PowerSync requiere `SELECT * FROM tabla WHERE columna = bucket.param` — tabla única, sin JOINs. Si una entidad hija no tiene acceso directo al `group_id` del bucket, agregar la columna desnormalizada es la solución correcta.
+
+**Ejemplo:** `grades` no tiene `group_id` directamente (solo `activity_id`). Se agrega `group_id` como columna desnormalizada.
+
+**Entidad:**
+```csharp
+public Guid GroupId { get; set; }   // ← desnormalizado para PowerSync
+public Guid ActivityId { get; set; }
+```
+
+**Configuración EF:**
+```csharp
+builder.Property(x => x.GroupId).HasColumnName("group_id");
+builder.HasIndex(x => x.GroupId).HasDatabaseName("ix_grades_group_id");
+```
+
+**Endpoint upsert — poblar al insertar:**
+```csharp
+db.Grades.Add(new Grade
+{
+    GroupId = grupoId,   // ← tomar del parámetro de ruta
+    ActivityId = actividadId,
+    StudentId = item.StudentId,
+    Score = item.Score,
+});
+```
+
+**Sync rule resultante (simple, sin JOINs):**
+```yaml
+- SELECT * FROM grades WHERE group_id = bucket.group_id
+```
+
+**Regla:** Siempre poblar `GroupId` desde el parámetro de ruta `grupoId` — nunca derivarlo de la actividad en memoria (evita inconsistencias en updates concurrentes).

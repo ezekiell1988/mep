@@ -15,6 +15,9 @@ public sealed class GradeConfiguration : IEntityTypeConfiguration<Grade>
                .HasColumnName("id")
                .ValueGeneratedNever();
 
+        builder.Property(x => x.GroupId)
+               .HasColumnName("group_id");
+
         builder.Property(x => x.ActivityId)
                .HasColumnName("activity_id");
 
@@ -43,6 +46,9 @@ public sealed class GradeConfiguration : IEntityTypeConfiguration<Grade>
         builder.HasIndex(x => new { x.ActivityId, x.StudentId })
                .IsUnique()
                .HasDatabaseName("ix_grades_activity_student");
+
+        builder.HasIndex(x => x.GroupId)
+               .HasDatabaseName("ix_grades_group_id");
 
         builder.HasIndex(x => x.StudentId)
                .HasDatabaseName("ix_grades_student_id");

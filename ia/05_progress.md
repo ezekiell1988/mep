@@ -146,7 +146,7 @@
 | F3 · App Web: badge promedio verde/rojo con umbral MEP (65/70 según nivel) | ✅ |
 | F3 · App Web: botón "📊 Notas" en cada tarjeta de grupo | ✅ |
 | F3 · PowerSync schema: tablas `evaluation_activities` + `grades` + tipos `EvaluationActivityRow` / `GradeRow` | ✅ |
-| F3 · PowerSync Sync Rules: agregar `evaluation_activities` y `grades` al bucket `teacher_data` | ⚠️ Acción manual pendiente |
+| F3 · PowerSync Sync Rules: `evaluation_activities` y `grades` en bucket `teacher_data` | ✅ |
 | F3 · App Móvil: `NotasScreen` — lista offline alumnos × notas, scroll horizontal, badge promedio verde/rojo | ✅ |
 | F3 · App Móvil: botón "Notas" en header de `EstudiantesScreen` | ✅ |
 | F3 · App Móvil: ruta `Notas` registrada en `AppNavigator` + `RootStackParamList` | ✅ |
@@ -155,6 +155,10 @@
 | F3 · Endpoints `GET /api/grupos/{id}/reportes/notas/xlsx` y `.../notas/pdf` | ✅ |
 | F3 · App Web: botones `↓ XLSX (SEA)` y `↓ PDF` en libro de notas (descarga directa) | ✅ |
 | F3 · App Web: alerta de riesgo ⚠ en filas de estudiantes bajo el umbral MEP (65/70) | ✅ |
+| F3 · `NotasTests.cs` — 5 tests: sin token 401, listar 200, sin body 400, resumen 200, flujo completo CRUD | ✅ |
+| F3 · `ApiClient.DeleteAsync()` agregado a infraestructura de tests | ✅ |
+| F3 · `Grade.GroupId` — columna `group_id` desnormalizada para PowerSync (patrón offline-first) | ✅ |
+| F3 · Migración `AddGradeGroupId` — columna `group_id` + índice `ix_grades_group_id` en `grades` | ✅ |
 
 ### PC-09: Mantenimiento de Dependencias (2026-05-06)
 | Tarea | Estado |

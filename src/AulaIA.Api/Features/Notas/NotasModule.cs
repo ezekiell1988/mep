@@ -85,6 +85,7 @@ public static class NotasModule
             {
                 db.Grades.Add(new Grade
                 {
+                    GroupId = grupoId,
                     ActivityId = actividadId,
                     StudentId = item.StudentId,
                     Score = item.Score,
