@@ -6,5 +6,6 @@ export type RootStackParamList = {
   TomarLista: { grupo: Grupo; date: string };
   Planeamientos: undefined;
   PlaneamientoDetalle: { planId: string; asignatura: string; nivel: number; trimestre: number };
+  PlaneamientoHoy: undefined;
   Notas: { grupo: Grupo };
 };

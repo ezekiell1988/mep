@@ -171,3 +171,30 @@ export const actualizarPonderacion = (token: string, groupId: string, body: Upda
     method: 'PUT',
     body: JSON.stringify(body),
   });
+
+// ─── Asistencia ──────────────────────────────────────────────────────────────
+
+export interface HistorialEstudianteRow {
+  studentId: string;
+  fullName: string;
+  studentCode: string;
+  asistencia: Record<string, string | null>; // "yyyy-MM-dd" → "Present"|"Absent"|"Late"|"Justified"|null
+}
+
+export interface HistorialAsistenciaResponse {
+  grupoId: string;
+  from: string;
+  to: string;
+  fechas: string[];
+  filas: HistorialEstudianteRow[];
+}
+
+export const getHistorialAsistencia = (
+  token: string,
+  groupId: string,
+  from: string,
+  to: string,
+) => apiFetch<HistorialAsistenciaResponse>(
+  `/api/grupos/${groupId}/asistencia/historial?from=${from}&to=${to}`,
+  token,
+);

@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
 > **Última actualización:** 2026-05-07
-> **Fase activa:** Fase 4 — Adecuaciones Curriculares e Informes Completos ⏳
+> **Fase activa:** Fase 2 — Módulo Calendario (pendiente) + Fase 4 — Adecuaciones ⏳
 
 ---
 
@@ -11,13 +11,13 @@
 
 **Fase 1 — Core: Grupos, Estudiantes y Asistencia QR** (2026-05-05)
 
----
-
-## ✅ Completado — Fase 2 (2026-05-06)
+**Fase 3 — Notas, Promedios y Reportes Básicos** (2026-05-07)
 
 ---
 
-## ✅ Completado — Fase 3 (2026-05-07)
+## 🔄 En progreso — Fase 2 (pendiente: Módulo Calendario)
+
+> El resto de Fase 2 estaba marcado erróneamente como completado. Los ítems de backend/web/móvil del planeamiento están ✅. El sub-módulo Calendario está pendiente.
 
 ---
 
@@ -28,6 +28,19 @@
 ## ⏳ Pendiente — Fase 5 — Monetización: Suscripciones, SINPE Móvil y Referidos
 
 > Detalles de componentes en `03_plan.md` — Fase 5.
+
+---
+
+## 🔄 Historial — Fase 2 (complemento 2026-05-07)
+### PC-10: Pendientes Fase 1 y Fase 2 completados
+| Tarea | Estado |
+|-------|--------|
+| F1 · App web: `GET /api/grupos/{grupoId}/asistencia/historial` — endpoint rango fechas | ✅ |
+| F1 · App web: `/asistencia/[grupoId]` — tabla asistencia histórica (sticky col, badge P/A/T/J, conteos por fila, selector de rango) | ✅ |
+| F1 · App web: botón `📅 Asistencia` en tarjetas de grupos | ✅ |
+| F2 · App móvil: `PlaneamientoHoyScreen` — query PowerSync por rango de fecha, render Markdown, botón "Ver completo" | ✅ |
+| F2 · App móvil: ruta `PlaneamientoHoy` en `RootStackParamList` + `AppNavigator` | ✅ |
+| F2 · App móvil: botón `Hoy` en header de pantalla Planeamientos | ✅ |
 
 ---
 

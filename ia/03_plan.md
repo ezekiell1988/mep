@@ -106,16 +106,11 @@ mep/
 | Autenticación con Auth0 | ✅ |
 | Vista de grupos y estudiantes | ✅ |
 | Descarga / impresión de QRs (PDF con toda la sección) | ✅ |
-| Vista historial de asistencia por sección | ⏳ |
-| **App Web (Next.js)** | |
-| Autenticación con Auth0 | ⏳ |
-| Vista de grupos y estudiantes | ⏳ |
-| Descarga / impresión de QRs (PDF con toda la sección) | ⏳ |
-| Vista historial de asistencia por sección | ⏳ |
+| Vista historial de asistencia por sección | ✅ |
 
 ---
 
-## Fase 2 — Planeamiento Didáctico con IA + Calendario ✅ Completada (2026-05-06)
+## Fase 2 — Planeamiento Didáctico con IA + Calendario 🔄 En progreso
 
 **Objetivo:** El módulo diferenciador #1 según retroalimentación de Adriana (2026-05-05). El docente genera un planeamiento completo, alineado al programa oficial del MEP y adaptado a su calendario institucional, en minutos.
 
@@ -132,8 +127,8 @@ mep/
 | Cálculo automático de lecciones disponibles por período | ⏳ |
 | Reorganización automática del planeamiento al modificar el calendario | ⏳ |
 | **Base de conocimiento MEP** | |
-| PDF programa Artes Plásticas subido → job extracción con GPT-5.5 | ⏳ |
-| Validación de unidades extraídas (admin) | ⏳ |
+| PDF programa Artes Plásticas subido → job extracción con GPT-5.5 | ✅ |
+| Validación de unidades extraídas (admin) | ✅ |
 | **Backend** ✅ | |
 | Entidades `CurriculumUnit` + `LessonPlan` + migración EF Core | ✅ |
 | Hangfire (queues: default, curriculum, planeamiento) + dashboard `/hangfire` | ✅ |
@@ -153,7 +148,7 @@ mep/
 | Historial de planeamientos generados | ✅ |
 | **App Móvil** | |
 | Vista de planeamientos guardados (offline) | ✅ |
-| Consulta de planeamiento por clase del día | ⏳ |
+| Consulta de planeamiento por clase del día | ✅ |
 
 ---
 
@@ -293,8 +288,8 @@ mep/
 |------|--------|-----------------|--------|
 | 0 | Infraestructura Azure + Setup | Todos los recursos Azure `demo` creados; repos estructurados | ✅ |
 | 1 | Core: Grupos + Asistencia QR | Adriana toma lista con QR en el aula | ✅ |
-| 2 | Planeamiento con IA + Calendario | Planeamiento MEP completo en minutos, reorganizable por calendario | ✅ |
-| 3 | Notas y Reportes básicos | Adriana cierra trimestre sin Excel; exporta al SEA | 🔄 |
+| 2 | Planeamiento con IA + Calendario | Planeamiento MEP completo en minutos, reorganizable por calendario | 🔄 |
+| 3 | Notas y Reportes básicos | Adriana cierra trimestre sin Excel; exporta al SEA | ✅ |
 | 4 | Adecuaciones e Informes | Informes CAE generados automáticamente | ⏳ |
 | 5 | Monetización: Pagos + Referidos | Trial, Stripe, paywalls, panel de comisiones Adriana | ⏳ |
 | 6 | Escala + Nuevas materias | Container Apps + plan institucional | ⏳ |

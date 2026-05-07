@@ -9,6 +9,7 @@ import EstudiantesScreen from '../screens/EstudiantesScreen';
 import TomarListaScreen from '../screens/TomarListaScreen';
 import PlaneamientosScreen from '../screens/PlaneamientosScreen';
 import PlaneamientoDetalleScreen from '../screens/PlaneamientoDetalleScreen';
+import PlaneamientoHoyScreen from '../screens/PlaneamientoHoyScreen';
 import NotasScreen from '../screens/NotasScreen';
 import { RootStackParamList } from './types';
 
@@ -74,7 +75,23 @@ export default function AppNavigator() {
         <Stack.Screen
           name="Planeamientos"
           component={PlaneamientosScreen}
-          options={{ title: 'Planeamientos' }}
+          options={({ navigation }) => ({
+            title: 'Planeamientos',
+            headerRight: () => (
+              <Pressable
+                onPress={() => navigation.navigate('PlaneamientoHoy')}
+                accessibilityLabel="Planeamiento de hoy"
+                style={{ marginRight: 4, paddingHorizontal: 8, paddingVertical: 4 }}
+              >
+                <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>Hoy</Text>
+              </Pressable>
+            ),
+          })}
+        />
+        <Stack.Screen
+          name="PlaneamientoHoy"
+          component={PlaneamientoHoyScreen}
+          options={{ title: 'Planeamiento de Hoy' }}
         />
         <Stack.Screen
           name="PlaneamientoDetalle"

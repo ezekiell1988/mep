@@ -15,8 +15,9 @@ public static class AsistenciaModule
                          .WithTags("Asistencia")
                          .RequireAuthorization("teacher");
 
-        byGroup.MapGet("/",  GetByDateAsync).WithName("GetAsistencia");
-        byGroup.MapPost("/", UpsertAsync).WithName("UpsertAsistencia");
+        byGroup.MapGet("/",          GetByDateAsync).WithName("GetAsistencia");
+        byGroup.MapGet("/historial", GetHistorialAsync).WithName("GetHistorialAsistencia");
+        byGroup.MapPost("/",         UpsertAsync).WithName("UpsertAsistencia");
 
         var qr = app.MapGroup("/api/asistencia")
                     .WithTags("Asistencia")
@@ -162,6 +163,59 @@ public static class AsistenciaModule
 
         return TypedResults.Ok(new ScanQrResponse(student.Id, student.FullName, student.StudentCode, fecha, status));
     }
+
+    // GET /api/grupos/{grupoId}/asistencia/historial?from=2026-04-01&to=2026-04-30
+    // Devuelve la matriz de asistencia: estudiantes × fechas registradas en el rango.
+    // El frontend puede pivotar la respuesta para mostrar la tabla.
+    private static async Task<IResult> GetHistorialAsync(
+        Guid grupoId, DateOnly? from, DateOnly? to,
+        ICurrentUserService currentUser, AulaIADbContext db, CancellationToken ct)
+    {
+        if (await ResolveGroupAsync(grupoId, currentUser, db, ct) is null)
+            return TypedResults.NotFound();
+
+        var inicio = from ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-30));
+        var fin    = to   ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
+        if (fin < inicio)
+            return TypedResults.BadRequest("La fecha 'to' debe ser mayor o igual a 'from'.");
+
+        var estudiantes = await db.Students
+            .AsNoTracking()
+            .Where(s => s.GroupId == grupoId && s.IsActive)
+            .OrderBy(s => s.FullName)
+            .Select(s => new { s.Id, s.FullName, s.StudentCode })
+            .ToListAsync(ct);
+
+        var registros = await db.AttendanceRecords
+            .AsNoTracking()
+            .Where(r => r.GroupId == grupoId && r.Date >= inicio && r.Date <= fin)
+            .Select(r => new { r.StudentId, r.Date, r.Status })
+            .ToListAsync(ct);
+
+        var fechas = registros
+            .Select(r => r.Date.ToString("yyyy-MM-dd"))
+            .Distinct()
+            .OrderBy(f => f)
+            .ToList();
+
+        var lookup = registros
+            .GroupBy(r => r.StudentId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.ToDictionary(r => r.Date.ToString("yyyy-MM-dd"), r => r.Status.ToString()));
+
+        var filas = estudiantes.Select(s => new HistorialEstudianteRow(
+            s.Id,
+            s.FullName,
+            s.StudentCode,
+            fechas.ToDictionary(
+                f => f,
+                f => lookup.TryGetValue(s.Id, out var byDate) && byDate.TryGetValue(f, out var st) ? st : null)
+        )).ToList();
+
+        return TypedResults.Ok(new HistorialAsistenciaResponse(grupoId, inicio, fin, fechas, filas));
+    }
 }
 
 // ── DTOs ────────────────────────────────────────────────────────────────────
@@ -200,3 +254,16 @@ public sealed record ScanQrResponse(
     string StudentCode,
     DateOnly Date,
     AttendanceStatus Status);
+
+public sealed record HistorialAsistenciaResponse(
+    Guid GrupoId,
+    DateOnly From,
+    DateOnly To,
+    IReadOnlyList<string> Fechas,
+    IReadOnlyList<HistorialEstudianteRow> Filas);
+
+public sealed record HistorialEstudianteRow(
+    Guid StudentId,
+    string FullName,
+    string StudentCode,
+    IReadOnlyDictionary<string, string?> Asistencia); // key = "yyyy-MM-dd", value = status string | null
