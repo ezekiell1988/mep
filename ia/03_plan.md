@@ -157,7 +157,7 @@ mep/
 
 ---
 
-## Fase 3 — Notas, Promedios y Reportes Básicos 🔄 En progreso (2026-05-06)
+## Fase 3 — Notas, Promedios y Reportes Básicos ✅ Completada (2026-05-07)
 
 **Objetivo:** El docente puede registrar toda la evaluación del período y generar el acta de notas para el MEP. Eliminar el doble trabajo con Excel.
 
@@ -169,21 +169,24 @@ mep/
 |-----------|--------|
 | **Backend** | |
 | Módulo Notas: EvaluationActivity + Grade CRUD | ✅ |
-| Cálculo de promedios con ponderación configurable | ✅ |
+| Cálculo de promedios con ponderación configurable por sección | ✅ |
 | Alertas de estudiantes en riesgo (< nota mínima) — indicador ⚠ en App Web | ✅ |
 | Generación de reportes: acta de notas PDF landscape (QuestPDF) | ✅ |
 | Exportación SEA — acta XLSX compatible SEA (ClosedXML) | ✅ |
+| `Group.PctCotidiano/Pruebas/Extraclase/Otros` — pesos configurables, defaults MEP | ✅ |
+| Endpoint `PUT /api/grupos/{id}/ponderacion` — valida suma = 100 | ✅ |
+| Migración `AddGroupWeighting` — 4 columnas `decimal(5,2)` con defaults MEP | ✅ |
 | **App Móvil** | |
 | Pantalla: actividades de evaluación por grupo | ✅ |
 | Pantalla: libro de notas (tabla offline, badge promedio verde/rojo) | ✅ |
 | Alertas visuales de estudiantes en riesgo (badge rojo bajo umbral) | ✅ |
 | Offline: notas y actividades sincronizadas con PowerSync | ✅ |
-| PowerSync Sync Rules: `evaluation_activities` + `grades` en bucket | ⚠️ Acción manual |
+| PowerSync Sync Rules: `evaluation_activities` + `grades` en bucket | ⚠️ Acción manual en dashboard |
 | **App Web** | |
 | Libro de notas completo (actividades × alumnos, edición inline) | ✅ |
 | Botones descarga `↓ XLSX (SEA)` y `↓ PDF` con autenticación Bearer | ✅ |
-| Configuración de ponderación por sección | ⏳ |
-| Tests de integración: módulo Notas | ⏳ |
+| Panel colapsable ponderación: 4 inputs, suma en tiempo real, guardar | ✅ |
+| Tests de integración: módulo Notas (5 tests) | ✅ |
 
 ---
 

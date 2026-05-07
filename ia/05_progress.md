@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-06
-> **Fase activa:** Fase 3 — Notas y Trabajo Cotidiano 🔄 (Fase 2 completa ✅)
+> **Última actualización:** 2026-05-07
+> **Fase activa:** Fase 4 — Adecuaciones Curriculares e Informes Completos ⏳
 
 ---
 
@@ -17,7 +17,15 @@
 
 ---
 
-## 🔄 En progreso — Fase 3
+## ✅ Completado — Fase 3 (2026-05-07)
+
+---
+
+## ⏳ Pendiente — Fase 4
+
+---
+
+## 🔄 Historial — Fase 3
 
 > **Decisiones de diseño confirmadas (2026-05-04):**
 > - Stack definido: .NET 10 + EF Core 10 + PostgreSQL + PowerSync + Auth0 + Azure AI Foundry GPT-5.5
@@ -159,6 +167,14 @@
 | F3 · `ApiClient.DeleteAsync()` agregado a infraestructura de tests | ✅ |
 | F3 · `Grade.GroupId` — columna `group_id` desnormalizada para PowerSync (patrón offline-first) | ✅ |
 | F3 · Migración `AddGradeGroupId` — columna `group_id` + índice `ix_grades_group_id` en `grades` | ✅ |
+| F3 · `Group.PctCotidiano/Pruebas/Extraclase/Otros` — 4 propiedades decimal con defaults MEP (20/45/20/15) | ✅ |
+| F3 · `GroupConfiguration` — columnas `pct_cotidiano/pruebas/extraclase/otros` (`decimal(5,2)`, defaults EF) | ✅ |
+| F3 · Migración `AddGroupWeighting` — aplicada a BD producción | ✅ |
+| F3 · Endpoint `PUT /api/grupos/{id}/ponderacion` — valida suma=100, rechaza 400 si no cumple | ✅ |
+| F3 · `GrupoResponse` ampliado — incluye los 4 pesos en GET /api/grupos y GET /api/grupos/{id} | ✅ |
+| F3 · `UpdatePonderacionRequest` — record con `[Range(0,100)]` en los 4 campos | ✅ |
+| F3 · App web `api.ts` — interfaz `Grupo` ampliada, `getGrupoById`, `actualizarPonderacion` | ✅ |
+| F3 · App web `/notas/[grupoId]` — panel colapsable ponderación: 4 inputs, indicador suma tiempo real, guardar | ✅ |
 
 ### PC-09: Mantenimiento de Dependencias (2026-05-06)
 | Tarea | Estado |

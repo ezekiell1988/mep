@@ -25,6 +25,10 @@ export interface Grupo {
   subject: string;
   schoolYear: number;
   teacherId: string;
+  pctCotidiano: number;
+  pctPruebas: number;
+  pctExtraclase: number;
+  pctOtros: number;
 }
 
 export interface Estudiante {
@@ -151,3 +155,19 @@ export const saveCalificaciones = (token: string, groupId: string, actividadId: 
 
 export const getResumenNotas = (token: string, groupId: string) =>
   apiFetch<ResumenGrupoResponse>(`/api/grupos/${groupId}/notas/resumen`, token);
+
+export interface UpdatePonderacionRequest {
+  pctCotidiano: number;
+  pctPruebas: number;
+  pctExtraclase: number;
+  pctOtros: number;
+}
+
+export const getGrupoById = (token: string, groupId: string) =>
+  apiFetch<Grupo>(`/api/grupos/${groupId}`, token);
+
+export const actualizarPonderacion = (token: string, groupId: string, body: UpdatePonderacionRequest) =>
+  apiFetch<void>(`/api/grupos/${groupId}/ponderacion`, token, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });

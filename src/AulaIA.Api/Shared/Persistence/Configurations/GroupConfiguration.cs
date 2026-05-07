@@ -58,6 +58,30 @@ public sealed class GroupConfiguration : IEntityTypeConfiguration<Group>
                .HasDefaultValueSql("now()")
                .ValueGeneratedOnAdd();
 
+        builder.Property(x => x.PctCotidiano)
+               .HasColumnName("pct_cotidiano")
+               .HasColumnType("decimal(5,2)")
+               .HasDefaultValue(20m)
+               .HasComment("% Trabajo Cotidiano (MEP default 20)");
+
+        builder.Property(x => x.PctPruebas)
+               .HasColumnName("pct_pruebas")
+               .HasColumnType("decimal(5,2)")
+               .HasDefaultValue(45m)
+               .HasComment("% Pruebas y Exámenes (MEP default 45)");
+
+        builder.Property(x => x.PctExtraclase)
+               .HasColumnName("pct_extraclase")
+               .HasColumnType("decimal(5,2)")
+               .HasDefaultValue(20m)
+               .HasComment("% Trabajo Extraclase (MEP default 20)");
+
+        builder.Property(x => x.PctOtros)
+               .HasColumnName("pct_otros")
+               .HasColumnType("decimal(5,2)")
+               .HasDefaultValue(15m)
+               .HasComment("% Otros (MEP default 15)");
+
         builder.HasIndex(x => new { x.TeacherId, x.SchoolYear })
                .HasDatabaseName("ix_groups_teacher_year");
 

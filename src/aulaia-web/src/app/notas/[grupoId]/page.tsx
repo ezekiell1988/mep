@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   getResumenNotas, getActividades, crearActividad, eliminarActividad, saveCalificaciones,
+  getGrupoById, actualizarPonderacion,
   type ResumenGrupoResponse, type ActividadResponse, type ResumenEstudianteResponse,
 } from '../../../lib/api';
 
@@ -50,6 +51,13 @@ export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Ponderación configurable
+  type Ponderacion = { pctCotidiano: number; pctPruebas: number; pctExtraclase: number; pctOtros: number };
+  const [ponderacion, setPonderacion] = useState<Ponderacion>({ pctCotidiano: 20, pctPruebas: 45, pctExtraclase: 20, pctOtros: 15 });
+  const [pondDraft, setPondDraft] = useState<Ponderacion>({ pctCotidiano: 20, pctPruebas: 45, pctExtraclase: 20, pctOtros: 15 });
+  const [showPond, setShowPond] = useState(false);
+  const [guardandoPond, setGuardandoPond] = useState(false);
+
   // Actividad seleccionada para editar calificaciones
   const [actividadActiva, setActividadActiva] = useState<string | null>(null);
   // notas en edición: studentId → score
@@ -90,12 +98,21 @@ export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: 
     setError(null);
     try {
       const token = await getAccessTokenSilently();
-      const [res, acts] = await Promise.all([
+      const [res, acts, grupo] = await Promise.all([
         getResumenNotas(token, grupoId),
         getActividades(token, grupoId),
+        getGrupoById(token, grupoId),
       ]);
       setResumen(res);
       setActividades(acts);
+      const p = {
+        pctCotidiano: grupo.pctCotidiano,
+        pctPruebas: grupo.pctPruebas,
+        pctExtraclase: grupo.pctExtraclase,
+        pctOtros: grupo.pctOtros,
+      };
+      setPonderacion(p);
+      setPondDraft(p);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al cargar');
     } finally {
@@ -169,6 +186,25 @@ export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: 
     }
   };
 
+  const handleGuardarPonderacion = async () => {
+    const sum = pondDraft.pctCotidiano + pondDraft.pctPruebas + pondDraft.pctExtraclase + pondDraft.pctOtros;
+    if (Math.abs(sum - 100) > 0.01) {
+      setError(`Los porcentajes deben sumar 100 (actual: ${sum.toFixed(1)})`);
+      return;
+    }
+    setGuardandoPond(true);
+    try {
+      const token = await getAccessTokenSilently();
+      await actualizarPonderacion(token, grupoId, pondDraft);
+      setPonderacion(pondDraft);
+      setShowPond(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al guardar ponderación');
+    } finally {
+      setGuardandoPond(false);
+    }
+  };
+
   if (isLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -218,6 +254,72 @@ export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: 
       {error ? (
         <div role="alert" className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6">{error}</div>
       ) : null}
+
+      {/* Panel ponderación configurable */}
+      <div className="mb-5">
+        <button
+          type="button"
+          onClick={() => { setShowPond(v => !v); setPondDraft(ponderacion); }}
+          className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+        >
+          <span className="font-medium">⚖ Ponderación MEP</span>
+          <span className="text-xs text-gray-400">
+            ({ponderacion.pctCotidiano}% Cot. / {ponderacion.pctPruebas}% Pruebas / {ponderacion.pctExtraclase}% Extra. / {ponderacion.pctOtros}% Otros)
+          </span>
+          <span className="text-xs">{showPond ? '▲' : '▼'}</span>
+        </button>
+        {showPond && (
+          <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-4 max-w-lg">
+            <p className="text-xs text-gray-500 mb-3">Distribución porcentual de la nota final. Deben sumar 100.</p>
+            {([ 
+              ['Trabajo Cotidiano', 'pctCotidiano'],
+              ['Pruebas y Exámenes', 'pctPruebas'],
+              ['Trabajo Extraclase', 'pctExtraclase'],
+              ['Otros', 'pctOtros'],
+            ] as [string, keyof typeof pondDraft][]).map(([label, key]) => (
+              <div key={key} className="flex items-center gap-3 mb-2">
+                <label htmlFor={`pond-${key}`} className="w-40 text-sm text-gray-700 shrink-0">{label}</label>
+                <input
+                  id={`pond-${key}`}
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.5}
+                  value={pondDraft[key]}
+                  onChange={e => setPondDraft(d => ({ ...d, [key]: Number(e.target.value) }))}
+                  className="w-20 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+                <span className="text-sm text-gray-400">%</span>
+              </div>
+            ))}
+            {(() => {
+              const s = pondDraft.pctCotidiano + pondDraft.pctPruebas + pondDraft.pctExtraclase + pondDraft.pctOtros;
+              return (
+                <p className={`text-sm font-medium mt-1 mb-3 ${Math.abs(s - 100) < 0.01 ? 'text-green-700' : 'text-red-600'}`}>
+                  Total: {s.toFixed(1)}% {Math.abs(s - 100) < 0.01 ? '✓' : '— debe ser 100'}
+                </p>
+              );
+            })()}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowPond(false)}
+                className="border border-gray-300 text-gray-600 rounded-lg px-4 py-1.5 text-sm hover:bg-gray-100"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleGuardarPonderacion}
+                disabled={guardandoPond}
+                className="bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg px-4 py-1.5 text-sm font-medium"
+              >
+                {guardandoPond ? 'Guardando…' : 'Guardar'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Resumen de peso */}
       {actividades.length > 0 ? (
