@@ -1,0 +1,74 @@
+# AulaIA — Docker Compose para desarrollo local
+# Variables sensibles: copiar .env.docker.example → .env.docker y rellenar.
+# Uso: docker compose --env-file .env.docker up --build
+
+services:
+
+  # ── PostgreSQL 16 ────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aulaia
+      POSTGRES_USER: aulaia
+      POSTGRES_PASSWORD: aulaia_dev
+    ports:
+      - "5433:5432"   # 5433 en host para no colisionar con PG local
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aulaia"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── AulaIA API (.NET 10) ─────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: final
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+
+      # Base de datos (apunta al contenedor 'db' de este compose)
+      Database__ConnectionString: "Host=db;Port=5432;Database=aulaia;Username=aulaia;Password=aulaia_dev;SslMode=Disable"
+
+      # Auth0
+      Auth__Authority: "${AUTH0_AUTHORITY}"
+      Auth__Audience: "${AUTH0_AUDIENCE}"
+
+      # Azure Blob Storage
+      Storage__ConnectionString: "${AZURE_STORAGE_CONNECTION_STRING}"
+
+      # PowerSync
+      PowerSync__InstanceUrl: "${POWERSYNC_INSTANCE_URL}"
+      PowerSync__SigningKey: "${POWERSYNC_SIGNING_KEY}"
+      PowerSync__KeyId: "${POWERSYNC_KEY_ID}"
+
+      # Azure AI / OpenAI
+      AI__Endpoint: "${AZURE_AI_ENDPOINT}"
+      AI__ApiKey: "${AZURE_AI_API_KEY}"
+      AI__DeploymentChat: "gpt-5.5"
+      AI__DeploymentImage: "gpt-image-2"
+
+      # SINPE Móvil
+      Sinpe__PhoneNumber: "${SINPE_PHONE_NUMBER}"
+      Sinpe__AccountName: "${SINPE_ACCOUNT_NAME}"
+      Sinpe__PriceBasicUsd: "6"
+      Sinpe__PriceProfessionalUsd: "15"
+      Sinpe__PriceInstitutionalUsd: "100"
+      Sinpe__TrialDays: "30"
+
+      # LLM Audit (desactivado por defecto en contenedor)
+      LlmAudit__Enabled: "false"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

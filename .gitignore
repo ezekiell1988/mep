@@ -10,3 +10,6 @@ src/**/appsettings.Development.json
 
 # Test config con credenciales reales (la plantilla sin secretos sí se versiona)
 src/**/appsettings.test.json
+
+# Docker env vars con secretos reales (el .example sí se versiona)
+.env.docker

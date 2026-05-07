@@ -1,7 +1,7 @@
 # 03 — Plan de Desarrollo
 
-> **Última actualización:** 2026-05-07 (rev 3)
-> **Estado general:** ✅ Fases 0–5 completadas — próxima: Fase 6 — Escala: Container Apps + Nuevas Materias
+> **Última actualización:** 2026-05-07 (rev 4)
+> **Estado general:** 🔄 Fase 6 en progreso — contenedorización completada, ACR + Container Apps pendientes
 
 ---
 
@@ -252,7 +252,7 @@ mep/
 
 ---
 
-## Fase 6 — Escala: Container Apps + Nuevas Materias ⏳ Pendiente
+## Fase 6 — Escala: Container Apps + Nuevas Materias 🔄 En progreso (2026-05-07)
 
 **Objetivo:** Migrar la infraestructura a Container Apps, agregar nuevas materias al programa MEP y abrir la plataforma a instituciones completas.
 
@@ -262,11 +262,17 @@ mep/
 
 | Componente | Estado |
 |-----------|--------|
-| **Infraestructura** | |
-| Contenedorizar `app-demo-api` (Dockerfile) | ⏳ |
-| Crear Azure Container Registry (ACR) `acr-demo` | ⏳ |
-| Crear Container Apps Environment `cae-demo` | ⏳ |
-| Migrar App Service → Container App | ⏳ |
+| **Contenedorización (repo)** | |
+| `Dockerfile` multi-stage (Node.js 22 → .NET SDK 10 → .NET aspnet 10) | ✅ |
+| `.dockerignore` | ✅ |
+| `docker-compose.yml` para dev local | ✅ |
+| `.env.docker.example` — plantilla de variables | ✅ |
+| CI/CD: pasos Docker Build + Push a ACR (condicional) en `deploy.yml` | ✅ |
+| **Infraestructura Azure** | |
+| Script Az CLI: crear ACR `acrdemo` + habilitar admin | ⏳ |
+| Script Az CLI: Container Apps Environment `cae-demo` + Container App `ca-aulaia-api` | ⏳ |
+| Migrar deploy CI/CD: zip → imagen ACR → Container App | ⏳ |
+| Managed Identity del Container App con roles ACR/KV/Storage | ⏳ |
 | Separar servicio de IA en Container App independiente (escala propia) | ⏳ |
 | **Producto** | |
 | Agregar programas: Artes Musicales, Educación para el Hogar | ⏳ |
@@ -288,4 +294,4 @@ mep/
 | 3 | Notas y Reportes básicos | Adriana cierra trimestre sin Excel; exporta al SEA | ✅ |
 | 4 | Adecuaciones e Informes | Informes CAE generados automáticamente | ✅ |
 | 5 | Monetización: Pagos + Referidos | Trial, SINPE, panel admin, panel comisiones Adriana | ✅ |
-| 6 | Escala + Nuevas materias | Container Apps + plan institucional | ⏳ |
+| 6 | Escala + Nuevas materias | Container Apps + plan institucional | 🔄 |

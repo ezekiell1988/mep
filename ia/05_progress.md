@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-07 (rev 4)
-> **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias ⏳
+> **Última actualización:** 2026-05-07 (rev 5)
+> **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
 
@@ -18,6 +18,29 @@
 **Fase 4 — Adecuaciones Curriculares e Informes Completos** (2026-05-07)
 
 **Fase 5 — Monetización: Suscripciones, SINPE Móvil y Referidos** (2026-05-07)
+
+---
+
+## 🔄 En progreso — Fase 6
+
+### PC-13: Fase 6 — Contenedorización (infraestructura)
+| Tarea | Estado |
+|-------|--------|
+| F6 · `Dockerfile` multi-stage: Node.js 22 (web-build) → .NET SDK 10 (api-build) → .NET aspnet 10 (final) | ✅ |
+| F6 · `.dockerignore` — excluye bin/, obj/, node_modules/, logs/, ia/, mobile/, AulaIA.Tests/ | ✅ |
+| F6 · `docker-compose.yml` — dev local con PostgreSQL 16 + API contenedorizada | ✅ |
+| F6 · `.env.docker.example` — plantilla de variables de entorno para el contenedor | ✅ |
+| F6 · `.gitignore` — agrega `.env.docker` (secretos reales nunca al repo) | ✅ |
+| F6 · `.github/workflows/deploy.yml` — pasos Docker Build + Push a ACR (condicional a `ACR_LOGIN_SERVER`) | ✅ |
+| F6 · Script Az CLI `infra/azure/06_acr_container_apps.sh` — ACR `acrdemo` + Container Apps Environment `cae-demo` + Container App `ca-aulaia-api` | ✅ |
+| F6 · CI/CD `deploy.yml` migrado: deploy final → `az containerapp update` con imagen ACR | ✅ |
+| F6 · Managed Identity del Container App con roles AcrPull/KV Secrets User/Storage Blob Contributor | ✅ |
+| F6 · ADR-010 registrado: decisión de migración App Service → Container Apps | ✅ |
+| F6 · Separar servicio de IA en Container App independiente | ⏳ |
+| F6 · Agregar programas: Artes Musicales, Educación para el Hogar | ⏳ |
+| F6 · Panel de director: vista institucional | ⏳ |
+| F6 · Plan institucional: gestión múltiples docentes | ⏳ |
+| F6 · Apple Sign-In | ⏳ |
 
 ---
 

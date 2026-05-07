@@ -68,3 +68,29 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: deploy.zip
+
+      # ── Docker: Build + Push a ACR (activo cuando ACR_LOGIN_SERVER esté configurado) ──
+      - name: Set up Docker Buildx
+        if: ${{ secrets.ACR_LOGIN_SERVER != '' }}
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Azure Container Registry
+        if: ${{ secrets.ACR_LOGIN_SERVER != '' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push Docker image to ACR
+        if: ${{ secrets.ACR_LOGIN_SERVER != '' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.ACR_LOGIN_SERVER }}/aulaia-api:latest
+            ${{ secrets.ACR_LOGIN_SERVER }}/aulaia-api:${{ github.sha }}
+          cache-from: type=registry,ref=${{ secrets.ACR_LOGIN_SERVER }}/aulaia-api:buildcache
+          cache-to: type=registry,ref=${{ secrets.ACR_LOGIN_SERVER }}/aulaia-api:buildcache,mode=max

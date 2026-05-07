@@ -1,0 +1,37 @@
+# ── Control de versiones ─────────────────────────────────────────────────
+.git
+.gitignore
+.gitattributes
+
+# ── IDE / editores ───────────────────────────────────────────────────────
+.vs/
+.vscode/
+**/*.user
+**/*.suo
+**/*.sln.DotSettings.user
+
+# ── Artefactos de compilación .NET ───────────────────────────────────────
+**/bin/
+**/obj/
+
+# ── Artefactos de compilación Node.js ────────────────────────────────────
+**/node_modules/
+**/.next/
+**/out/
+
+# ── wwwroot existente (se regenera desde la etapa web-build en Docker) ───
+src/AulaIA.Api/wwwroot/
+
+# ── Logs ─────────────────────────────────────────────────────────────────
+**/logs/
+**/npm-debug.log*
+
+# ── Directorios no necesarios para la imagen ─────────────────────────────
+ia/
+mobile/
+assets/
+credentials/
+infra/
+
+# ── Proyecto de tests (no se incluye en la imagen de producción) ─────────
+src/AulaIA.Tests/
