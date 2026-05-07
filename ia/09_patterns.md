@@ -1,6 +1,6 @@
 # 09 — Patrones Verificados de Código
 
-> **Última actualización:** 2026-05-06
+> **Última actualización:** 2026-05-07
 > Registrar aquí solo patrones que ya funcionan en producción/dev y deben replicarse.
 
 ---
@@ -247,3 +247,57 @@ public async Task<decimal> GetCurrentSellRateAsync(CancellationToken ct)
 - Guardar `exchange_rate_used` en `PaymentRequest` en el momento de creación, no calcularlo despues (auditoría).
 - El token BCCR es gratuito; registrarse en `https://gee.bccr.fi.cr` con el correo del proyecto.
 - Configurar las credenciales BCCR en Key Vault, no en `appsettings.json`.
+
+---
+
+## PATTERN-06: Next.js `output: export` con rutas dinámicas `[param]` y `'use client'`
+
+**Contexto:** Next.js 16 con `output: 'export'` requiere `generateStaticParams()` en toda ruta dinámica. Las páginas `'use client'` no pueden exportar `generateStaticParams()`. La solución es un **server wrapper** que actúa como `page.tsx` y delega a un `PageClient.tsx`.
+
+**Problema con `return []` vacío:** Turbopack 16 ignora `generateStaticParams` si retorna array vacío y lanza `"Page X is missing generateStaticParams()"`. Necesita al menos un elemento placeholder.
+
+**Estructura de carpeta:**
+```
+app/feature/[grupoId]/
+├── page.tsx        ← Server Component (wrapper) — SIN 'use client'
+└── PageClient.tsx  ← Client Component real — CON 'use client'
+```
+
+**`page.tsx` (Server Component wrapper):**
+```tsx
+import { Suspense } from 'react';
+import PageClient from './PageClient';
+
+export function generateStaticParams() {
+  return [{ grupoId: '_' }];   // ← placeholder obligatorio; no puede ser []
+}
+
+export default function Page({ params }: { params: Promise<{ grupoId: string }> }) {
+  return (
+    <Suspense fallback={null}>
+      <PageClient params={params} />
+    </Suspense>
+  );
+}
+```
+
+**`PageClient.tsx` (Client Component):**
+```tsx
+'use client';
+import { use } from 'react';
+
+export default function FeaturePage({ params }: { params: Promise<{ grupoId: string }> }) {
+  const { grupoId } = use(params);
+  // ... lógica normal con hooks, Auth0, useEffect, etc.
+}
+```
+
+**Por qué funciona en runtime:** ASP.NET Core sirve `index.html` como SPA fallback para todas las rutas no encontradas. El HTML del placeholder `/_` nunca llega al usuario — el router client-side de Next.js intercepta la navegación y `use(params)` resuelve el `grupoId` real de la URL del browser.
+
+**El `<Suspense>` es obligatorio** porque Next.js 16 pre-renderiza SSG en build time e intenta resolver `useSearchParams()` (u otros hooks de cliente) sincrónicamente sin él, lanzando `"useSearchParams() should be wrapped in a suspense boundary"`.
+
+**Reglas:**
+- El array de `generateStaticParams` NUNCA puede ser `[]` con `output: export` — usar `[{ grupoId: '_' }]`.
+- El `fallback={null}` en `<Suspense>` es intencional — evita flash de contenido durante hidratación.
+- No agregar `'use client'` ni ningún import de React al `page.tsx` wrapper — debe permanecer Server Component.
+- Si el `PageClient` usa `useSearchParams()`, también necesita estar envuelto en `<Suspense>` en su propio render o heredarlo del wrapper.

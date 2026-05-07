@@ -204,7 +204,7 @@ mep/
 | `AdecuacionesModule` — 6 endpoints: list, get, upsert, delete, generar, informe PDF | ✅ |
 | Registrado en `Program.cs` (`AddAdecuacionesModule` + `MapAdecuacionesEndpoints`) | ✅ |
 | Integración de adecuaciones en planeamiento generado | ⏳ |
-| Reporte de asistencia por período (PDF/XLSX) | ⏳ |
+| Reporte de asistencia por período (PDF/XLSX) | ✅ |
 | Informe docente para dirección | ⏳ |
 | **App Web** | |
 | Tipos + funciones en `api.ts` (`listAdecuaciones`, `upsertAdecuacion`, `generarPropuestaAdecuacion`, `getInformeAdecuacionUrl`, etc.) | ✅ |

@@ -344,3 +344,10 @@ export const generarPropuestaAdecuacion = (token: string, groupId: string, stude
 
 export const getInformeAdecuacionUrl = (groupId: string, studentId: string) =>
   `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/grupos/${groupId}/estudiantes/${studentId}/adecuacion/informe`;
+
+// ── Reportes de asistencia ──────────────────────────────────────────────────
+export const getReporteAsistenciaUrl = (groupId: string, from: string, to: string, format: 'pdf' | 'xlsx') =>
+  `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/grupos/${groupId}/reportes/asistencia/${format}?from=${from}&to=${to}`;
+
+export const getInformeDirectorUrl = (groupId: string, from: string, to: string) =>
+  `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/grupos/${groupId}/reportes/informe-director?from=${from}&to=${to}`;

@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-07
+> **Última actualización:** 2026-05-07 (rev 2)
 > **Fase activa:** Fase 4 — Adecuaciones Curriculares e Informes 🔄
 
 ---
@@ -39,8 +39,17 @@
 | F4 · App Web: patrón `reloadTrigger`/`reload` + `cancelled` flag (consistente con `calendario/[grupoId]`) | ✅ |
 | F4 · App Web: botón `♿ Adecuaciones` en tarjetas de `/grupos` | ✅ |
 | F4 · Integración de adecuaciones en planeamiento generado | ⏳ |
-| F4 · Reporte de asistencia por período (PDF/XLSX) | ⏳ |
-| F4 · Informe docente para dirección | ⏳ |
+| F4 · Reporte de asistencia por período (PDF/XLSX) | ✅ |
+| F4 · `ReporteAsistenciaService` — PDF landscape (tabla coloreada P/A/T/J, % asistencia semáforo) + XLSX (zebra, freeze rows+cols, colores semáforo) | ✅ |
+| F4 · Endpoints `GET /api/grupos/{id}/reportes/asistencia/pdf?from=&to=` y `.../xlsx?from=&to=` en `ReportesModule` | ✅ |
+| F4 · `getReporteAsistenciaUrl()` en `api.ts` | ✅ |
+| F4 · App Web: botones **📊 XLSX** y **📄 PDF** en `/asistencia/[grupoId]` (mismo rango from/to del filtro, descarga autenticada blob URL) | ✅ |
+| F4 · `InformeDirectorService` — PDF QuestPDF Portrait Letter: cápsulas estadísticas, tabla por alumno (promedio color, semáforo asistencia, adecuación), sección adecuaciones activas, nota Ley 7600, 3 líneas de firma | ✅ |
+| F4 · Endpoint `GET /api/grupos/{id}/reportes/informe-director?from=&to=` en `ReportesModule` | ✅ |
+| F4 · `getInformeDirectorUrl()` en `api.ts` | ✅ |
+| F4 · App Web: botón **↓ Informe Dirección** en `/notas/[grupoId]` (descarga autenticada, período feb-hoy) | ✅ |
+| F4 · App Web: fix build `output: export` — server wrapper `page.tsx` con `generateStaticParams([{ grupoId: '_' }])` + `<Suspense>` para las 4 rutas `[grupoId]` | ✅ |
+| F4 · Frontend build: 0 errores (`npm run build` → `out/`) | ✅ |
 | F4 · Dashboard docente: resumen del período | ⏳ |
 | F4 · App móvil: indicador de adecuación activa en perfil del estudiante | ⏳ |
 | F4 · App móvil: notificaciones push alertas de rendimiento | ⏳ |
