@@ -17,6 +17,10 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+      ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+      ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
 
     steps:
       # ── Checkout ──────────────────────────────────────────────
@@ -71,26 +75,26 @@ jobs:
 
       # ── Docker: Build + Push a ACR (activo cuando ACR_LOGIN_SERVER esté configurado) ──
       - name: Set up Docker Buildx
-        if: ${{ secrets.ACR_LOGIN_SERVER != '' }}
+        if: env.ACR_LOGIN_SERVER != ''
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Azure Container Registry
-        if: ${{ secrets.ACR_LOGIN_SERVER != '' }}
+        if: env.ACR_LOGIN_SERVER != ''
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.ACR_LOGIN_SERVER }}
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
+          registry: ${{ env.ACR_LOGIN_SERVER }}
+          username: ${{ env.ACR_USERNAME }}
+          password: ${{ env.ACR_PASSWORD }}
 
       - name: Build and push Docker image to ACR
-        if: ${{ secrets.ACR_LOGIN_SERVER != '' }}
+        if: env.ACR_LOGIN_SERVER != ''
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
           push: true
           tags: |
-            ${{ secrets.ACR_LOGIN_SERVER }}/aulaia-api:latest
-            ${{ secrets.ACR_LOGIN_SERVER }}/aulaia-api:${{ github.sha }}
-          cache-from: type=registry,ref=${{ secrets.ACR_LOGIN_SERVER }}/aulaia-api:buildcache
-          cache-to: type=registry,ref=${{ secrets.ACR_LOGIN_SERVER }}/aulaia-api:buildcache,mode=max
+            ${{ env.ACR_LOGIN_SERVER }}/aulaia-api:latest
+            ${{ env.ACR_LOGIN_SERVER }}/aulaia-api:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.ACR_LOGIN_SERVER }}/aulaia-api:buildcache
+          cache-to: type=registry,ref=${{ env.ACR_LOGIN_SERVER }}/aulaia-api:buildcache,mode=max
