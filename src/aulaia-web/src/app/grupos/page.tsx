@@ -107,6 +107,13 @@ export default function GruposPage() {
               </button>
               <button
                 type="button"
+                onClick={() => router.push(`/adecuaciones/${g.id}?nombre=${encodeURIComponent(g.name)}`)}
+                className="text-sm bg-orange-50 hover:bg-orange-100 text-orange-700 font-medium px-4 py-2 rounded-lg transition-colors"
+              >
+                <span aria-hidden="true">♿</span> Adecuaciones
+              </button>
+              <button
+                type="button"
                 onClick={() => router.push(`/qrs?groupId=${g.id}&groupName=${encodeURIComponent(g.name)}&level=${encodeURIComponent(g.level)}`)}
                 className="text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium px-4 py-2 rounded-lg transition-colors"
               >

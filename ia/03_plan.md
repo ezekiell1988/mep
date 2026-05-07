@@ -1,7 +1,7 @@
 # 03 — Plan de Desarrollo
 
 > **Última actualización:** 2026-05-07
-> **Estado general:** ⏳ Fase 4 — Adecuaciones Curriculares e Informes Completos
+> **Estado general:** 🔄 Fase 4 — Adecuaciones Curriculares e Informes (parcialmente completada)
 
 ---
 
@@ -196,16 +196,21 @@ mep/
 | Componente | Estado |
 |-----------|--------|
 | **Backend** | |
-| Módulo Adecuaciones: Accommodation CRUD | ⏳ |
-| Generación de propuesta pedagógica con IA (AS y ANS) | ⏳ |
+| Entidad `Accommodation` + EF config (`AccommodationConfiguration`) + índice único `(student_id, group_id)` | ✅ |
+| Migración EF Core `AddAccommodations` | ✅ |
+| `AdecuacionAiService` — genera propuesta pedagógica con GPT-5.5 (AS/ANS/AA según Ley 7600) | ✅ |
+| `GenerarAdecuacionJob` — Hangfire job, transiciones Pending → Generating → Ready/Failed | ✅ |
+| `InformeAdecuacionService` — PDF QuestPDF para expediente CAE (datos generales, estrategias, propuesta IA, firmas) | ✅ |
+| `AdecuacionesModule` — 6 endpoints: list, get, upsert, delete, generar, informe PDF | ✅ |
+| Registrado en `Program.cs` (`AddAdecuacionesModule` + `MapAdecuacionesEndpoints`) | ✅ |
 | Integración de adecuaciones en planeamiento generado | ⏳ |
-| Informe de adecuaciones PDF para expediente CAE | ⏳ |
 | Reporte de asistencia por período (PDF/XLSX) | ⏳ |
 | Informe docente para dirección | ⏳ |
 | **App Web** | |
-| Perfil completo del estudiante (historial + adecuación) | ⏳ |
-| Formulario de adecuación curricular | ⏳ |
-| Vista de propuesta pedagógica generada | ⏳ |
+| Tipos + funciones en `api.ts` (`listAdecuaciones`, `upsertAdecuacion`, `generarPropuestaAdecuacion`, `getInformeAdecuacionUrl`, etc.) | ✅ |
+| `/adecuaciones/[grupoId]/page.tsx` — tabla de alumnos + panel lateral + polling + descarga PDF | ✅ |
+| A11y auditada y corregida (`role="dialog"`, `htmlFor`/`id`, `scope="col"`, `aria-live`, emojis ocultos) | ✅ |
+| Botón `♿ Adecuaciones` en tarjetas de grupos (`/grupos`) | ✅ |
 | Dashboard del docente: resumen del período | ⏳ |
 | **App Móvil** | |
 | Perfil del estudiante con indicador de adecuación activa | ⏳ |

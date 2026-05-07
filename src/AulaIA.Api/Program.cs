@@ -1,3 +1,4 @@
+using AulaIA.Api.Features.Adecuaciones;
 using AulaIA.Api.Features.Asistencia;
 using AulaIA.Api.Features.Calendario;
 using AulaIA.Api.Features.Curriculum;
@@ -29,6 +30,7 @@ builder.Services
     .AddCurriculumModule()
     .AddReportesModule()
     .AddCalendarioModule()
+    .AddAdecuacionesModule()
     .AddPowerSyncModule();
 
 var app = builder.Build();
@@ -62,6 +64,7 @@ app.MapGruposEndpoints()
    .MapCurriculumEndpoints()
    .MapReportesEndpoints()
    .MapCalendarioEndpoints()
+   .MapAdecuacionesEndpoints()
    .MapPowerSyncEndpoints();
 
 app.LogStartupFacts();

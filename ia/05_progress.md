@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
 > **Última actualización:** 2026-05-07
-> **Fase activa:** Fase 4 — Adecuaciones Curriculares e Informes ⏳
+> **Fase activa:** Fase 4 — Adecuaciones Curriculares e Informes 🔄
 
 ---
 
@@ -18,6 +18,32 @@
 ---
 
 ## 🔄 En progreso — Fase 4
+
+### PC-11: Fase 4 — Adecuaciones Curriculares
+| Tarea | Estado |
+|-------|--------|
+| F4 · Entidad `Accommodation` + `AccommodationConfiguration` (EF, snake_case, enums como string) | ✅ |
+| F4 · Índice único `(student_id, group_id)` — una adecuación por alumno por grupo | ✅ |
+| F4 · `DbSet<Accommodation>` en `AulaIADbContext` | ✅ |
+| F4 · Migración EF Core `AddAccommodations` (generada y verificada) | ✅ |
+| F4 · `AdecuacionAiService` — prompt GPT-5.5 con contexto alumno + grupo + hasta 10 `CurriculumUnit` validadas | ✅ |
+| F4 · `GenerarAdecuacionJob` (Hangfire `default`, retry 1) — ciclo Draft → Pending → Generating → Ready/Failed | ✅ |
+| F4 · `InformeAdecuacionService` — PDF QuestPDF Community: datos generales, estrategias, propuesta IA, nota legal AS, 3 firmas | ✅ |
+| F4 · `AdecuacionesModule` — `AddAdecuacionesModule()` + 6 endpoints REST | ✅ |
+| F4 · Endpoints: `GET /list`, `GET /one`, `PUT /upsert`, `DELETE`, `POST /generar`, `GET /informe` | ✅ |
+| F4 · Registrado en `Program.cs` | ✅ |
+| F4 · Backend build: 0 errores, 0 advertencias | ✅ |
+| F4 · Tipos y funciones en `src/lib/api.ts` (`AccommodationType`, `AccommodationStatus`, `AdecuacionResumen`, `AdecuacionResponse`, etc.) | ✅ |
+| F4 · App Web: `/adecuaciones/[grupoId]/page.tsx` — tabla alumnos + polling 4s + panel lateral con formulario + propuesta IA + descarga PDF | ✅ |
+| F4 · App Web: A11y auditada (`role="dialog"`, `aria-modal`, `aria-labelledby`, `htmlFor`/`id`, `scope="col"`, `aria-live="polite"`, emojis `aria-hidden`) | ✅ |
+| F4 · App Web: patrón `reloadTrigger`/`reload` + `cancelled` flag (consistente con `calendario/[grupoId]`) | ✅ |
+| F4 · App Web: botón `♿ Adecuaciones` en tarjetas de `/grupos` | ✅ |
+| F4 · Integración de adecuaciones en planeamiento generado | ⏳ |
+| F4 · Reporte de asistencia por período (PDF/XLSX) | ⏳ |
+| F4 · Informe docente para dirección | ⏳ |
+| F4 · Dashboard docente: resumen del período | ⏳ |
+| F4 · App móvil: indicador de adecuación activa en perfil del estudiante | ⏳ |
+| F4 · App móvil: notificaciones push alertas de rendimiento | ⏳ |
 
 ---
 

@@ -271,3 +271,76 @@ export const getLeccionesDisponibles = (
   `/api/grupos/${groupId}/calendario/lecciones?from=${from}&to=${to}&leccionesPorSemana=${leccionesPorSemana}`,
   token,
 );
+
+// ── Adecuaciones ──────────────────────────────────────────────────────────
+
+export type AccommodationType = 'AS' | 'ANS' | 'AA';
+export type AccommodationStatus = 'Draft' | 'Pending' | 'Generating' | 'Ready' | 'Failed';
+
+export interface AdecuacionResumen {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentCode: string;
+  type: AccommodationType;
+  diagnostico: string;
+  status: AccommodationStatus;
+  generatedAt: string | null;
+}
+
+export interface AdecuacionResponse {
+  id: string;
+  studentId: string;
+  groupId: string;
+  type: AccommodationType;
+  diagnostico: string;
+  condicionEspecial: string | null;
+  estrategiasMediacion: string | null;
+  estrategiasEvaluacion: string | null;
+  observaciones: string | null;
+  propuestaGenerada: string | null;
+  status: AccommodationStatus;
+  generatedAt: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpsertAdecuacionRequest {
+  type: AccommodationType;
+  diagnostico: string;
+  condicionEspecial?: string | null;
+  estrategiasMediacion?: string | null;
+  estrategiasEvaluacion?: string | null;
+  observaciones?: string | null;
+}
+
+export const ACCOMMODATION_TYPE_LABELS: Record<AccommodationType, string> = {
+  AS:  'Adecuación Significativa (AS)',
+  ANS: 'Adecuación No Significativa (ANS)',
+  AA:  'Apoyo Académico (AA)',
+};
+
+export const listAdecuaciones = (token: string, groupId: string) =>
+  apiFetch<AdecuacionResumen[]>(`/api/grupos/${groupId}/adecuaciones`, token);
+
+export const getAdecuacion = (token: string, groupId: string, studentId: string) =>
+  apiFetch<AdecuacionResponse>(`/api/grupos/${groupId}/estudiantes/${studentId}/adecuacion`, token);
+
+export const upsertAdecuacion = (token: string, groupId: string, studentId: string, body: UpsertAdecuacionRequest) =>
+  apiFetch<AdecuacionResponse>(`/api/grupos/${groupId}/estudiantes/${studentId}/adecuacion`, token, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+export const eliminarAdecuacion = (token: string, groupId: string, studentId: string) =>
+  apiFetch<void>(`/api/grupos/${groupId}/estudiantes/${studentId}/adecuacion`, token, { method: 'DELETE' });
+
+export const generarPropuestaAdecuacion = (token: string, groupId: string, studentId: string) =>
+  apiFetch<AdecuacionResponse>(`/api/grupos/${groupId}/estudiantes/${studentId}/adecuacion/generar`, token, {
+    method: 'POST',
+  });
+
+export const getInformeAdecuacionUrl = (groupId: string, studentId: string) =>
+  `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/grupos/${groupId}/estudiantes/${studentId}/adecuacion/informe`;
