@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-07 (rev 3)
-> **Fase activa:** Fase 5 — Monetización: Suscripciones, SINPE Móvil y Referidos ⏳
+> **Última actualización:** 2026-05-07 (rev 4)
+> **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias ⏳
 
 ---
 
@@ -16,6 +16,36 @@
 **Fase 3 — Notas, Promedios y Reportes Básicos** (2026-05-07)
 
 **Fase 4 — Adecuaciones Curriculares e Informes Completos** (2026-05-07)
+
+**Fase 5 — Monetización: Suscripciones, SINPE Móvil y Referidos** (2026-05-07)
+
+---
+
+## ✅ Completado — Fase 5 (detalle)
+
+### PC-12: Fase 5 — Monetización
+| Tarea | Estado |
+|-------|--------|
+| F5 · Entidades `Subscription`, `PaymentRequest`, `ReferralCode`, `Commission`, `ExchangeRate` (EF Core, snake_case, enums como string) | ✅ |
+| F5 · Campo `referred_by_code` en entidad `User` + `UserConfiguration` actualizada | ✅ |
+| F5 · `DbSet<>` para las 5 nuevas entidades en `AulaIADbContext` | ✅ |
+| F5 · Configuraciones EF: `SubscriptionConfiguration`, `PaymentRequestConfiguration`, `ReferralCodeConfiguration`, `CommissionConfiguration`, `ExchangeRateConfiguration` | ✅ |
+| F5 · Migración EF Core `AddMonetization` (generada, 5 tablas, índices únicos) | ✅ |
+| F5 · `SinpeOptions` — `PhoneNumber`, `AccountName`, precios USD por plan, `TrialDays` (sección `Sinpe` en appsettings) | ✅ |
+| F5 · `UpdateExchangeRateJob` (Hangfire, 12h UTC) — SOAP BCCR indicador 318, skips si ya existe el día | ✅ |
+| F5 · `CheckExpiredSubscriptionsJob` (Hangfire, 8h UTC) — expira suscripciones vencidas | ✅ |
+| F5 · `CalculateCommissionsJob` — 20% neto (bruto − infra Azure prorateada), idempotente por `(referral_code_id, referred_user_id, month)` | ✅ |
+| F5 · `SuscripcionesModule` — GET estado, POST trial (Conflict si existe), POST solicitar pago (`AUI-YYYYMMDD-XXXX`), POST upload comprobante (Blob `pagos`, max 10 MB, jpg/png/pdf/webp), GET info pública | ✅ |
+| F5 · `PaymentsModule` (admin) — GET pendientes, GET historial (últimos 200), POST aprobar (extiende período), POST rechazar con nota, GET suscripciones | ✅ |
+| F5 · `ReferralsModule` — GET mi-codigo (auto-genera de nombre + año), GET panel, GET comisiones; admin: POST cierre-mensual (encola job), GET comisiones, POST marcar pagada | ✅ |
+| F5 · Registrado en `Program.cs`: `AddSuscripcionesModule()`, `MapSuscripcionesEndpoints()`, `MapPaymentsEndpoints()`, `MapReferralsEndpoints()`, 2 `RecurringJob.AddOrUpdate` | ✅ |
+| F5 · Backend build: 0 errores, 0 advertencias | ✅ |
+| F5 · Tipos y funciones en `src/lib/api.ts` — 15 tipos + 16 funciones (estado, trial, pago, comprobante, admin pagos, admin suscripciones, referidos, comisiones, cierre mensual) | ✅ |
+| F5 · App Web: `/precios` — 3 cards (Basic/Professional/Institutional), precios USD+CRC, TC BCCR, sección SINPE, CTA login | ✅ |
+| F5 · App Web: `/suscripcion` — estado actual, activar trial gratuito, generar instrucciones SINPE (código + monto CRC + número), upload comprobante | ✅ |
+| F5 · App Web: `/admin` — 4 tabs (Pagos pendientes, Suscripciones, Cierre mensual, Comisiones); A11y: `role="tablist"`, `aria-selected` literal, `role="tabpanel"`, `type="button"`, emojis `aria-hidden` | ✅ |
+| F5 · App Web: `/perfil` — info usuario Auth0, suscripción actual, código referido copiable, panel referidos, historial comisiones | ✅ |
+| F5 · Frontend build: 0 errores (`npm run build` → `out/`, 12 rutas estáticas) | ✅ |
 
 ---
 
@@ -71,9 +101,9 @@
 
 ---
 
-## ⏳ Pendiente — Fase 5 — Monetización: Suscripciones, SINPE Móvil y Referidos
+## ⏳ Pendiente — Fase 6 — Escala: Container Apps + Nuevas Materias
 
-> Detalles de componentes en `03_plan.md` — Fase 5.
+> Detalles de componentes en `03_plan.md` — Fase 6.
 
 ---
 

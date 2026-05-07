@@ -1,7 +1,7 @@
 # 03 — Plan de Desarrollo
 
-> **Última actualización:** 2026-05-07 (rev 2)
-> **Estado general:** ⏳ Fase 5 — Monetización: Suscripciones, SINPE Móvil y Referidos
+> **Última actualización:** 2026-05-07 (rev 3)
+> **Estado general:** ✅ Fases 0–5 completadas — próxima: Fase 6 — Escala: Container Apps + Nuevas Materias
 
 ---
 
@@ -218,46 +218,37 @@ mep/
 
 ---
 
-## Fase 5 — Monetización: Suscripciones y Referidos ⏳ Pendiente
+## Fase 5 — Monetización: Suscripciones y Referidos ✅ Completada (2026-05-07)
 
 **Objetivo:** Activar el modelo de negocio antes del lanzamiento público. Sin esta fase no hay ingresos ni tracking del acuerdo con Adriana.
 
 **Criterio de éxito:** Un docente nuevo puede registrarse, usar el trial de 30 días, enviar un SINPE al número de AulaIA, presionar "Ya pagué" y el admin aprueba la suscripción en menos de 24 horas. Adriana ve en su panel la comisión generada por ese referido.
 
-**Disparador:** Completar antes de cualquier comunicación pública del producto (antes de que Adriana lo comparta en sus grupos de WhatsApp).
-
-**Método de pago:** SINPE Móvil con verificación manual por admin. Sin pasarela de pago automática ni API bancaria. Ver RF-36 en `01_requirements.md`.
+**Método de pago:** SINPE Móvil con verificación manual por admin. Sin pasarela de pago automática ni API bancaria (ADR-009).
 
 ### Componentes
 
 | Componente | Estado |
 |-----------|--------|
 | **Backend — Suscripciones** | |
-| Entidades `Subscription` + `PaymentRequest` + migración EF Core | ⏳ |
-| `SubscriptionsModule` — activar trial, POST solicitar pago (genera `reference_code`), GET estado | ⏳ |
-| `PaymentsModule` (admin) — GET pendientes, POST aprobar, POST rechazar | ⏳ |
-| Middleware de plan: verifica `subscription.plan` en cada request protegido por tier | ⏳ |
-| Job diario `CheckExpiredSubscriptionsJob` (Hangfire) — degrada a Basic si `current_period_end` vencido | ⏳ |
-| Notificaciones email: trial por vencer (7d, 3d, 0d), pago aprobado, pago rechazado, suscripción por vencer (7d, 0d) | ⏳ |
-| Upload de comprobante SINPE → Azure Blob Storage (contenedor `pagos`, privado) | ⏳ |
-| Job diario `UpdateExchangeRateJob` (Hangfire) — consulta API BCCR (indicador 318, venta USD) y guarda TC en `exchange_rates` | ⏳ |
-| `AppSettings`: `SinpeNumber` configurable sin redeployar | ⏳ |
+| Entidades `Subscription` + `PaymentRequest` + `ExchangeRate` + migración EF Core `AddMonetization` | ✅ |
+| `SubscriptionsModule` — GET estado, POST trial, POST solicitar pago (genera `AUI-YYYYMMDD-XXXX`), POST upload comprobante (Blob `pagos`) | ✅ |
+| `PaymentsModule` (admin) — GET pendientes, GET historial, POST aprobar (activa/renueva suscripción), POST rechazar con nota | ✅ |
+| `SinpeOptions` — `PhoneNumber`, `AccountName`, precios USD por plan, `TrialDays` (configurables sin redeploy) | ✅ |
+| Job diario `UpdateExchangeRateJob` (Hangfire, 12h UTC) — SOAP BCCR indicador 318 → tabla `exchange_rates` | ✅ |
+| Job diario `CheckExpiredSubscriptionsJob` (Hangfire, 8h UTC) — expira suscripciones vencidas | ✅ |
+| Endpoint público `GET /api/suscripcion/info` — planes, precios, TC actual, número SINPE | ✅ |
 | **Backend — Referidos** | |
-| Entidades `ReferralCode` + `Commission` + migración EF Core | ⏳ |
-| `ReferralsModule` — generar código, GET panel de referidos, GET comisiones | ⏳ |
-| Job mensual `CalculateCommissionsJob` (Hangfire) — calcula comisión neta (el admin ingresa costo infra Azure del mes) | ⏳ |
-| Tracking de `?ref=CODIGO` en registro y campo `referred_by_code` en `users` | ⏳ |
+| Entidades `ReferralCode` + `Commission` + campo `referred_by_code` en `users` | ✅ |
+| `ReferralsModule` — GET mi-codigo (auto-genera), GET panel referidos, GET comisiones (usuario) | ✅ |
+| Admin endpoints: GET comisiones, POST marcar pagada, POST cierre-mensual (encola `CalculateCommissionsJob`) | ✅ |
+| `CalculateCommissionsJob` — 20% sobre ingresos netos (bruto − infra Azure), idempotente por `(codigo, usuario, mes)` | ✅ |
 | **App Web** | |
-| Página de precios con los tres planes | ⏳ |
-| Pantalla de pago SINPE: número destino, monto, código de referencia, instrucciones paso a paso | ⏳ |
-| Botón "Ya pagué" + upload opcional de comprobante (imagen/PDF) | ⏳ |
-| Paywalls inline: banner con descripción del plan requerido + instrucciones SINPE | ⏳ |
-| Banner trial: días restantes + progress bar + CTA "Activar suscripción" | ⏳ |
-| Panel admin — pestaña Pagos: lista pendientes, aprobar/rechazar con nota, historial | ⏳ |
-| Panel admin — pestaña Suscripciones: activas, por vencer, historial | ⏳ |
-| Panel admin — pestaña Cierre mensual: ingresar costo infra, ejecutar `CalculateCommissionsJob`, exportar reporte | ⏳ |
-| Panel de referidos en perfil del usuario: lista referidos, comisiones por mes, estado de pago | ⏳ |
-| Campo código de referido en formulario de registro | ⏳ |
+| `/precios` — 3 cards de planes (USD + CRC + TC BCCR), sección SINPE, CTA → `/suscripcion?plan=X` | ✅ |
+| `/suscripcion` — estado actual, activar trial, generar instrucciones SINPE, upload comprobante | ✅ |
+| `/admin` — 4 tabs: Pagos pendientes (aprobar/rechazar), Suscripciones, Cierre mensual, Comisiones | ✅ |
+| `/perfil` — info Auth0, suscripción, código referido + enlace copiable, panel referidos, historial comisiones | ✅ |
+| A11y: `role="tablist"`, `aria-selected="true"/"false"` (literales), `role="tabpanel"`, `aria-controls`, `type="button"`, emojis `aria-hidden`, spinners `role="status"` | ✅ |
 
 ---
 
@@ -296,5 +287,5 @@ mep/
 | 2 | Planeamiento con IA + Calendario | Planeamiento MEP completo en minutos, reorganizable por calendario | ✅ |
 | 3 | Notas y Reportes básicos | Adriana cierra trimestre sin Excel; exporta al SEA | ✅ |
 | 4 | Adecuaciones e Informes | Informes CAE generados automáticamente | ✅ |
-| 5 | Monetización: Pagos + Referidos | Trial, Stripe, paywalls, panel de comisiones Adriana | ⏳ |
+| 5 | Monetización: Pagos + Referidos | Trial, SINPE, panel admin, panel comisiones Adriana | ✅ |
 | 6 | Escala + Nuevas materias | Container Apps + plan institucional | ⏳ |

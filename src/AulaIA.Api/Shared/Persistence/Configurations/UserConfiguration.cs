@@ -56,6 +56,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(x => x.InstitutionId)
                .HasDatabaseName("ix_users_institution_id");
 
+        builder.Property(x => x.ReferredByCode)
+               .HasColumnName("referred_by_code")
+               .HasMaxLength(32);
+
         builder.HasOne(x => x.Institution)
                .WithMany(i => i.Users)
                .HasForeignKey(x => x.InstitutionId)

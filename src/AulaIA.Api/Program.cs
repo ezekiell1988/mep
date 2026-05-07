@@ -9,7 +9,10 @@ using AulaIA.Api.Features.Notas;
 using AulaIA.Api.Features.Planeamiento;
 using AulaIA.Api.Features.PowerSync;
 using AulaIA.Api.Features.Reportes;
+using AulaIA.Api.Features.Suscripciones;
+using AulaIA.Api.Features.Suscripciones.Jobs;
 using AulaIA.Api.Shared.Extensions;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +35,8 @@ builder.Services
     .AddReportesModule()
     .AddCalendarioModule()
     .AddAdecuacionesModule()
-    .AddPowerSyncModule();
+    .AddPowerSyncModule()
+    .AddSuscripcionesModule();
 
 var app = builder.Build();
 
@@ -67,7 +71,21 @@ app.MapGruposEndpoints()
    .MapCalendarioEndpoints()
    .MapAdecuacionesEndpoints()
    .MapDashboardEndpoints()
-   .MapPowerSyncEndpoints();
+   .MapPowerSyncEndpoints()
+   .MapSuscripcionesEndpoints()
+   .MapPaymentsEndpoints()
+   .MapReferralsEndpoints();
+
+// ── Hangfire recurring jobs ───────────────────────────────────────────────
+RecurringJob.AddOrUpdate<UpdateExchangeRateJob>(
+    "update-exchange-rate",
+    j => j.ExecuteAsync(CancellationToken.None),
+    "0 12 * * *");  // 12 PM UTC = 6 AM Costa Rica
+
+RecurringJob.AddOrUpdate<CheckExpiredSubscriptionsJob>(
+    "check-expired-subscriptions",
+    j => j.ExecuteAsync(CancellationToken.None),
+    "0 8 * * *");   // 8 AM UTC = 2 AM Costa Rica
 
 app.LogStartupFacts();
 app.Run();

@@ -372,3 +372,191 @@ export interface DocenteResumenResponse {
 
 export const getDocenteResumen = (token: string) =>
   apiFetch<DocenteResumenResponse>('/api/docente/resumen', token);
+
+// ── Suscripciones ─────────────────────────────────────────────────────────
+
+export type SubscriptionPlan = 'Trial' | 'Basic' | 'Professional' | 'Institutional';
+export type SubscriptionStatus = 'Active' | 'Expired' | 'Cancelled';
+export type PaymentRequestStatus = 'Pending' | 'Approved' | 'Rejected';
+
+export interface SuscripcionEstadoResponse {
+  hasSubscription: boolean;
+  plan: SubscriptionPlan | null;
+  status: SubscriptionStatus | null;
+  isTrial: boolean;
+  currentPeriodEnd: string | null;
+  daysRemaining: number | null;
+  trialDays: number;
+}
+
+export interface PaymentRequestResponse {
+  id: string;
+  plan: SubscriptionPlan;
+  amountUsd: number;
+  amountCrc: number;
+  exchangeRateUsed: number;
+  referenceCode: string;
+  status: PaymentRequestStatus;
+  sinpePhone: string;
+  sinpeAccountName: string;
+  createdAt: string;
+}
+
+export interface PlanInfo {
+  id: SubscriptionPlan;
+  nombre: string;
+  precioUsd: number;
+  precioCrc: number;
+  descripcion: string;
+}
+
+export interface SuscripcionInfoResponse {
+  sinpePhone: string;
+  sinpeAccountName: string;
+  exchangeRate: number;
+  trialDays: number;
+  plans: PlanInfo[];
+}
+
+export interface AdminPagoResponse {
+  id: string;
+  userName: string;
+  userEmail: string;
+  plan: SubscriptionPlan;
+  amountUsd: number;
+  amountCrc: number;
+  referenceCode: string;
+  status: PaymentRequestStatus;
+  hasVoucher: boolean;
+  adminNote: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+}
+
+export interface AdminSuscripcionResponse {
+  id: string;
+  userName: string;
+  userEmail: string;
+  plan: SubscriptionPlan;
+  status: SubscriptionStatus;
+  isTrial: boolean;
+  periodStart: string;
+  periodEnd: string;
+  daysRemaining: number;
+}
+
+export interface ReferralCodeResponse {
+  id: string;
+  code: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface ReferidoResumen {
+  nombre: string;
+  email: string;
+  plan: string;
+  estado: string;
+  registrado: string;
+}
+
+export interface ReferralPanelResponse {
+  code: string | null;
+  totalReferidos: number;
+  totalComisionesCrc: number;
+  referidos: ReferidoResumen[];
+}
+
+export interface ComisionResponse {
+  id: string;
+  referidoNombre: string;
+  month: number;
+  grossRevenueCrc: number;
+  infraCostCrc: number;
+  baseAmountCrc: number;
+  commissionAmountCrc: number;
+  status: 'Pending' | 'Paid';
+  createdAt: string;
+}
+
+export interface AdminComisionResponse {
+  id: string;
+  codigoReferido: string;
+  referidorNombre: string;
+  referidoNombre: string;
+  month: number;
+  commissionAmountCrc: number;
+  status: 'Pending' | 'Paid';
+}
+
+export const getSuscripcionEstado = (token: string) =>
+  apiFetch<SuscripcionEstadoResponse>('/api/suscripcion', token);
+
+export const activarTrial = (token: string) =>
+  apiFetch<SuscripcionEstadoResponse>('/api/suscripcion/trial', token, { method: 'POST' });
+
+export const solicitarPago = (token: string, plan: SubscriptionPlan) =>
+  apiFetch<PaymentRequestResponse>('/api/suscripcion/pago', token, {
+    method: 'POST',
+    body: JSON.stringify({ plan }),
+  });
+
+export const getSuscripcionInfo = () =>
+  fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/suscripcion/info`)
+    .then(r => r.json() as Promise<SuscripcionInfoResponse>);
+
+export const getAdminPagosPendientes = (token: string) =>
+  apiFetch<AdminPagoResponse[]>('/api/admin/pagos/pendientes', token);
+
+export const getAdminPagosHistorial = (token: string) =>
+  apiFetch<AdminPagoResponse[]>('/api/admin/pagos/historial', token);
+
+export const aprobarPago = (token: string, id: string, nota?: string) =>
+  apiFetch<void>(`/api/admin/pagos/${id}/aprobar`, token, {
+    method: 'POST',
+    body: JSON.stringify({ nota: nota ?? null }),
+  });
+
+export const rechazarPago = (token: string, id: string, nota: string) =>
+  apiFetch<void>(`/api/admin/pagos/${id}/rechazar`, token, {
+    method: 'POST',
+    body: JSON.stringify({ nota }),
+  });
+
+export const getAdminSuscripciones = (token: string) =>
+  apiFetch<AdminSuscripcionResponse[]>('/api/admin/suscripciones', token);
+
+export const getMiCodigoReferido = (token: string) =>
+  apiFetch<ReferralCodeResponse>('/api/referidos/mi-codigo', token);
+
+export const getReferralPanel = (token: string) =>
+  apiFetch<ReferralPanelResponse>('/api/referidos/panel', token);
+
+export const getComisiones = (token: string) =>
+  apiFetch<ComisionResponse[]>('/api/referidos/comisiones', token);
+
+export const ejecutarCierreMensual = (token: string, month: number, infraCostCrc: number) =>
+  apiFetch<string>('/api/admin/referidos/cierre-mensual', token, {
+    method: 'POST',
+    body: JSON.stringify({ month, infraCostCrc }),
+  });
+
+export const getAdminComisiones = (token: string) =>
+  apiFetch<AdminComisionResponse[]>('/api/admin/referidos/comisiones', token);
+
+export const marcarComisionPagada = (token: string, id: string) =>
+  apiFetch<void>(`/api/admin/referidos/comisiones/${id}/pagar`, token, { method: 'POST' });
+
+export const subirComprobante = async (token: string, paymentId: string, file: File): Promise<void> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/suscripcion/pago/${paymentId}/comprobante`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    },
+  );
+  if (!res.ok) throw new Error(`Error subiendo comprobante: ${res.status}`);
+};

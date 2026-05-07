@@ -37,6 +37,12 @@ public static class OptionsExtensions
                 .BindConfiguration(AiOptions.Section)
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
+
+            services
+                .AddOptions<SinpeOptions>()
+                .BindConfiguration(SinpeOptions.Section)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
         }
     }
 }

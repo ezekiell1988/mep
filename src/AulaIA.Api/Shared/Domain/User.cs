@@ -12,6 +12,10 @@ public sealed class User
     public Guid InstitutionId { get; set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
+    /// <summary>Código de referido usado al registrarse (null si llegó orgánico).</summary>
+    public string? ReferredByCode { get; set; }
+
     public Institution? Institution { get; init; }
     public ICollection<Group> Groups { get; init; } = [];
+    public Subscription? Subscription { get; init; }
 }
