@@ -175,6 +175,13 @@
 | F3 · `UpdatePonderacionRequest` — record con `[Range(0,100)]` en los 4 campos | ✅ |
 | F3 · App web `api.ts` — interfaz `Grupo` ampliada, `getGrupoById`, `actualizarPonderacion` | ✅ |
 | F3 · App web `/notas/[grupoId]` — panel colapsable ponderación: 4 inputs, indicador suma tiempo real, guardar | ✅ |
+| F3 · `GruposTests.cs` — 7 tests: 401/200/campos/flujo completo actualizar-persistir-restaurar + validación suma | ✅ |
+| F3 · `ApiClient.PutAsJsonAsync()` agregado a infraestructura de tests | ✅ |
+| F3 · `CurriculumTests.FlujoCompleto` — guard `PdfPath` null/inexistente (evita falso negativo sin PDF real) | ✅ |
+| F3 · BD verificada: tabla `groups` con 4 columnas `pct_*` (`numeric`, defaults 20/45/20/15, NOT NULL) | ✅ |
+| F3 · Suite completa 23/23 tests verdes (SanityTests + GruposTests + NotasTests + CurriculumTests + PlaneamientoTests) | ✅ |
+| F3 · Migración `SeedDemoData` — 2 grupos (7°A Matemáticas, 8°B Español), 10 estudiantes, 6 actividades de evaluación | ✅ |
+| F3 · BD: `users.auth0_sub` de `ezekiell1988@gmail.com` actualizado a `google-oauth2|113068059463803033614` (login Google real) | ✅ |
 
 ### PC-09: Mantenimiento de Dependencias (2026-05-06)
 | Tarea | Estado |
