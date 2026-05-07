@@ -93,6 +93,13 @@ export default function GruposPage() {
               </button>
               <button
                 type="button"
+                onClick={() => router.push(`/calendario/${g.id}?nombre=${encodeURIComponent(g.name)}`)}
+                className="text-sm bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium px-4 py-2 rounded-lg transition-colors"
+              >
+                <span aria-hidden="true">🗓️</span> Calendario
+              </button>
+              <button
+                type="button"
                 onClick={() => router.push(`/notas/${g.id}?nombre=${encodeURIComponent(g.name)}&nivel=${encodeURIComponent(g.level)}&asignatura=${encodeURIComponent(g.subject)}`)}
                 className="text-sm bg-green-50 hover:bg-green-100 text-green-700 font-medium px-4 py-2 rounded-lg transition-colors"
               >

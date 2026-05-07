@@ -15,6 +15,7 @@ public sealed class AulaIADbContext(DbContextOptions<AulaIADbContext> options) :
     public DbSet<CurriculumUnit> CurriculumUnits => Set<CurriculumUnit>();
     public DbSet<CurriculumExtraction> CurriculumExtractions => Set<CurriculumExtraction>();
     public DbSet<LessonPlan> LessonPlans => Set<LessonPlan>();
+    public DbSet<CalendarEvent> CalendarEvents => Set<CalendarEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -198,3 +198,76 @@ export const getHistorialAsistencia = (
   `/api/grupos/${groupId}/asistencia/historial?from=${from}&to=${to}`,
   token,
 );
+
+// ─── Calendario ───────────────────────────────────────────────────────────────
+
+export const CALENDAR_EVENT_TYPES = [
+  'Holiday', 'Exam', 'TeacherMeeting', 'SportWeek', 'Civic', 'Institutional', 'Other',
+] as const;
+export type CalendarEventType = (typeof CALENDAR_EVENT_TYPES)[number];
+
+export const CALENDAR_EVENT_LABELS: Record<CalendarEventType, string> = {
+  Holiday:        'Feriado',
+  Exam:           'Exámenes',
+  TeacherMeeting: 'Consejo de profesores',
+  SportWeek:      'FEA / Semana del deporte',
+  Civic:          'Acto cívico',
+  Institutional:  'Día institucional',
+  Other:          'Otro',
+};
+
+export interface CalendarEventResponse {
+  id: string;
+  groupId: string | null;
+  date: string;        // "YYYY-MM-DD"
+  endDate: string | null;
+  title: string;
+  type: CalendarEventType;
+  isNational: boolean;
+  isEditable: boolean;
+}
+
+export interface LeccionesDisponiblesResponse {
+  from: string;
+  to: string;
+  leccionesPorSemana: number;
+  diasHabiles: number;
+  diasNoLectivos: number;
+  diasEfectivos: number;
+  leccionesDisponibles: number;
+}
+
+export const getCalendario = (token: string, groupId: string, year?: number, month?: number) => {
+  const params = new URLSearchParams();
+  if (year)  params.set('year', String(year));
+  if (month) params.set('month', String(month));
+  const qs = params.toString();
+  return apiFetch<CalendarEventResponse[]>(
+    `/api/grupos/${groupId}/calendario${qs ? `?${qs}` : ''}`,
+    token,
+  );
+};
+
+export const crearEventoCalendario = (
+  token: string,
+  groupId: string,
+  body: { date: string; endDate?: string | null; title: string; type: string },
+) => apiFetch<CalendarEventResponse>(
+  `/api/grupos/${groupId}/calendario`,
+  token,
+  { method: 'POST', body: JSON.stringify(body) },
+);
+
+export const eliminarEventoCalendario = (token: string, groupId: string, id: string) =>
+  apiFetch<void>(`/api/grupos/${groupId}/calendario/${id}`, token, { method: 'DELETE' });
+
+export const getLeccionesDisponibles = (
+  token: string,
+  groupId: string,
+  from: string,
+  to: string,
+  leccionesPorSemana: number,
+) => apiFetch<LeccionesDisponiblesResponse>(
+  `/api/grupos/${groupId}/calendario/lecciones?from=${from}&to=${to}&leccionesPorSemana=${leccionesPorSemana}`,
+  token,
+);
