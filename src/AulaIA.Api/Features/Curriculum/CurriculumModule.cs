@@ -26,10 +26,15 @@ public static class CurriculumModule
         })
         .AddStandardResilienceHandler(opts =>
         {
-            // PDFs pueden ser grandes — ajustar timeouts por encima del default (30 s)
-            opts.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(120);
-            opts.AttemptTimeout.Timeout      = TimeSpan.FromSeconds(90);
-            opts.Retry.MaxRetryAttempts      = 2;
+            // PDFs del MEP pueden ser grandes. Restricciones del pipeline:
+            //   TotalRequestTimeout >= AttemptTimeout × (1 + MaxRetryAttempts)
+            //     600 >= 60 × 3 = 180 ✓
+            //   CircuitBreaker.SamplingDuration > 2 × AttemptTimeout
+            //     300 > 2 × 60 = 120 ✓
+            opts.TotalRequestTimeout.Timeout     = TimeSpan.FromSeconds(600);
+            opts.AttemptTimeout.Timeout          = TimeSpan.FromSeconds(60);
+            opts.Retry.MaxRetryAttempts          = 2;
+            opts.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(300);
         });
 
         return services;

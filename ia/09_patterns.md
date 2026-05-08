@@ -380,3 +380,83 @@ export default function FeaturePage({ params }: { params: Promise<{ grupoId: str
 - El `fallback={null}` en `<Suspense>` es intencional — evita flash de contenido durante hidratación.
 - No agregar `'use client'` ni ningún import de React al `page.tsx` wrapper — debe permanecer Server Component.
 - Si el `PageClient` usa `useSearchParams()`, también necesita estar envuelto en `<Suspense>` en su propio render o heredarlo del wrapper.
+
+---
+
+## PATTERN-07: Limpieza de `Program.cs` con C# 14 Extension Blocks
+
+**Contexto:** En un monolito modular con muchos feature modules, `Program.cs` crece y se convierte en un archivo de 100+ líneas difícil de mantener. Extraer los bloques de registro/endpoints/jobs/migrate a extension blocks de C# 14 mantiene `Program.cs` en ~50 líneas y mejora la trazabilidad.
+
+**Destino:** `Shared/Extensions/ModulesExtensions.cs`
+
+**Patrón de extension blocks C# 14:**
+```csharp
+public static class ModulesExtensions
+{
+    extension(IServiceCollection services)
+    {
+        public void AddAulaIAModules() =>
+            services
+                .AddGruposModule()
+                .AddEstudiantesModule()
+                // ... todos los módulos
+                .AddSuscripcionesModule();
+    }
+
+    extension(WebApplication app)
+    {
+        public void MapAulaIAEndpoints() =>
+            app.MapGruposEndpoints()
+               .MapEstudiantesEndpoints()
+               // ... todos los endpoints
+               .MapReferralsEndpoints();
+
+        public void AddAulaIARecurringJobs()
+        {
+            RecurringJob.AddOrUpdate<UpdateExchangeRateJob>(...);
+            // ...
+        }
+
+        public async Task RunMigrationsAsync()
+        {
+            using var scope = app.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AulaIADbContext>();
+            await db.Database.MigrateAsync();
+        }
+    }
+}
+```
+
+**`Program.cs` resultante (47 líneas):**
+```csharp
+using AulaIA.Api.Shared.Extensions;  // ← único using necesario
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAulaIAOptions();
+builder.AddAulaIAPersistence();
+builder.AddAulaIAAuth();
+builder.AddAulaIACors();
+builder.AddAulaIAHangfire();
+builder.Services.AddOpenApi();
+builder.AddLlmAuditServices();
+builder.Services.AddAulaIAModules();  // ← todos los módulos en una línea
+
+var app = builder.Build();
+
+// Middleware (orden obligatorio)...
+app.MapAulaIAEndpoints();             // ← todos los endpoints en una línea
+app.MapFallbackToFile("index.html").ExcludeFromDescription();
+
+await app.RunMigrationsAsync();       // ← migrate antes de Run()
+app.AddAulaIARecurringJobs();
+app.LogStartupFacts();
+app.Run();
+```
+
+**Reglas:**
+- Los extension blocks van en `Shared/Extensions/ModulesExtensions.cs`, nunca en `Program.cs`.
+- `RunMigrationsAsync()` se llama con `await` **antes** de `app.Run()` — no dentro del pipeline de middlewares.
+- `AddAulaIARecurringJobs()` se llama después de `RunMigrationsAsync()` — Hangfire necesita las tablas ya creadas.
+- Usar `extension(IServiceCollection)` para DI y `extension(WebApplication)` para pipeline y runtime.
+

@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-08 (rev 9)
+> **Última actualización:** 2026-05-08 (rev 10)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -49,7 +49,10 @@
 | F6 · Entidad `CurriculumSource` + tabla `curriculum_sources` — registra URL MEP, ETag, Last-Modified, IsActive por asignatura/ciclo | ✅ |
 | F6 · Migración EF Core `AddCurriculumSource` generada (índice único `asignatura+ciclo`) | ✅ |
 | F6 · `SyncCurriculumJob` (Hangfire, manual — cron `0 0 30 2 *`) — orquesta HEAD→download→Blob→ExtractCurriculumJob por cada fuente activa; siembra catálogo inicial si tabla vacía | ✅ |
-| F6 · `Microsoft.Extensions.Http.Resilience` v10.5.0 — HttpClient "mep" con `AddStandardResilienceHandler()` (TotalTimeout 120s, Retry 2) | ✅ |
+| F6 · `Microsoft.Extensions.Http.Resilience` v10.5.0 — HttpClient "mep" con `AddStandardResilienceHandler()` (TotalTimeout 600s, AttemptTimeout 60s, CircuitBreaker.SamplingDuration 300s, Retry 2) | ✅ |
+| F6 · Fix `OptionsValidationException` al arrancar — `CircuitBreaker.SamplingDuration` debe ser `> 2 × AttemptTimeout`; valores corregidos y validados con `dotnet run` | ✅ |
+| F6 · `ModulesExtensions.cs` — `AddAulaIAModules()`, `MapAulaIAEndpoints()`, `AddAulaIARecurringJobs()`, `RunMigrationsAsync()` en C# 14 extension blocks | ✅ |
+| F6 · `Program.cs` refactorizado: 116 → 47 líneas; un único `using AulaIA.Api.Shared.Extensions` | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
 | F6 · Subir PDFs al API admin + extracción IA por GPT-5.5 | ⏳ |
 | F6 · Panel de director: vista institucional | ⏳ |
