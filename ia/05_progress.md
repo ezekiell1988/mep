@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-08 (rev 8)
+> **Última actualización:** 2026-05-08 (rev 9)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -46,6 +46,10 @@
 | F6 · Skill `mep-cloudflare` creado — documenta flarectl, registros DNS, flujo completo y lecciones aprendidas | ✅ |
 | F6 · Dropdown asignaturas actualizado: `'Música'` → `'Artes Musicales'` + `'Educación para el Hogar'` añadido | ✅ |
 | F6 · 13 PDFs del MEP descargados a `assets/` con curl + skill `mep-curriculum-pdfs` creado | ✅ |
+| F6 · Entidad `CurriculumSource` + tabla `curriculum_sources` — registra URL MEP, ETag, Last-Modified, IsActive por asignatura/ciclo | ✅ |
+| F6 · Migración EF Core `AddCurriculumSource` generada (índice único `asignatura+ciclo`) | ✅ |
+| F6 · `SyncCurriculumJob` (Hangfire, manual — cron `0 0 30 2 *`) — orquesta HEAD→download→Blob→ExtractCurriculumJob por cada fuente activa; siembra catálogo inicial si tabla vacía | ✅ |
+| F6 · `Microsoft.Extensions.Http.Resilience` v10.5.0 — HttpClient "mep" con `AddStandardResilienceHandler()` (TotalTimeout 120s, Retry 2) | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
 | F6 · Subir PDFs al API admin + extracción IA por GPT-5.5 | ⏳ |
 | F6 · Panel de director: vista institucional | ⏳ |

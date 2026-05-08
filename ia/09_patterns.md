@@ -1,6 +1,6 @@
 # 09 — Patrones Verificados de Código
 
-> **Última actualización:** 2026-05-07
+> **Última actualización:** 2026-05-08
 > Registrar aquí solo patrones que ya funcionan en producción/dev y deben replicarse.
 
 ---
@@ -247,6 +247,85 @@ public async Task<decimal> GetCurrentSellRateAsync(CancellationToken ct)
 - Guardar `exchange_rate_used` en `PaymentRequest` en el momento de creación, no calcularlo despues (auditoría).
 - El token BCCR es gratuito; registrarse en `https://gee.bccr.fi.cr` con el correo del proyecto.
 - Configurar las credenciales BCCR en Key Vault, no en `appsettings.json`.
+
+---
+
+## PATTERN-06: Job Hangfire maestro con detección de cambios por ETag/Last-Modified
+
+**Contexto:** Cuando se necesita sincronizar recursos externos (PDFs, archivos) y solo procesar si hubo cambio real, usar HEAD + comparación de ETag/Last-Modified contra BD antes de descargar el recurso completo. El job maestro orquesta y delega el procesamiento a jobs hijos.
+
+**Ejemplo:** `SyncCurriculumJob` → detecta si un PDF del MEP cambió → encola `ExtractCurriculumJob`
+
+**Entidad de estado por fuente:**
+```csharp
+public sealed class CurriculumSource
+{
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public required string Asignatura { get; set; }
+    public required string Ciclo { get; set; }
+    public required string MepUrl { get; set; }
+    public string? LastEtag { get; set; }
+    public DateTimeOffset? LastModifiedMep { get; set; }
+    public DateTimeOffset? LastSyncedAt { get; set; }
+    public bool IsActive { get; set; } = true;
+}
+```
+
+**Configuración EF — índice único por (asignatura, ciclo):**
+```csharp
+builder.HasIndex(x => new { x.Asignatura, x.Ciclo }).IsUnique();
+```
+
+**Job maestro — patrón de siembra + detección + delegación:**
+```csharp
+// 1. Sembrar catálogo si tabla vacía (auto-seed inicial)
+if (!await db.CurriculumSources.AnyAsync(ct))
+{
+    foreach (var (asignatura, ciclo, url) in CatalogoInicial)
+        db.CurriculumSources.Add(new CurriculumSource { Asignatura = asignatura, Ciclo = ciclo, MepUrl = url });
+    await db.SaveChangesAsync(ct);
+}
+
+// 2. HEAD → detectar cambio
+var (etag, lastModified) = await GetMepHeadAsync(http, fuente.MepUrl, ct);
+var hayNuevaVersion = fuente.LastSyncedAt is null          // primera vez
+    || (etag is not null && etag != fuente.LastEtag)       // ETag cambió
+    || (lastModified.HasValue && lastModified > fuente.LastModifiedMep); // más nuevo
+
+if (!hayNuevaVersion) { fuente.LastSyncedAt = DateTimeOffset.UtcNow; continue; }
+
+// 3. Descargar + subir a Blob
+var blobUrl = await DownloadAndUploadAsync(http, fuente, ct);
+
+// 4. Encolar job hijo de procesamiento
+var jobId = backgroundJobs.Enqueue<ExtractCurriculumJob>("curriculum",
+    j => j.ExecuteAsync(blobUrl, fuente.Asignatura, fuente.Ciclo, CancellationToken.None));
+
+// 5. Actualizar estado en BD
+fuente.LastEtag        = etag;
+fuente.LastModifiedMep = lastModified;
+fuente.LastSyncedAt    = DateTimeOffset.UtcNow;
+await db.SaveChangesAsync(ct);
+```
+
+**HttpClient con resilencia obligatoria (dotnet-10-csharp-14):**
+```csharp
+services.AddHttpClient("nombre", c => { c.BaseAddress = new Uri("https://..."); })
+    .AddStandardResilienceHandler(opts =>
+    {
+        opts.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(120); // ajustar para archivos grandes
+        opts.AttemptTimeout.Timeout      = TimeSpan.FromSeconds(90);
+        opts.Retry.MaxRetryAttempts      = 2;
+    });
+```
+
+**Reglas:**
+- HEAD antes de GET siempre — evita descargar archivos que no cambiaron.
+- Si el servidor no devuelve ETag ni Last-Modified, tratar como "nueva versión" solo la primera vez; las siguientes se saltan (no descargar ciegamente en cada ejecución).
+- Errores por fuente se capturan individualmente — no abortar las demás fuentes si una falla.
+- Si al final hubo errores, lanzar excepción para que Hangfire marque el job maestro como fallido y aparezca en el dashboard.
+- Schedule imposible (`"0 0 30 2 *"` = 30 de febrero) para jobs que deben ejecutarse solo manualmente desde el dashboard de Hangfire.
+- Paquete requerido: `Microsoft.Extensions.Http.Resilience` (no incluido en `Microsoft.Extensions.Http` base).
 
 ---
 
