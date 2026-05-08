@@ -1,6 +1,6 @@
 # 00 — Contexto del Proyecto
 
-> **Última actualización:** 2026-05-07 (rev 2)
+> **Última actualización:** 2026-05-08 (rev 3)
 > **Scope:** `/` (raíz del repositorio)
 
 ---
@@ -22,6 +22,8 @@
 
 **Contexto de precio:** $10–15/mes equivale al 0.7–1.3% del salario mensual de un docente MEP (₡600,000–900,000 ≈ $1,100–1,700). Comparable con Spotify.
 **Dominio:** `mep.ezekl.com` (web) · `api.mep.ezekl.com` (API backend) — DNS gestionado en Cloudflare
+**Azure Tenant ID:** `2f80d4e1-da0e-4b6d-84da-30f67e280e4b`
+**Azure Resource Group:** `rg-ezequiel`
 
 ---
 
@@ -52,16 +54,16 @@
 
 | # | Módulo | Prioridad | Estado |
 |---|--------|-----------|--------|
-| 1 | Gestión de Grupos y Estudiantes | 🔴 Core — prerequisito técnico de todo | ⏳ No iniciado |
-| 2 | Planeamiento Didáctico con IA | 🔴 **Prioridad #1 según Adriana — diferenciador principal** | ⏳ No iniciado |
-| 3 | Calendario Escolar Integrado | 🔴 Crítico — alimenta y reorganiza el planeamiento | ⏳ No iniciado |
-| 4 | Asistencia con QR | 🔴 Módulo estrella (viralidad móvil) | ⏳ No iniciado |
-| 5 | Adecuaciones Curriculares | 🔴 Diferenciador secundario + planeamiento individual | ⏳ No iniciado |
-| 6 | Trabajo Cotidiano y Tareas | 🟡 Alta prioridad | ⏳ No iniciado |
-| 7 | Gestión de Notas y Promedios | 🟡 Alta prioridad | ⏳ No iniciado |
-| 8 | Generador de Reportes e Informes | 🟡 Alta prioridad | ⏳ No iniciado |
-| 9 | Suscripciones y Pagos (SINPE Móvil) | 🟠 Necesario antes del lanzamiento público | ⏳ No iniciado |
-| 10 | Sistema de Referidos y Comisiones | 🟠 Necesario antes del lanzamiento público — ADR-008 | ⏳ No iniciado |
+| 1 | Gestión de Grupos y Estudiantes | 🔴 Core — prerequisito técnico de todo | ✅ Completado (Fase 1) |
+| 2 | Planeamiento Didáctico con IA | 🔴 **Prioridad #1 según Adriana — diferenciador principal** | ✅ Completado (Fase 2) |
+| 3 | Calendario Escolar Integrado | 🔴 Crítico — alimenta y reorganiza el planeamiento | ✅ Completado (Fase 2) |
+| 4 | Asistencia con QR | 🔴 Módulo estrella (viralidad móvil) | ✅ Completado (Fase 1) |
+| 5 | Adecuaciones Curriculares | 🔴 Diferenciador secundario + planeamiento individual | ✅ Completado (Fase 4) |
+| 6 | Trabajo Cotidiano y Tareas | 🟡 Alta prioridad | ✅ Completado (Fase 3) |
+| 7 | Gestión de Notas y Promedios | 🟡 Alta prioridad | ✅ Completado (Fase 3) |
+| 8 | Generador de Reportes e Informes | 🟡 Alta prioridad | ✅ Completado (Fase 3/4) |
+| 9 | Suscripciones y Pagos (SINPE Móvil) | 🟠 Necesario antes del lanzamiento público | ✅ Completado (Fase 5) |
+| 10 | Sistema de Referidos y Comisiones | 🟠 Necesario antes del lanzamiento público — ADR-008 | ✅ Completado (Fase 5) |
 
 ---
 
