@@ -57,19 +57,81 @@ az containerapp update \
 
 ### 4. Verificar que levantó bien
 ```bash
-# Health check
-curl https://ca-aulaia-api.whitewater-319185f7.eastus.azurecontainerapps.io/health
+FQDN="https://ca-aulaia-api.whitewater-319185f7.eastus.azurecontainerapps.io"
 
-# Ver logs en vivo
+# Health check de la API
+curl -s $FQDN/health
+# Esperado: {"status":"healthy","version":"1.0.0"}
+
+# SPA — verifica que el index.html carga (Next.js static export)
+curl -s -o /dev/null -w "%{http_code}" $FQDN/
+# Esperado: 200
+
+# Una ruta interna del SPA (debe devolver 200 con el fallback index.html)
+curl -s -o /dev/null -w "%{http_code}" $FQDN/grupos
+# Esperado: 200
+
+# Rutas de la API (no deben ir al SPA)
+curl -s -o /dev/null -w "%{http_code}" $FQDN/scalar
+# Esperado: 200
+```
+
+Si alguna devuelve 404, revisar logs:
+```bash
 az containerapp logs show \
   --name ca-aulaia-api \
   --resource-group rg-ezequiel \
   --tail 50 --follow
 ```
 
+### 5. Limpiar imágenes antiguas del ACR (conservar últimas 4)
+Las revisiones del Container App se nombran `ca-aulaia-api--0000001`, `--0000002`, etc. — incrementan con cada `containerapp update`. Para poder hacer rollback a cualquiera de las últimas 4, conservamos los últimos 4 tags SHA en el ACR y borramos el resto.
+
+```bash
+# Ver todos los tags SHA (excluye latest, buildcache)
+az acr repository show-tags \
+  --name acrdemoitqs \
+  --repository aulaia-api \
+  --orderby time_desc \
+  --output tsv | grep -v "^latest$" | grep -v "buildcache"
+
+# Borrar todos excepto los últimos 4 SHA
+TAGS_TO_DELETE=$(az acr repository show-tags \
+  --name acrdemoitqs \
+  --repository aulaia-api \
+  --orderby time_desc \
+  --output tsv | grep -v "^latest$" | grep -v "buildcache" | tail -n +5)
+
+for TAG in $TAGS_TO_DELETE; do
+  echo "Borrando tag: $TAG"
+  az acr repository delete \
+    --name acrdemoitqs \
+    --image aulaia-api:$TAG \
+    --yes
+done
+echo "Limpieza completada. Tags restantes:"
+az acr repository show-tags --name acrdemoitqs --repository aulaia-api --orderby time_desc --output tsv
+```
+
+### Rollback a una revisión anterior
+```bash
+# Ver revisiones disponibles
+az containerapp revision list \
+  --name ca-aulaia-api \
+  --resource-group rg-ezequiel \
+  --query "[].{name:name, image:properties.template.containers[0].image, active:properties.active}" \
+  -o table
+
+# Activar una revisión anterior (reemplaza la activa)
+az containerapp update \
+  --name ca-aulaia-api \
+  --resource-group rg-ezequiel \
+  --image acrdemoitqs.azurecr.io/aulaia-api:<SHA_ANTERIOR>
+```
+
 ---
 
-## Script completo de una línea
+## Script completo de deploy + limpieza
 
 ```bash
 SHA=$(git rev-parse --short HEAD) && \
@@ -82,7 +144,24 @@ az containerapp update \
   --name ca-aulaia-api \
   --resource-group rg-ezequiel \
   --image acrdemoitqs.azurecr.io/aulaia-api:$SHA && \
-echo "Deploy $SHA completado ✓"
+echo "✓ Deploy $SHA completado" && \
+\
+FQDN="https://ca-aulaia-api.whitewater-319185f7.eastus.azurecontainerapps.io" && \
+sleep 5 && \
+echo "API health: $(curl -s $FQDN/health)" && \
+echo "SPA /    :  $(curl -s -o /dev/null -w '%{http_code}' $FQDN/)" && \
+echo "SPA /grupos: $(curl -s -o /dev/null -w '%{http_code}' $FQDN/grupos)" && \
+\
+echo "Limpiando imágenes antiguas (conservando últimas 4)..." && \
+TAGS_TO_DELETE=$(az acr repository show-tags \
+  --name acrdemoitqs --repository aulaia-api \
+  --orderby time_desc --output tsv \
+  | grep -v "^latest$" | grep -v "buildcache" | tail -n +5) && \
+for TAG in $TAGS_TO_DELETE; do
+  az acr repository delete --name acrdemoitqs --image aulaia-api:$TAG --yes --output none
+  echo "  Borrado: $TAG"
+done && \
+echo "✓ Listo"
 ```
 
 ---
