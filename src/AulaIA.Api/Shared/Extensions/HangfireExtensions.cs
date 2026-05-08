@@ -23,6 +23,7 @@ public static class HangfireExtensions
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseConsole()
+                .UseFilter(new AutomaticRetryAttribute { Attempts = 0 })  // sin reintentos por defecto
                 .UsePostgreSqlStorage(options => options.UseNpgsqlConnection(connStr)));
 
             builder.Services.AddHangfireServer(options =>

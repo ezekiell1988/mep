@@ -26,7 +26,7 @@ public sealed class ExtractCurriculumJob(
     private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
 
     [Queue("curriculum")]
-    [AutomaticRetry(Attempts = 2)]
+    [AutomaticRetry(Attempts = 1)]
     public async Task ExecuteAsync(string blobUrl, string asignatura, string ciclo, PerformContext? ctx = null, CancellationToken ct = default)
     {
         ctx.WriteLine($"🚀 ExtractCurriculumJob: {asignatura} ({ciclo})");

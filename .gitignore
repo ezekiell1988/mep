@@ -4,6 +4,9 @@
 src/**/bin/
 src/**/obj/
 
+# SPA estático — se genera con `npm run build` y se copia manualmente al deploy
+src/AulaIA.Api/wwwroot/
+
 # User secrets
 src/**/appsettings.Development.json
 **/secrets.json
