@@ -5,7 +5,7 @@ import { AppSchema } from './schema';
 import { useAuth } from '../auth/AuthContext';
 
 const POWERSYNC_URL = 'https://69f98b0463989ab5d2ed2a3b.powersync.journeyapps.com';
-const API_BASE      = 'https://api.mep.ezekl.com';
+const API_BASE      = 'https://mep.ezekl.com';
 
 // ── Connector ────────────────────────────────────────────────────────────────
 

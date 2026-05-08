@@ -1,6 +1,6 @@
 # 00 — Contexto del Proyecto
 
-> **Última actualización:** 2026-05-08 (rev 4)
+> **Última actualización:** 2026-05-08 (rev 5)
 > **Scope:** `/` (raíz del repositorio)
 
 ---
@@ -21,7 +21,7 @@
 | **Institucional** | $100 USD/mes | Colegio completo | Todos los docentes + panel de director + reportes institucionales |
 
 **Contexto de precio:** $10–15/mes equivale al 0.7–1.3% del salario mensual de un docente MEP (₡600,000–900,000 ≈ $1,100–1,700). Comparable con Spotify.
-**Dominio:** `mep.ezekl.com` (web) · `api.mep.ezekl.com` (API backend) — DNS gestionado en Cloudflare
+**Dominio:** `mep.ezekl.com` — DNS gestionado en Cloudflare (CNAME → Container App, cert gestionado Azure, proxy OFF)
 **Azure Tenant ID:** `2f80d4e1-da0e-4b6d-84da-30f67e280e4b`
 **Azure Resource Group:** `rg-ezequiel`
 
@@ -42,7 +42,7 @@
 | Lector de QR | Expo Camera / mobile_scanner | Funciona offline; para asistencia en el aula |
 | Autenticación | Auth0 | Decidido — ver ADR-006 en `06_decisions.md` |
 | Almacenamiento de archivos | Azure Blob Storage | Decidido — ver ADR-003 en `06_decisions.md` |
-| Hosting | Azure Container Apps | **Activo desde Fase 6.** Container App `ca-aulaia-api` en env `cae-demo-itqs` (eastus). FQDN: `ca-aulaia-api.whitewater-319185f7.eastus.azurecontainerapps.io`. App Service `app-demo-api` sigue activo como fallback. Ver ADR-010. |
+| Hosting | Azure Container Apps | **Activo desde Fase 6.** Container App `ca-aulaia-api` en env `cae-demo-itqs` (eastus). Dominio: `mep.ezekl.com` (cert gestionado `mc-cae-demo-itqs-mep-ezekl-com-6484`). App Service `app-demo-api` activo como fallback. Ver ADR-010. |
 | Deploy | Manual — `mep-deploy` skill | `docker buildx build --platform linux/amd64` + `az containerapp update`. Sin CI/CD automatizado (cuenta con MFA corporativo, no hay Service Principal disponible). |
 | Notificaciones push | Firebase Cloud Messaging (FCM) | iOS y Android |
 | DNS / CDN / Proxy | Cloudflare | Dominio `mep.ezekl.com`; WAF, SSL, caché de borde |

@@ -54,7 +54,7 @@ az login --tenant 2f80d4e1-da0e-4b6d-84da-30f67e280e4b
 | AI Foundry | `demo-itqs` + `demo-itqs-proj` | Cognitive Services | eastus | GPT-5.5, gpt-image-2, sora-2, gpt-realtime |
 | AI Foundry (2) | `ebalt-mif64qfm-centralus` | Cognitive Services | centralus | Endpoint alternativo para realtime |
 
-**Dominio:** `mep.ezekl.com` (web) · `api.mep.ezekl.com` (API) — DNS en Cloudflare
+**Dominio:** `mep.ezekl.com` — DNS en Cloudflare, apunta al Container App (cert gestionado activo `mc-cae-demo-itqs-mep-ezekl-com-6484`). HTTPS 200 ✅
 
 ---
 
@@ -139,7 +139,35 @@ az vm get-instance-view --resource-group rg-ezequiel --name demo-itqs \
 
 # Ver secretos del Key Vault
 az keyvault secret list --vault-name kv-demomep --output table
+
+# Listar hostnames y certs del Container App
+az containerapp hostname list \
+  --resource-group rg-ezequiel \
+  --name ca-aulaia-api \
+  --output table
 ```
+
+---
+
+## 6. Dominio personalizado en Container App — flujo correcto
+
+> ⚠️ El orden importa. Saltarse pasos causa errores específicos.
+
+```
+Paso 1: Crear TXT asuid.<dominio> en Cloudflare (skill mep-cloudflare)
+Paso 2: dig TXT asuid.<dominio> +short  ← NO continuar hasta que devuelva el ID
+Paso 3: az containerapp hostname add  ← valida el TXT
+Paso 4: az containerapp hostname bind  ← emite y vincula el cert (puede tardar 20 min)
+Paso 5: curl https://<dominio>/health  ← verificar 200
+```
+
+**Errores conocidos:**
+
+| Error | Causa | Solución |
+|-------|-------|----------|
+| `RequireCustomHostnameInEnvironment` en `hostname bind` | Se omitió `hostname add` | Ejecutar `hostname add` primero |
+| `InvalidCustomHostNameValidation` en `hostname add` | TXT aún no propagó | Esperar y verificar con `dig` |
+| `hostname bind` tarda indefinidamente | Normal — hasta 20 min | Ejecutar con timeout largo o en background |
 
 ---
 

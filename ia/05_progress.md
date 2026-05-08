@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-08 (rev 6)
+> **Última actualización:** 2026-05-08 (rev 7)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -40,6 +40,10 @@
 | F6 · Skills de agente creados: `mep-azure-infra`, `mep-deploy`, `mep-github` | ✅ |
 | F6 · GitHub Actions eliminado — cuenta `ebaltodano@itqscr.com` tiene MFA corporativo, no hay Service Principal disponible. Deploy es manual. | ✅ |
 | F6 · ADR-010 registrado: decisión de migración App Service → Container Apps | ✅ |
+| F6 · Dominio `mep.ezekl.com` → Container App: CNAME actualizado, TXT `asuid.mep.ezekl.com` creado, cert gestionado `mc-cae-demo-itqs-mep-ezekl-com-6484` activo (SniEnabled). HTTPS 200 ✅ | ✅ |
+| F6 · `api.mep.ezekl.com` eliminado — hostname removido del Container App, CNAME y TXT borrados de Cloudflare | ✅ |
+| F6 · App móvil actualizada — `API_BASE` en `client.ts` y `PowerSyncContext.tsx` apunta a `https://mep.ezekl.com` | ✅ |
+| F6 · Skill `mep-cloudflare` creado — documenta flarectl, registros DNS, flujo completo y lecciones aprendidas | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
 | F6 · Agregar programas: Artes Musicales, Educación para el Hogar | ⏳ |
 | F6 · Panel de director: vista institucional | ⏳ |

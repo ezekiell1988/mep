@@ -1,4 +1,4 @@
-const API_BASE = 'https://api.mep.ezekl.com';
+const API_BASE = 'https://mep.ezekl.com';
 
 export async function apiFetch<T>(
   path: string,
