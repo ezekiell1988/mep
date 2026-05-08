@@ -14,6 +14,7 @@ public sealed class AulaIADbContext(DbContextOptions<AulaIADbContext> options) :
     public DbSet<Grade> Grades => Set<Grade>();
     public DbSet<CurriculumUnit> CurriculumUnits => Set<CurriculumUnit>();
     public DbSet<CurriculumExtraction> CurriculumExtractions => Set<CurriculumExtraction>();
+    public DbSet<CurriculumSource> CurriculumSources => Set<CurriculumSource>();
     public DbSet<LessonPlan> LessonPlans => Set<LessonPlan>();
     public DbSet<CalendarEvent> CalendarEvents => Set<CalendarEvent>();
     public DbSet<Accommodation> Accommodations => Set<Accommodation>();

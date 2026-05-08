@@ -16,6 +16,22 @@ public static class CurriculumModule
     public static IServiceCollection AddCurriculumModule(this IServiceCollection services)
     {
         services.AddScoped<ExtractCurriculumJob>();
+        services.AddScoped<SyncCurriculumJob>();
+
+        // HttpClient dedicado para llamadas al sitio del MEP (HEAD + GET de PDFs)
+        services.AddHttpClient("mep", c =>
+        {
+            c.BaseAddress = new Uri("https://www.mep.go.cr");
+            c.DefaultRequestHeaders.UserAgent.ParseAdd("AulaIA-SyncBot/1.0");
+        })
+        .AddStandardResilienceHandler(opts =>
+        {
+            // PDFs pueden ser grandes — ajustar timeouts por encima del default (30 s)
+            opts.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(120);
+            opts.AttemptTimeout.Timeout      = TimeSpan.FromSeconds(90);
+            opts.Retry.MaxRetryAttempts      = 2;
+        });
+
         return services;
     }
 

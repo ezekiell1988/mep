@@ -3,6 +3,7 @@ using AulaIA.Api.Features.Asistencia;
 using AulaIA.Api.Features.Dashboard;
 using AulaIA.Api.Features.Calendario;
 using AulaIA.Api.Features.Curriculum;
+using AulaIA.Api.Features.Curriculum.Jobs;
 using AulaIA.Api.Features.Estudiantes;
 using AulaIA.Api.Features.Grupos;
 using AulaIA.Api.Features.Notas;
@@ -90,6 +91,13 @@ RecurringJob.AddOrUpdate<CheckExpiredSubscriptionsJob>(
     "check-expired-subscriptions",
     j => j.ExecuteAsync(CancellationToken.None),
     "0 8 * * *");   // 8 AM UTC = 2 AM Costa Rica
+
+// Cron "0 0 30 2 *" → 30 de febrero: nunca ocurre automáticamente.
+// Ejecutar manualmente desde el dashboard de Hangfire en /hangfire.
+RecurringJob.AddOrUpdate<SyncCurriculumJob>(
+    "sync-curriculum-mep",
+    j => j.ExecuteAsync(CancellationToken.None),
+    "0 0 30 2 *");  // manual only — 30 de febrero
 
 // ── Fallback SPA: cualquier ruta no-API → index.html ─────────────────────
 // /api/*, /hangfire/*, /scalar/*, /health → .NET
