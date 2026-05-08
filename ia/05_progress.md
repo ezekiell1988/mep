@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-07 (rev 5)
+> **Última actualización:** 2026-05-08 (rev 6)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -31,10 +31,14 @@
 | F6 · `docker-compose.yml` — dev local con PostgreSQL 16 + API contenedorizada | ✅ |
 | F6 · `.env.docker.example` — plantilla de variables de entorno para el contenedor | ✅ |
 | F6 · `.gitignore` — agrega `.env.docker` (secretos reales nunca al repo) | ✅ |
-| F6 · `.github/workflows/deploy.yml` — pasos Docker Build + Push a ACR (condicional a `ACR_LOGIN_SERVER`) | ✅ |
-| F6 · Script Az CLI `infra/azure/06_acr_container_apps.sh` — ACR `acrdemo` + Container Apps Environment `cae-demo` + Container App `ca-aulaia-api` | ✅ |
-| F6 · CI/CD `deploy.yml` migrado: deploy final → `az containerapp update` con imagen ACR | ✅ |
-| F6 · Managed Identity del Container App con roles AcrPull/KV Secrets User/Storage Blob Contributor | ✅ |
+| F6 · Script Az CLI `infra/azure/06_acr_container_apps.sh` — ACR `acrdemoitqs` + Container Apps Environment `cae-demo-itqs` + Container App `ca-aulaia-api` | ✅ |
+| F6 · Container App `ca-aulaia-api` corriendo — imagen `acrdemoitqs.azurecr.io/aulaia-api:ec90e46`, health `/health` HTTP 200 | ✅ |
+| F6 · Fix `UseStaticFiles()` + `MapFallbackToFile("index.html")` — SPA sirve desde `wwwroot/` | ✅ |
+| F6 · Fix `AddHttpClient()` en DI — corrige `IHttpClientFactory` para `UpdateExchangeRateJob` | ✅ |
+| F6 · Fix `MigrateAsync()` al startup — migraciones EF Core aplicadas automáticamente en arranque | ✅ |
+| F6 · Deploy manual documentado en skill `mep-deploy` — `docker buildx --platform linux/amd64` + `az containerapp update` | ✅ |
+| F6 · Skills de agente creados: `mep-azure-infra`, `mep-deploy`, `mep-github` | ✅ |
+| F6 · GitHub Actions eliminado — cuenta `ebaltodano@itqscr.com` tiene MFA corporativo, no hay Service Principal disponible. Deploy es manual. | ✅ |
 | F6 · ADR-010 registrado: decisión de migración App Service → Container Apps | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
 | F6 · Agregar programas: Artes Musicales, Educación para el Hogar | ⏳ |

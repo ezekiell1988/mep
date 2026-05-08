@@ -1,6 +1,6 @@
 # 00 — Contexto del Proyecto
 
-> **Última actualización:** 2026-05-08 (rev 3)
+> **Última actualización:** 2026-05-08 (rev 4)
 > **Scope:** `/` (raíz del repositorio)
 
 ---
@@ -42,8 +42,8 @@
 | Lector de QR | Expo Camera / mobile_scanner | Funciona offline; para asistencia en el aula |
 | Autenticación | Auth0 | Decidido — ver ADR-006 en `06_decisions.md` |
 | Almacenamiento de archivos | Azure Blob Storage | Decidido — ver ADR-003 en `06_decisions.md` |
-| Hosting (Fase 1–2) | Azure App Service (tier B1/S1) | Decidido — ver ADR-004 en `06_decisions.md` |
-| Hosting (Fase 3+) | Azure Container Apps | Migración planeada cuando se escalen módulos — ver ADR-004 |
+| Hosting | Azure Container Apps | **Activo desde Fase 6.** Container App `ca-aulaia-api` en env `cae-demo-itqs` (eastus). FQDN: `ca-aulaia-api.whitewater-319185f7.eastus.azurecontainerapps.io`. App Service `app-demo-api` sigue activo como fallback. Ver ADR-010. |
+| Deploy | Manual — `mep-deploy` skill | `docker buildx build --platform linux/amd64` + `az containerapp update`. Sin CI/CD automatizado (cuenta con MFA corporativo, no hay Service Principal disponible). |
 | Notificaciones push | Firebase Cloud Messaging (FCM) | iOS y Android |
 | DNS / CDN / Proxy | Cloudflare | Dominio `mep.ezekl.com`; WAF, SSL, caché de borde |
 | Pasarela de pagos | SINPE Móvil (manual) | Sin API; flujo: usuario transfiere → sube comprobante → admin aprueba. Ver ADR-009. |
