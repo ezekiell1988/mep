@@ -63,7 +63,7 @@ public static class ModulesExtensions
 
             manager.AddOrUpdate<UpdateExchangeRateJob>(
                 "update-exchange-rate",
-                j => j.ExecuteAsync(CancellationToken.None),
+                j => j.ExecuteAsync(null!, CancellationToken.None),
                 "0 12 * * *");   // 12 PM UTC = 6 AM Costa Rica
 
             manager.AddOrUpdate<CheckExpiredSubscriptionsJob>(

@@ -1,6 +1,6 @@
 # 07 — Issues Conocidos
 
-> **Última actualización:** 2026-05-08 (rev 2)
+> **Última actualización:** 2026-05-08 (rev 6)
 
 ---
 
@@ -48,3 +48,47 @@ Dos problemas combinados:
 
 ### Pendiente
 - `AdecuacionAiService.cs` (línea ~39) y `PlaneamientoAiService.cs` (línea ~49) también instancian `AzureOpenAIClient` por llamada — mismo riesgo potencial, no reportado como fallo todavía.
+
+---
+
+## ✅ ISSUE-003: UpdateExchangeRateJob falla con HTTP 500 / XmlException del BCCR (job 51)
+
+**Detectado:** 2026-05-08 (job 51 en Hangfire)
+**Estado:** ✅ Resuelto
+**Componentes:** `UpdateExchangeRateJob.cs`, `BccrOptions.cs`, `SinpeOptions.cs`, `OptionsExtensions.cs`
+
+### Síntoma (dos etapas)
+1. `HttpRequestException: Response status code does not indicate success: 500` al llamar al SOAP del BCCR.
+2. Tras corregir el HTTP 500: `System.Xml.XmlException: Data at the root level is invalid. Line 1, position 1` en `ParseTipoCambio` — el BCCR devuelve 200 con contenido no-XML (texto plano, vacío o `"Nothing"`) cuando no tiene dato para la fecha.
+
+### Causa raíz
+1. **SOAP body incompleto:** faltaban `<Token>` y `<CorreoElectronico>` — campos obligatorios según el WSDL del BCCR. Sin ellos el servicio devuelve HTTP 500.
+2. **`EnsureSuccessStatusCode()`** propagaba el 500 como excepción.
+3. **`ParseTipoCambio` sin guard:** `XDocument.Parse()` lanza `XmlException` cuando el BCCR responde 200 con texto plano en días sin datos (fines de semana, feriados).
+
+### Fix aplicado
+- `BccrOptions.cs` (nuevo): clase de opciones con todos los campos del WSDL — `Token`, `CorreoElectronico`, `Nombre`, `SubNiveles` (default `"N"`), `IndicadorDolar` (default `318`). Validación con `[Required]` + `ValidateOnStart`.
+- `SinpeOptions.cs`: propiedad `BccrToken` eliminada (movida a `BccrOptions`).
+- `OptionsExtensions.cs`: registro de `BccrOptions` con `BindConfiguration` + `ValidateDataAnnotations`.
+- `UpdateExchangeRateJob.cs`:
+  - Constructor inyecta `IOptions<BccrOptions>` en lugar de `IOptions<SinpeOptions>`.
+  - SOAP body completo con los 7 campos obligatorios (incluyendo `<CorreoElectronico>` y `<Token>`).
+  - Reemplaza `EnsureSuccessStatusCode()` por verificación manual → `null` + `LogWarning` si no-2xx.
+  - Catch de `XmlException` e `InvalidOperationException` en `FetchTipoCambioAsync` → `null` (no falla el job).
+  - `ExecuteAsync(PerformContext? ctx, CancellationToken ct)`: si `FetchTipoCambioAsync` retorna `null` → `ctx?.WriteLine(...)` + `LogWarning` + retorna sin excepción (job queda `Succeeded`).
+  - Logs visibles en dashboard Hangfire con `ctx?.WriteLine()`: pasos `[1/4]`–`[4/4]`, HTTP status + ms de respuesta, XML de respuesta BCCR (hasta 500 chars) y resultado del parse.
+- `ModulesExtensions.cs`: recurring job registrado con `j.ExecuteAsync(null!, CancellationToken.None)` para que Hangfire inyecte el `PerformContext` real al ejecutar.
+- `appsettings.json`: secciones `Bccr` y `Sinpe` con defaults vacíos.
+- `appsettings.Development.json`: sección `Bccr` con credenciales de desarrollo.
+- Container App `ca-aulaia-api`: env vars `Bccr__Token`, `Bccr__CorreoElectronico`, `Bccr__Nombre`, `Bccr__SubNiveles`, `Bccr__IndicadorDolar` configuradas.
+
+**Etapa 3 — Parse incorrecto (detectado via logs `PerformContext`):**
+- Los logs mostraron que el BCCR sí responde 200 con XML válido, pero `ParseTipoCambio` fallaba con `XmlException` en el segundo `XDocument.Parse`. Causa: `ObtenerIndicadoresEconomicosResult` contiene los datos como nodos hijo XML reales (schema + diffgram), no como string embebido. `.Value` devolvía solo texto concatenado sin tags → no era XML válido.
+- Fix: eliminado el doble parse. `ParseTipoCambio` ahora hace un solo `XDocument.Parse(soapXml)` y busca `NUM_VALOR` en `doc.Descendants()` directamente.
+- Fix adicional: si `FetchTipoCambioAsync` retorna `null` → lanza `InvalidOperationException` (job termina `Failed`) en lugar de retornar silenciosamente.
+- Fix BD: job 51 tenía `invocationdata` con firma antigua `ExecuteAsync(CancellationToken)` persistida; eliminado manualmente de `hangfire.job`, `hangfire.state`, `hangfire.jobparameter`; `LastJobId` limpiado en `hangfire.hash`.
+
+### Verificación
+- Logs del dashboard confirmaron que el XML del BCCR llegaba correctamente (1633 chars) antes del fix de parse.
+- Deploy revisión `ca-aulaia-api--0000006` con parse corregido.
+- Próxima ejecución diaria (12h UTC) debe guardar el TC en `exchange_rates`.

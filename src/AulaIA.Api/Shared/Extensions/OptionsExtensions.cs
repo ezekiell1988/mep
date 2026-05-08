@@ -47,6 +47,12 @@ public static class OptionsExtensions
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
+            services
+                .AddOptions<BccrOptions>()
+                .BindConfiguration(BccrOptions.Section)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             // AzureOpenAIClient como singleton: reutiliza pool de conexiones HTTP y
             // evita el NetworkTimeout de 100s por defecto que falla en Azure con PDFs grandes.
             services.AddSingleton(sp =>

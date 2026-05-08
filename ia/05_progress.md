@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-08 (rev 13)
+> **Última actualización:** 2026-05-08 (rev 16)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -64,6 +64,14 @@
 | F6 · Skill `mep-blob-access` creado — documenta az CLI para listar, verificar, descargar y eliminar blobs; convención de slugs; diagnóstico BlobNotFound | ✅ |
 | F6 · Fix NetworkTimeout en `ExtractCurriculumJob` (job 46 — Francés 5.4MB) — `AzureOpenAIClient` registrado como singleton en DI con `NetworkTimeout = TimeSpan.FromMinutes(10)`; inyectado por constructor en `ExtractCurriculumJob` | ✅ |
 | F6 · Deploy revisión `ca-aulaia-api--0000003` — imagen con ambos fixes (BlobNotFound + NetworkTimeout); health `/health` 200, SPA 200 ✅ | ✅ |
+| F6 · Fix `UpdateExchangeRateJob` (job 51, etapa 1) — SOAP body sin `<Token>`/`<CorreoElectronico>` causaba HTTP 500 del BCCR. Fix: `BccrOptions` (clase propia con todos los campos WSDL, `[Required]` + `ValidateOnStart`); `SinpeOptions` sin `BccrToken`; SOAP body completo con `Token`, `CorreoElectronico`, `Nombre`, `SubNiveles`. Env vars `Bccr__*` configuradas en Container App | ✅ |
+| F6 · Fix `UpdateExchangeRateJob` (job 51, etapa 2) — BCCR devuelve HTTP 200 con texto no-XML (vacío, `"Nothing"`) en feriados/fines de semana; `XDocument.Parse()` lanzaba `XmlException`. Fix: catch de `XmlException`/`InvalidOperationException` → retorna `null` → job termina Succeeded con log ⚠️ | ✅ |
+| F6 · `UpdateExchangeRateJob` con `PerformContext` — logs `[1/4]`–`[4/4]` visibles en dashboard Hangfire: HTTP status + ms de respuesta, XML de respuesta BCCR (hasta 500 chars), resultado del parse. `ModulesExtensions.cs` actualizado: `j.ExecuteAsync(null!, CancellationToken.None)` | ✅ |
+| F6 · Deploy revisión `ca-aulaia-api--0000005` — imagen con `PerformContext` en `UpdateExchangeRateJob` + `BccrOptions` completo | ✅ |
+| F6 · Fix `ParseTipoCambio` (job 51 etapa 3) — BCCR devuelve `NUM_VALOR` como nodo hijo directo del SOAP (no string XML embebido); eliminado segundo `XDocument.Parse`; ahora busca `NUM_VALOR` en `doc.Descendants()` directamente | ✅ |
+| F6 · `UpdateExchangeRateJob`: si TC es null → lanza `InvalidOperationException` (job falla en rojo) en lugar de retornar silenciosamente con Succeeded | ✅ |
+| F6 · Fix BD Hangfire: job 51 tenía `invocationdata` con firma antigua `ExecuteAsync(CancellationToken)` — eliminado de `hangfire.job/state/jobparameter`; `LastJobId` limpiado en `hangfire.hash` | ✅ |
+| F6 · Deploy revisión `ca-aulaia-api--0000006` — imagen con `ParseTipoCambio` corregido + comportamiento de error correcto | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
 | F6 · Subir PDFs al API admin + extracción IA por GPT-5.5 | ⏳ |
 | F6 · Panel de director: vista institucional | ⏳ |
