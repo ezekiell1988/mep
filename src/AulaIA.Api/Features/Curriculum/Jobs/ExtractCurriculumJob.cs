@@ -7,6 +7,8 @@ using AulaIA.Api.Shared.Services;
 using Azure.AI.OpenAI;
 using Azure.Storage.Blobs;
 using Hangfire;
+using Hangfire.Console;
+using Hangfire.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OpenAI.Chat;
@@ -25,17 +27,20 @@ public sealed class ExtractCurriculumJob(
 
     [Queue("curriculum")]
     [AutomaticRetry(Attempts = 2)]
-    public async Task ExecuteAsync(string blobUrl, string asignatura, string ciclo, CancellationToken ct)
+    public async Task ExecuteAsync(string blobUrl, string asignatura, string ciclo, PerformContext? ctx = null, CancellationToken ct = default)
     {
+        ctx.WriteLine($"🚀 ExtractCurriculumJob: {asignatura} ({ciclo})");
         audit.LogEvent("ExtractCurriculumJob", "Iniciando",
             $"asignatura={asignatura} ciclo={ciclo}",
             new { blobUrl });
 
         try
         {
+            ctx.WriteLine("📥 Descargando PDF desde Blob Storage...");
             var pdfText = await DownloadAndExtractTextAsync(blobUrl, ct);
             if (string.IsNullOrWhiteSpace(pdfText))
             {
+                ctx.WriteLine("⚠️ PDF sin texto extraíble (puede ser escaneado sin OCR)");
                 audit.LogEvent("ExtractCurriculumJob", "PDF sin texto",
                     "⚠️ PdfPig no extrajo texto — puede ser PDF escaneado sin OCR",
                     new { blobUrl });
@@ -43,19 +48,24 @@ public sealed class ExtractCurriculumJob(
                 return;
             }
 
+            ctx.WriteLine($"📄 PDF extraído: {pdfText.Length:N0} caracteres");
             audit.LogEvent("ExtractCurriculumJob", "PDF extraído",
                 $"✅ {pdfText.Length:N0} caracteres — enviando a GPT-5.5");
 
+            ctx.WriteLine($"🤖 Enviando a {aiOpts.Value.DeploymentName}...");
             var (units, tokensUsed) = await ExtractUnitsWithAiAsync(pdfText, asignatura, ciclo, ct);
 
             if (units.Count == 0)
             {
+                ctx.WriteLine("⚠️ La IA no encontró unidades curriculares en el documento");
                 audit.LogEvent("ExtractCurriculumJob", "Sin unidades",
                     "⚠️ GPT-5.5 no encontró unidades curriculares en el documento — " +
                     "verificar que el PDF es el programa oficial del MEP y no otro documento");
                 logger.LogWarning("La IA no extrajo unidades del programa: {Asignatura}", asignatura);
                 return;
             }
+
+            ctx.WriteLine($"✅ {units.Count} unidades extraídas ({tokensUsed:N0} tokens) — guardando en BD...");
 
             // Eliminar extracción previa no validada para esta asignatura/ciclo (re-extracción)
             var extraccionPrevia = await db.CurriculumExtractions
@@ -89,6 +99,7 @@ public sealed class ExtractCurriculumJob(
             extraction.UnidadCount = seen.Count;
             await db.SaveChangesAsync(ct);
 
+            ctx.WriteLine($"📊 {seen.Count} unidades guardadas en curriculum_units ({tokensUsed:N0} tokens)");
             audit.LogEvent("ExtractCurriculumJob", "Completado",
                 $"✅ {seen.Count} unidades guardadas en curriculum_units (tokens: {tokensUsed:N0})",
                 new { asignatura, ciclo, count = seen.Count, tokensUsed, extractionId = extraction.Id });
@@ -97,6 +108,7 @@ public sealed class ExtractCurriculumJob(
         }
         catch (Exception ex)
         {
+            ctx.WriteLine($"❌ Error: {ex.Message}");
             audit.LogError("ExtractCurriculumJob", $"Falló la extracción para {asignatura}", ex);
             logger.LogError(ex, "Error en ExtractCurriculumJob para {Asignatura}", asignatura);
             throw;

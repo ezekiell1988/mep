@@ -4,6 +4,8 @@ using AulaIA.Api.Shared.Persistence;
 using AulaIA.Api.Shared.Services;
 using Azure.Storage.Blobs;
 using Hangfire;
+using Hangfire.Console;
+using Hangfire.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -53,8 +55,9 @@ public sealed class SyncCurriculumJob(
 
     [Queue("curriculum")]
     [AutomaticRetry(Attempts = 1)]
-    public async Task ExecuteAsync(CancellationToken ct)
+    public async Task ExecuteAsync(PerformContext? ctx = null, CancellationToken ct = default)
     {
+        ctx.WriteLine("🚀 SyncCurriculumJob iniciando...");
         logger.LogInformation("SyncCurriculumJob: iniciando");
         audit.LogEvent("SyncCurriculumJob", "Iniciando",
             "Verificando actualizaciones de programas en el sitio del MEP");
@@ -66,6 +69,7 @@ public sealed class SyncCurriculumJob(
 
         if (fuentes.Count == 0)
         {
+            ctx.WriteLine($"📋 Tabla vacía — sembrando {CatalogoInicial.Length} fuentes del catálogo inicial");
             logger.LogInformation("SyncCurriculumJob: tabla vacía — sembrando {Count} fuentes del catálogo inicial",
                 CatalogoInicial.Length);
 
@@ -85,16 +89,23 @@ public sealed class SyncCurriculumJob(
                 .Where(s => s.IsActive)
                 .ToListAsync(ct);
 
+            ctx.WriteLine($"✅ {fuentes.Count} fuentes insertadas en curriculum_sources");
             audit.LogEvent("SyncCurriculumJob", "Catálogo sembrado",
                 $"✅ {fuentes.Count} fuentes insertadas en curriculum_sources");
+        }
+        else
+        {
+            ctx.WriteLine($"📂 {fuentes.Count} fuentes activas en BD");
         }
 
         // ── 2. Procesar cada fuente ─────────────────────────────────────────
         var http = httpClientFactory.CreateClient("mep");
         int actualizadas = 0, sinCambios = 0, errores = 0;
 
-        foreach (var fuente in fuentes)
+        for (int i = 0; i < fuentes.Count; i++)
         {
+            var fuente = fuentes[i];
+            ctx.WriteLine($"🔍 [{i + 1}/{fuentes.Count}] {fuente.Asignatura} ({fuente.Ciclo})");
             try
             {
                 logger.LogInformation("SyncCurriculumJob: verificando {Asignatura} ({Ciclo})",
@@ -109,6 +120,7 @@ public sealed class SyncCurriculumJob(
 
                 if (!hayNuevaVersion)
                 {
+                    ctx.WriteLine($"   ↳ Sin cambios (ETag: {etag ?? "n/a"})");
                     logger.LogInformation(
                         "SyncCurriculumJob: {Asignatura} ({Ciclo}) sin cambios — ETag={ETag} LastModified={LastModified}",
                         fuente.Asignatura, fuente.Ciclo, etag, lastModified);
@@ -119,18 +131,23 @@ public sealed class SyncCurriculumJob(
                     continue;
                 }
 
+                var razon = esPrimera ? "primera sincronización" : etagDistinto ? "ETag cambió" : "LastModified más nuevo";
+                ctx.WriteLine($"   ↳ 🆕 Nueva versión ({razon}) — descargando PDF...");
                 logger.LogInformation(
                     "SyncCurriculumJob: {Asignatura} ({Ciclo}) — nueva versión detectada " +
                     "(primera={EsPrimera} etagDistinto={EtagDistinto} masNuevo={MasNuevo}), descargando PDF...",
                     fuente.Asignatura, fuente.Ciclo, esPrimera, etagDistinto, masNuevo);
 
                 // ── 3. Descargar y subir a Blob Storage ─────────────────────
-                var blobUrl = await DownloadAndUploadAsync(http, fuente, ct);
+                var blobUrl = await DownloadAndUploadAsync(http, fuente, ctx, ct);
+                ctx.WriteLine($"   ↳ 📤 PDF subido a Blob");
 
                 // ── 4. Encolar extracción con IA ─────────────────────────────
                 var jobId = backgroundJobs.Enqueue<ExtractCurriculumJob>(
                     "curriculum",
-                    j => j.ExecuteAsync(blobUrl, fuente.Asignatura, fuente.Ciclo, CancellationToken.None));
+                    j => j.ExecuteAsync(blobUrl, fuente.Asignatura, fuente.Ciclo, null, CancellationToken.None));
+
+                ctx.WriteLine($"   ↳ 📌 ExtractCurriculumJob encolado (jobId: {jobId})");
 
                 // ── 5. Actualizar estado en BD ───────────────────────────────
                 fuente.LastEtag        = etag;
@@ -150,6 +167,7 @@ public sealed class SyncCurriculumJob(
             }
             catch (Exception ex)
             {
+                ctx.WriteLine($"   ↳ ❌ Error: {ex.Message}");
                 audit.LogError("SyncCurriculumJob",
                     $"Error procesando {fuente.Asignatura} ({fuente.Ciclo})", ex);
 
@@ -165,6 +183,7 @@ public sealed class SyncCurriculumJob(
         // ── 6. Resumen ───────────────────────────────────────────────────────
         var resumen = $"✅ {actualizadas} actualizadas · {sinCambios} sin cambios · {errores} errores";
 
+        ctx.WriteLine($"\n📊 Resumen: {resumen}");
         audit.LogEvent("SyncCurriculumJob", "Completado", resumen,
             new { actualizadas, sinCambios, errores, total = fuentes.Count });
 
@@ -204,12 +223,13 @@ public sealed class SyncCurriculumJob(
     /// Retorna la URL del blob en Azure Storage.
     /// </summary>
     private async Task<string> DownloadAndUploadAsync(
-        HttpClient http, CurriculumSource fuente, CancellationToken ct)
+        HttpClient http, CurriculumSource fuente, PerformContext? ctx, CancellationToken ct)
     {
         using var resp = await http.GetAsync(fuente.MepUrl, HttpCompletionOption.ResponseContentRead, ct);
         resp.EnsureSuccessStatusCode();
 
         var pdfBytes = await resp.Content.ReadAsByteArrayAsync(ct);
+        ctx.WriteLine($"   ↳ 📄 PDF descargado: {pdfBytes.Length / 1024} KB");
         logger.LogInformation(
             "SyncCurriculumJob: PDF descargado — {Asignatura} {Ciclo} ({Kb} KB)",
             fuente.Asignatura, fuente.Ciclo, pdfBytes.Length / 1024);

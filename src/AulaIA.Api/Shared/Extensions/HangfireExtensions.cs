@@ -1,5 +1,7 @@
 using AulaIA.Api.Shared.Options;
 using Hangfire;
+using Hangfire.Console;
+using Hangfire.Dashboard;
 using Hangfire.PostgreSql;
 
 namespace AulaIA.Api.Shared.Extensions;
@@ -20,6 +22,7 @@ public static class HangfireExtensions
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
+                .UseConsole()
                 .UsePostgreSqlStorage(options => options.UseNpgsqlConnection(connStr)));
 
             builder.Services.AddHangfireServer(options =>
@@ -34,10 +37,15 @@ public static class HangfireExtensions
     {
         public void UseAulaIAHangfire()
         {
-            // Dashboard solo accesible con rol admin
+            // En Development: acceso libre (sin JWT) para poder disparar jobs manualmente.
+            // En producción: solo admin autenticado con rol admin.
+            IDashboardAuthorizationFilter[] filters = app.Environment.IsDevelopment()
+                ? [new LocalRequestsOnlyAuthorizationFilter()]
+                : [new HangfireAdminAuthFilter()];
+
             app.UseHangfireDashboard(DashboardPath, new DashboardOptions
             {
-                Authorization = [new HangfireAdminAuthFilter()],
+                Authorization  = filters,
                 DarkModeEnabled = true
             });
         }

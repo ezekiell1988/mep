@@ -73,7 +73,7 @@ public static class ModulesExtensions
             // Disparar manualmente desde /hangfire.
             RecurringJob.AddOrUpdate<SyncCurriculumJob>(
                 "sync-curriculum-mep",
-                j => j.ExecuteAsync(CancellationToken.None),
+                j => j.ExecuteAsync(null, CancellationToken.None),
                 "0 0 30 2 *");   // manual only
         }
 

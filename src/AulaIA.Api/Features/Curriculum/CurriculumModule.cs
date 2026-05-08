@@ -76,7 +76,7 @@ public static class CurriculumModule
 
             var jobId = jobs.Enqueue<ExtractCurriculumJob>(
                 "curriculum",
-                j => j.ExecuteAsync(blobUrl, asignatura, ciclo, CancellationToken.None));
+                j => j.ExecuteAsync(blobUrl, asignatura, ciclo, null, CancellationToken.None));
 
             return TypedResults.Accepted("/api/curriculum/jobs", new UploadResponse(jobId, blobUrl));
         })
