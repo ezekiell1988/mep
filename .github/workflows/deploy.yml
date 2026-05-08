@@ -13,6 +13,7 @@ env:
   PUBLISH_DIR: "publish"
   AZURE_WEBAPP_NAME: "app-demo-api"
   AZURE_RESOURCE_GROUP: "rg-ezequiel"
+  CONTAINER_APP_NAME: "ca-aulaia-api"
 
 jobs:
   build-and-deploy:
@@ -92,9 +93,28 @@ jobs:
         with:
           context: .
           file: Dockerfile
+          platforms: linux/amd64
           push: true
           tags: |
             ${{ env.ACR_LOGIN_SERVER }}/aulaia-api:latest
             ${{ env.ACR_LOGIN_SERVER }}/aulaia-api:${{ github.sha }}
           cache-from: type=registry,ref=${{ env.ACR_LOGIN_SERVER }}/aulaia-api:buildcache
           cache-to: type=registry,ref=${{ env.ACR_LOGIN_SERVER }}/aulaia-api:buildcache,mode=max
+
+      # ── Deploy a Container App ─────────────────────────────────────────────
+      - name: Azure CLI login
+        if: env.ACR_LOGIN_SERVER != ''
+        run: |
+          az login \
+            --username "${{ secrets.AZURE_USERNAME }}" \
+            --password "${{ secrets.AZURE_PASSWORD }}" \
+            --tenant "${{ secrets.AZURE_TENANT_ID }}"
+          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+
+      - name: Update Container App with new image
+        if: env.ACR_LOGIN_SERVER != ''
+        run: |
+          az containerapp update \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.ACR_LOGIN_SERVER }}/aulaia-api:${{ github.sha }}

@@ -12,6 +12,7 @@ public static class PersistenceExtensions
         public void AddAulaIAPersistence()
         {
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddHttpClient();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             builder.Services.AddDbContext<AulaIADbContext>(options =>

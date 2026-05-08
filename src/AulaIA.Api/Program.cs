@@ -13,6 +13,7 @@ using AulaIA.Api.Features.Suscripciones;
 using AulaIA.Api.Features.Suscripciones.Jobs;
 using AulaIA.Api.Shared.Extensions;
 using Hangfire;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,9 @@ else
     app.UseCors(CorsExtensions.FrontendPolicy);
 }
 
+// ── Static files (Next.js SPA desde wwwroot/) ─────────────────────────────
+app.UseStaticFiles();    // sirve _next/static, favicon, imágenes, etc.
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAulaIAHangfire();
@@ -86,6 +90,19 @@ RecurringJob.AddOrUpdate<CheckExpiredSubscriptionsJob>(
     "check-expired-subscriptions",
     j => j.ExecuteAsync(CancellationToken.None),
     "0 8 * * *");   // 8 AM UTC = 2 AM Costa Rica
+
+// ── Fallback SPA: cualquier ruta no-API → index.html ─────────────────────
+// /api/*, /hangfire/*, /scalar/*, /health → .NET
+// Todo lo demás → Next.js SPA (client-side router)
+app.MapFallbackToFile("index.html")
+   .ExcludeFromDescription();
+
+// ── Auto-migrate al arrancar ────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AulaIA.Api.Shared.Persistence.AulaIADbContext>();
+    await db.Database.MigrateAsync();
+}
 
 app.LogStartupFacts();
 app.Run();
