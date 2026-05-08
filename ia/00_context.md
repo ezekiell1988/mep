@@ -34,7 +34,8 @@
 | App iOS / Android | React Native (Expo) | Un solo código TypeScript para ambas plataformas |
 | App Web | Next.js (React) | Comparte lógica con React Native; SSR; tareas de escritorio |
 | Backend / API | .NET 10 (ASP.NET Core Minimal APIs) | Decidido — ver ADR-001 en `06_decisions.md` |
-| Base de datos (servidor) | PostgreSQL | Relacional; notas, asistencia, grupos |\n| ORM | Entity Framework Core 10 | Code-first, migraciones, LINQ — ver ADR-001 |
+| Base de datos (servidor) | PostgreSQL | Instalado en VM `demo-itqs` (Standard_DS1_v2 Linux, eastus). DB: `aulaia`. No es un Flexible Server de Azure. |
+| ORM | Entity Framework Core 10 | Code-first, migraciones, LINQ — ver ADR-001 |
 | Base de datos (local) | SQLite (móvil) + IndexedDB (web) | Almacenamiento offline estructurado |
 | Sincronización offline | PowerSync | Decidido — ver ADR-005 en `06_decisions.md` |
 | IA / LLM | Azure AI Foundry — GPT-5.5 | Decidido — ver ADR-002 en `06_decisions.md` |
