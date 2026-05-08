@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-08 (rev 12)
+> **Última actualización:** 2026-05-08 (rev 13)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -62,6 +62,8 @@
 | F6 · Fix BlobNotFound en `ExtractCurriculumJob` — `Uri.AbsolutePath` percent-encodea acentos; corregido con `Uri.UnescapeDataString` al construir el blob name (`ExtractCurriculumJob.cs` line ~128) | ✅ |
 | F6 · Fix slug con acentos en `SyncCurriculumJob` — reemplazado `ToLowerInvariant().Replace(" ","-")` por `ToAsciiSlug()` (normalización NFD + strip NonSpacingMark); blobs futuros sin acentos en el nombre | ✅ |
 | F6 · Skill `mep-blob-access` creado — documenta az CLI para listar, verificar, descargar y eliminar blobs; convención de slugs; diagnóstico BlobNotFound | ✅ |
+| F6 · Fix NetworkTimeout en `ExtractCurriculumJob` (job 46 — Francés 5.4MB) — `AzureOpenAIClient` registrado como singleton en DI con `NetworkTimeout = TimeSpan.FromMinutes(10)`; inyectado por constructor en `ExtractCurriculumJob` | ✅ |
+| F6 · Deploy revisión `ca-aulaia-api--0000003` — imagen con ambos fixes (BlobNotFound + NetworkTimeout); health `/health` 200, SPA 200 ✅ | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
 | F6 · Subir PDFs al API admin + extracción IA por GPT-5.5 | ⏳ |
 | F6 · Panel de director: vista institucional | ⏳ |

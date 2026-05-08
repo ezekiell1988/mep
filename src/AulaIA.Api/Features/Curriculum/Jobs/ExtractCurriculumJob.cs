@@ -18,6 +18,7 @@ namespace AulaIA.Api.Features.Curriculum.Jobs;
 
 public sealed class ExtractCurriculumJob(
     AulaIADbContext db,
+    AzureOpenAIClient aiClient,
     IOptions<AiOptions> aiOpts,
     IOptions<StorageOptions> storageOpts,
     ILlmAuditService audit,
@@ -143,8 +144,7 @@ public sealed class ExtractCurriculumJob(
         string pdfText, string asignatura, string ciclo, CancellationToken ct)
     {
         var opts = aiOpts.Value;
-        var azureClient = new AzureOpenAIClient(new Uri(opts.Endpoint), new Azure.AzureKeyCredential(opts.ApiKey ?? ""));
-        var chatClient = azureClient.GetChatClient(opts.DeploymentName);
+        var chatClient = aiClient.GetChatClient(opts.DeploymentName);
 
         var systemPrompt = """
             Eres un extractor de programas de estudio del MEP de Costa Rica.

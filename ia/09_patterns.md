@@ -1,6 +1,6 @@
 # 09 — Patrones Verificados de Código
 
-> **Última actualización:** 2026-05-08
+> **Última actualización:** 2026-05-08 (rev 2)
 > Registrar aquí solo patrones que ya funcionan en producción/dev y deben replicarse.
 
 ---
@@ -168,6 +168,48 @@ db.Grades.Add(new Grade
 ```
 
 **Regla:** Siempre poblar `GroupId` desde el parámetro de ruta `grupoId` — nunca derivarlo de la actividad en memoria (evita inconsistencias en updates concurrentes).
+
+---
+
+## PATTERN-06: AzureOpenAIClient como singleton en DI
+
+**Contexto:** `AzureOpenAIClient` instanciado por llamada crea un `HttpClient` nuevo cada vez (sin pool). En Azure esto causa `NetworkTimeout` con PDFs grandes o respuestas largas del LLM. Registrar como singleton resuelve el problema y aumenta el timeout.
+
+**Registro en DI (`OptionsExtensions.cs`):**
+```csharp
+services.AddSingleton(sp =>
+{
+    var ai = sp.GetRequiredService<IOptions<AiOptions>>().Value;
+    var clientOptions = new AzureOpenAIClientOptions
+    {
+        NetworkTimeout = TimeSpan.FromMinutes(10)
+    };
+    return new AzureOpenAIClient(
+        new Uri(ai.Endpoint),
+        new ApiKeyCredential(ai.ApiKey ?? ""),
+        clientOptions);
+});
+```
+
+**Uso en job/servicio (inyección por constructor):**
+```csharp
+public sealed class ExtractCurriculumJob(
+    AulaIADbContext db,
+    AzureOpenAIClient aiClient,   // ← singleton inyectado
+    IOptions<AiOptions> aiOpts,
+    ...)
+{
+    // En el método que llama al LLM:
+    var chatClient = aiClient.GetChatClient(aiOpts.Value.DeploymentName);
+    var response = await chatClient.CompleteChatAsync(messages, options, ct);
+}
+```
+
+**Reglas:**
+- **Nunca** `new AzureOpenAIClient(...)` dentro de un método de job o servicio — usar DI siempre.
+- El singleton comparte el `HttpClient` interno → connection pooling correcto.
+- `NetworkTimeout = 10 min` cubre PDFs grandes (5+ MB) procesados por GPT-5.5 desde Azure.
+- `AdecuacionAiService` y `PlaneamientoAiService` aún instancian el cliente por llamada (deuda técnica pendiente).
 
 ---
 
