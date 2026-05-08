@@ -413,7 +413,8 @@ public static class ModulesExtensions
 
         public void AddAulaIARecurringJobs()
         {
-            RecurringJob.AddOrUpdate<UpdateExchangeRateJob>(...);
+            var manager = app.Services.GetRequiredService<IRecurringJobManager>();
+            manager.AddOrUpdate<UpdateExchangeRateJob>(...); // ← desde DI, no estático
             // ...
         }
 
@@ -459,4 +460,76 @@ app.Run();
 - `RunMigrationsAsync()` se llama con `await` **antes** de `app.Run()` — no dentro del pipeline de middlewares.
 - `AddAulaIARecurringJobs()` se llama después de `RunMigrationsAsync()` — Hangfire necesita las tablas ya creadas.
 - Usar `extension(IServiceCollection)` para DI y `extension(WebApplication)` para pipeline y runtime.
+
+---
+
+## PATTERN-08: Hangfire — Recurring Jobs + Console Logs
+
+**Contexto:** Dos errores comunes al configurar recurring jobs en Hangfire con PostgreSQL: (1) usar `RecurringJob.AddOrUpdate` estático que depende de `JobStorage.Current` (puede no estar disponible en startup), y (2) no tener visibilidad de lo que hace el job en el dashboard. Este patrón cubre ambos.
+
+### Registro de recurring jobs — siempre con `IRecurringJobManager` desde DI
+
+```csharp
+// ❌ NO: RecurringJob.AddOrUpdate estático — falla silenciosamente si JobStorage.Current
+//        no está inicializado cuando se llama desde AddAulaIARecurringJobs()
+RecurringJob.AddOrUpdate<MiJob>("mi-job", j => j.ExecuteAsync(CancellationToken.None), "0 12 * * *");
+
+// ✅ SÍ: IRecurringJobManager desde el contenedor DI — siempre disponible post-Build()
+public void AddAulaIARecurringJobs()
+{
+    var manager = app.Services.GetRequiredService<IRecurringJobManager>();
+    manager.AddOrUpdate<UpdateExchangeRateJob>(
+        "update-exchange-rate", j => j.ExecuteAsync(CancellationToken.None), "0 12 * * *");
+    manager.AddOrUpdate<CheckExpiredSubscriptionsJob>(
+        "check-expired-subscriptions", j => j.ExecuteAsync(CancellationToken.None), "0 8 * * *");
+    manager.AddOrUpdate<SyncCurriculumJob>(
+        "sync-curriculum-mep", j => j.ExecuteAsync(null, CancellationToken.None), "0 0 30 2 *");
+}
+```
+
+### Logs en tiempo real en el dashboard — `Hangfire.Console`
+
+**Paquete:** `Hangfire.Console` 1.4.2
+
+**Registro en `AddHangfire()`:**
+```csharp
+builder.Services.AddHangfire(config => config
+    .UseConsole()                                             // ← agregar
+    .UseFilter(new AutomaticRetryAttribute { Attempts = 0 }) // retries globales = 0
+    .UsePostgreSqlStorage(...));
+```
+
+**En el job — `PerformContext` como parámetro opcional al final:**
+```csharp
+using Hangfire.Console;
+using Hangfire.Server;
+
+[Queue("curriculum")]
+[AutomaticRetry(Attempts = 1)] // override del global
+public async Task ExecuteAsync(string blobUrl, string asignatura, string ciclo,
+    PerformContext? ctx = null, CancellationToken ct = default)
+{
+    ctx.WriteLine($"🚀 ExtractCurriculumJob: {asignatura} ({ciclo})");
+    // ... trabajo ...
+    ctx.WriteLine($"✅ {count} unidades guardadas ({tokensUsed:N0} tokens)");
+}
+```
+
+**Al encolar desde código — pasar `null` explícito para `PerformContext`:**
+```csharp
+// Hangfire inyecta el PerformContext real en runtime; pasar null al encolar
+jobs.Enqueue<ExtractCurriculumJob>("curriculum",
+    j => j.ExecuteAsync(blobUrl, asignatura, ciclo, null, CancellationToken.None));
+
+// Recurring jobs — igual: null para PerformContext
+manager.AddOrUpdate<SyncCurriculumJob>(
+    "sync-curriculum-mep", j => j.ExecuteAsync(null, CancellationToken.None), "0 0 30 2 *");
+```
+
+**Reglas:**
+- `PerformContext? ctx = null` **siempre al final** de la firma, antes de `CancellationToken` — o después si CT ya es el último.
+- `ctx.WriteLine()` es extensión de `Hangfire.Console`; funciona aunque `ctx` sea `null` (el método es null-safe).
+- Los retries globales se configuran con `.UseFilter(new AutomaticRetryAttribute { Attempts = 0 })` en `AddHangfire()`. Los atributos `[AutomaticRetry]` por clase ganan al global.
+- Dashboard en dev: `LocalRequestsOnlyAuthorizationFilter` (sin JWT). En prod: `HangfireAdminAuthFilter` con JWT.
+- Si el dashboard muestra 0 recurring jobs pero la BD tiene datos en `hangfire.hash`: ver skill `hangfire-reset`.
 

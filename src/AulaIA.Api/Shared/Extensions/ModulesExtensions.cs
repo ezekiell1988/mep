@@ -59,19 +59,21 @@ public static class ModulesExtensions
         /// <summary>Registra todos los recurring jobs de Hangfire.</summary>
         public void AddAulaIARecurringJobs()
         {
-            RecurringJob.AddOrUpdate<UpdateExchangeRateJob>(
+            var manager = app.Services.GetRequiredService<IRecurringJobManager>();
+
+            manager.AddOrUpdate<UpdateExchangeRateJob>(
                 "update-exchange-rate",
                 j => j.ExecuteAsync(CancellationToken.None),
                 "0 12 * * *");   // 12 PM UTC = 6 AM Costa Rica
 
-            RecurringJob.AddOrUpdate<CheckExpiredSubscriptionsJob>(
+            manager.AddOrUpdate<CheckExpiredSubscriptionsJob>(
                 "check-expired-subscriptions",
                 j => j.ExecuteAsync(CancellationToken.None),
                 "0 8 * * *");    // 8 AM UTC = 2 AM Costa Rica
 
             // "0 0 30 2 *" → 30 de febrero: nunca ejecuta automáticamente.
             // Disparar manualmente desde /hangfire.
-            RecurringJob.AddOrUpdate<SyncCurriculumJob>(
+            manager.AddOrUpdate<SyncCurriculumJob>(
                 "sync-curriculum-mep",
                 j => j.ExecuteAsync(null, CancellationToken.None),
                 "0 0 30 2 *");   // manual only

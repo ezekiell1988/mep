@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-08 (rev 10)
+> **Última actualización:** 2026-05-08 (rev 11)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -53,6 +53,12 @@
 | F6 · Fix `OptionsValidationException` al arrancar — `CircuitBreaker.SamplingDuration` debe ser `> 2 × AttemptTimeout`; valores corregidos y validados con `dotnet run` | ✅ |
 | F6 · `ModulesExtensions.cs` — `AddAulaIAModules()`, `MapAulaIAEndpoints()`, `AddAulaIARecurringJobs()`, `RunMigrationsAsync()` en C# 14 extension blocks | ✅ |
 | F6 · `Program.cs` refactorizado: 116 → 47 líneas; un único `using AulaIA.Api.Shared.Extensions` | ✅ |
+| F6 · Hangfire dashboard accesible en dev sin JWT — `LocalRequestsOnlyAuthorizationFilter` en env Development; `HangfireAdminAuthFilter` en Production | ✅ |
+| F6 · `Hangfire.Console` 1.4.2 integrado — `UseConsole()` en config; `SyncCurriculumJob` y `ExtractCurriculumJob` usan `PerformContext? ctx` + `ctx.WriteLine()` para logs en tiempo real en el dashboard | ✅ |
+| F6 · Retries globales = 0 — `UseFilter(new AutomaticRetryAttribute { Attempts = 0 })` en `AddHangfire()`; jobs de curriculum con `[AutomaticRetry(Attempts = 1)]` propio | ✅ |
+| F6 · Fix `AddAulaIARecurringJobs()` — migrado de `RecurringJob.AddOrUpdate` (estático, depende de `JobStorage.Current`) a `IRecurringJobManager` desde DI; los 3 jobs se registran correctamente en startup | ✅ |
+| F6 · `wwwroot/` agregado a `.gitignore` (SPA compilada, no se versiona) | ✅ |
+| F6 · Skill `hangfire-reset` creado — documenta causa raíz de `hangfire.hash`/`hangfire.set` desincronizados, fix y regla de truncate completo | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
 | F6 · Subir PDFs al API admin + extracción IA por GPT-5.5 | ⏳ |
 | F6 · Panel de director: vista institucional | ⏳ |
