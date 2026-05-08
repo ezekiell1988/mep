@@ -117,9 +117,12 @@ public sealed class ExtractCurriculumJob(
 
     private async Task<string> DownloadAndExtractTextAsync(string blobUrl, CancellationToken ct)
     {
-        // Usar connection string para acceder al container privado
+        // Usar connection string para acceder al container privado.
+        // Uri.AbsolutePath percent-encodea caracteres no-ASCII; se debe decodificar
+        // antes de usarlo como blob name (que es un path literal, no una URL).
         var blobUri = new Uri(blobUrl);
-        var blobName = string.Join("/", blobUri.AbsolutePath.TrimStart('/').Split('/').Skip(1));
+        var blobName = string.Join("/",
+            Uri.UnescapeDataString(blobUri.AbsolutePath).TrimStart('/').Split('/').Skip(1));
         var blobClient = new BlobClient(
             storageOpts.Value.ConnectionString,
             storageOpts.Value.ContainerCurriculum,

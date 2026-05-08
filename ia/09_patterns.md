@@ -79,12 +79,36 @@ await db.SaveChangesAsync(ct);
 // ❌ NO funciona con blob privado:
 // var response = await http.GetAsync(blobUrl);
 
-// ✅ Autenticar con connection string:
+// ✅ Autenticar con connection string + decodificar AbsolutePath:
 var blobUri = new Uri(blobUrl);
-var blobName = string.Join("/", blobUri.AbsolutePath.TrimStart('/').Split('/').Skip(1));
+// Uri.AbsolutePath percent-encodea caracteres no-ASCII (acentos, etc.).
+// El blob name es un path literal — se debe decodificar antes de usarlo.
+var blobName = string.Join("/",
+    Uri.UnescapeDataString(blobUri.AbsolutePath).TrimStart('/').Split('/').Skip(1));
 var blobClient = new BlobClient(storageOpts.Value.ConnectionString, "curriculum", blobName);
 using var stream = await blobClient.OpenReadAsync(cancellationToken: ct);
 ```
+
+**Slug de blob sin acentos (`SyncCurriculumJob`):**
+```csharp
+// ✅ Siempre usar ToAsciiSlug() para generar el nombre de carpeta del blob
+private static string ToAsciiSlug(string asignatura)
+{
+    var normalized = asignatura.ToLowerInvariant().Normalize(NormalizationForm.FormD);
+    var sb = new StringBuilder();
+    foreach (var c in normalized)
+    {
+        if (CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.NonSpacingMark)
+            continue;   // elimina tildes, diéresis, etc.
+        sb.Append(c == ' ' ? '-' : c);
+    }
+    return sb.ToString().Normalize(NormalizationForm.FormC);
+}
+// Resultado: "Educación Física" → "educacion-fisica"
+//            "Artes Plásticas"  → "artes-plasticas"
+```
+
+**Regla crítica:** `Uri.AbsolutePath` **nunca** debe usarse directamente como blob name si el nombre puede tener caracteres no-ASCII. Siempre `Uri.UnescapeDataString(blobUri.AbsolutePath)` primero.
 
 ---
 

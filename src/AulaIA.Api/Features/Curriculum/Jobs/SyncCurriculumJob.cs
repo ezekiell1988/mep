@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using AulaIA.Api.Shared.Domain;
 using AulaIA.Api.Shared.Options;
 using AulaIA.Api.Shared.Persistence;
@@ -197,6 +199,23 @@ public sealed class SyncCurriculumJob(
     // ── Helpers ─────────────────────────────────────────────────────────────
 
     /// <summary>
+    /// Convierte un nombre de asignatura en un slug ASCII seguro para blob names.
+    /// Ej: "Educación Física" → "educacion-fisica"
+    /// </summary>
+    private static string ToAsciiSlug(string asignatura)
+    {
+        var normalized = asignatura.ToLowerInvariant().Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder();
+        foreach (var c in normalized)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.NonSpacingMark)
+                continue;   // eliminar diacríticos (tildes, etc.)
+            sb.Append(c == ' ' ? '-' : c);
+        }
+        return sb.ToString().Normalize(NormalizationForm.FormC);
+    }
+
+    /// <summary>
     /// Hace HEAD al URL del MEP y extrae ETag y Last-Modified.
     /// Retorna nulls si el servidor no los devuelve.
     /// </summary>
@@ -235,7 +254,7 @@ public sealed class SyncCurriculumJob(
             fuente.Asignatura, fuente.Ciclo, pdfBytes.Length / 1024);
 
         var timestamp = DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmss");
-        var blobName  = $"{fuente.Asignatura.ToLowerInvariant().Replace(" ", "-")}/{timestamp}.pdf";
+        var blobName  = $"{ToAsciiSlug(fuente.Asignatura)}/{timestamp}.pdf";
 
         var container = new BlobContainerClient(
             storageOpts.Value.ConnectionString,
