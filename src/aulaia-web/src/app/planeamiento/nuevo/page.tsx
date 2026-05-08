@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { getGrupos, crearPlaneamiento, type Grupo } from '../../../lib/api';
 
 const ASIGNATURAS = [
-  'Artes Plásticas', 'Música', 'Educación Física', 'Matemáticas', 'Español',
+  'Artes Plásticas', 'Artes Musicales', 'Educación para el Hogar',
+  'Educación Física', 'Matemáticas', 'Español',
   'Ciencias', 'Estudios Sociales', 'Inglés', 'Francés', 'Informática',
   'Religión', 'Orientación',
 ];

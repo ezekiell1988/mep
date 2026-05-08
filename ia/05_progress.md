@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-08 (rev 7)
+> **Última actualización:** 2026-05-08 (rev 8)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -44,8 +44,10 @@
 | F6 · `api.mep.ezekl.com` eliminado — hostname removido del Container App, CNAME y TXT borrados de Cloudflare | ✅ |
 | F6 · App móvil actualizada — `API_BASE` en `client.ts` y `PowerSyncContext.tsx` apunta a `https://mep.ezekl.com` | ✅ |
 | F6 · Skill `mep-cloudflare` creado — documenta flarectl, registros DNS, flujo completo y lecciones aprendidas | ✅ |
+| F6 · Dropdown asignaturas actualizado: `'Música'` → `'Artes Musicales'` + `'Educación para el Hogar'` añadido | ✅ |
+| F6 · 13 PDFs del MEP descargados a `assets/` con curl + skill `mep-curriculum-pdfs` creado | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
-| F6 · Agregar programas: Artes Musicales, Educación para el Hogar | ⏳ |
+| F6 · Subir PDFs al API admin + extracción IA por GPT-5.5 | ⏳ |
 | F6 · Panel de director: vista institucional | ⏳ |
 | F6 · Plan institucional: gestión múltiples docentes | ⏳ |
 | F6 · Apple Sign-In | ⏳ |
