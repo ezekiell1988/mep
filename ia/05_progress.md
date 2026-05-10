@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-10 (rev 18)
+> **Última actualización:** 2026-05-10 (rev 19)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -81,9 +81,16 @@
 | F6 · Skill `mep-deploy` actualizado — agrega paso 5 (limpieza imágenes locales Docker) y paso 6 (ACR conserva últimas 4); script completo integra ambas limpiezas post-deploy | ✅ |
 | F6 · ISSUE-006 resuelto — `BlobSlugHelper.ToAsciiSlug()` en `Shared/Extensions/BlobSlugHelper.cs`; `SyncCurriculumJob` elimina `ToAsciiSlug()` privado; `CurriculumModule` corrige blob name en `POST /api/curriculum/upload` | ✅ |
 | F6 · Tab "Curriculum PDF" en `/admin` — selector asignatura/ciclo + file input + `uploadCurriculumPdf()` en `api.ts`; encola `ExtractCurriculumJob` y muestra Job ID resultante | ✅ |
+| F6 · `DirectorModule.cs` — C# 14 extension block; `GET /api/director/resumen` → `ResumenInstitucionalResponse` (institución, totales docentes/grupos/estudiantes, plan institucional, días restantes); `GET /api/director/docentes` → `IReadOnlyList<DocenteInstitucionalResponse>` (breakdown por docente con grupos, plan, conteos); policy `director` (roles director + admin) | ✅ |
+| F6 · Plan Institucional propagación — `PaymentsModule.AprobarPagoAsync`: si `payment.Plan == Institutional`, upsert de suscripción `Institutional/Active` a todos los usuarios de la misma `InstitutionId` con el mismo período | ✅ |
+| F6 · `ModulesExtensions.cs` — `.MapDirectorEndpoints()` registrado en cadena `MapAulaIAEndpoints()` | ✅ |
+| F6 · `api.ts` — 3 tipos (`ResumenInstitucionalResponse`, `GrupoResumenDirector`, `DocenteInstitucionalResponse`) + 2 funciones (`getDirectorResumen`, `getDirectorDocentes`) | ✅ |
+| F6 · `/director/page.tsx` — wrapper estático (`generateStaticParams` → `[]`, `<Suspense>` + `<DirectorClient />`) | ✅ |
+| F6 · `/director/DirectorClient.tsx` — carga paralela resumen + docentes con `cancelled` flag; stat cards (docentes/grupos/estudiantes); acordeón por docente con tabla de grupos; `isDirector` guard; skill-compliant: ternary+null, sin falsy `&&` | ✅ |
+| F6 · `/dashboard/DashboardClient.tsx` — botón "Panel Dirección" condicional a `isDirector` → `router.push('/director')`; falsy `&&` convertidos a ternary | ✅ |
+| F6 · A11y `/director/DirectorClient.tsx` — botón acordeón: `aria-expanded` con literales `"true"`/`"false"` (dos `<button>` condicionales, no expresión); `aria-label` dinámico `"Ver/Ocultar grupos de {fullName}"`; `aria-controls` + `id` panel; SVG `aria-hidden="true"` | ✅ |
+| F6 · .NET build — 0 errores, 0 advertencias (validado post-Director feature) | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
-| F6 · Panel de director: vista institucional | ⏳ |
-| F6 · Plan institucional: gestión múltiples docentes | ⏳ |
 | F6 · Apple Sign-In | ⏳ |
 
 ---

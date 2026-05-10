@@ -25,6 +25,9 @@ export default function DashboardClient() {
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState<string | null>(null);
 
+  const roles: string[] = (user as Record<string, unknown>)?.['https://aulaia.ezekl.com/roles'] as string[] ?? [];
+  const isDirector = roles.includes('director') || roles.includes('admin');
+
   useEffect(() => {
     if (isLoading) return;
     if (!isAuthenticated) {
@@ -66,7 +69,7 @@ export default function DashboardClient() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          {user?.name && <p className="text-sm text-gray-500 mt-0.5">{user.name}</p>}
+          {user?.name ? <p className="text-sm text-gray-500 mt-0.5">{user.name}</p> : null}
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -76,6 +79,15 @@ export default function DashboardClient() {
           >
             Mis Grupos
           </button>
+          {isDirector && (
+            <button
+              type="button"
+              onClick={() => router.push('/director')}
+              className="text-sm border border-indigo-300 text-indigo-600 hover:bg-indigo-50 font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              Panel Dirección
+            </button>
+          )}
           <button
             type="button"
             onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
@@ -90,9 +102,9 @@ export default function DashboardClient() {
         <div role="alert" className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6">{error}</div>
       ) : null}
 
-      {resumen && (
+      {resumen ? (
         <>
-          {/* Tarjetas de estadísticas */}
+          {/* Tarjetas de estadísticas */
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
             <StatCard
               label="Grupos activos"
@@ -154,13 +166,13 @@ export default function DashboardClient() {
             </section>
           )}
 
-          {resumen.totalGrupos === 0 && (
+          {resumen.totalGrupos === 0 ? (
             <p className="text-center text-gray-400 mt-16">
               Aún no tienes grupos. <button type="button" onClick={() => router.push('/grupos')} className="text-blue-600 underline">Crear uno</button>
             </p>
-          )}
+          ) : null}
         </>
-      )}
+      ) : null}
     </div>
   );
 }

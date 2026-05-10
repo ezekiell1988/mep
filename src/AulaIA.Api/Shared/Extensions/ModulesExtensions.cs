@@ -51,6 +51,7 @@ public static class ModulesExtensions
                .MapCalendarioEndpoints()
                .MapAdecuacionesEndpoints()
                .MapDashboardEndpoints()
+               .MapDirectorEndpoints()
                .MapPowerSyncEndpoints()
                .MapSuscripcionesEndpoints()
                .MapPaymentsEndpoints()

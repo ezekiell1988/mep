@@ -591,3 +591,40 @@ export const uploadCurriculumPdf = async (
   }
   return res.json() as Promise<UploadCurriculumResponse>;
 };
+
+// ── Director institucional ─────────────────────────────────────────────────
+
+export interface ResumenInstitucionalResponse {
+  institutionId: string;
+  institutionName: string;
+  totalDocentes: number;
+  totalGrupos: number;
+  totalEstudiantes: number;
+  planInstitucional: string | null;
+  diasRestantes: number | null;
+}
+
+export interface GrupoResumenDirector {
+  id: string;
+  name: string;
+  subject: string;
+  level: string;
+  totalEstudiantes: number;
+}
+
+export interface DocenteInstitucionalResponse {
+  docenteId: string;
+  fullName: string;
+  email: string;
+  totalGrupos: number;
+  totalEstudiantes: number;
+  plan: string;
+  planActivo: boolean;
+  grupos: GrupoResumenDirector[];
+}
+
+export const getDirectorResumen = (token: string) =>
+  apiFetch<ResumenInstitucionalResponse>('/api/director/resumen', token);
+
+export const getDirectorDocentes = (token: string) =>
+  apiFetch<DocenteInstitucionalResponse[]>('/api/director/docentes', token);

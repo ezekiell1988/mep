@@ -116,6 +116,46 @@ public static class PaymentsModule
         sub.CurrentPeriodEnd = periodStart.AddMonths(1);
         sub.UpdatedAt = now;
 
+        // Plan institucional: activar a todos los usuarios de la misma institución
+        if (payment.Plan == SubscriptionPlan.Institutional && payment.User?.InstitutionId is Guid instId)
+        {
+            var compañeros = await db.Users
+                .Where(u => u.InstitutionId == instId && u.Id != payment.UserId)
+                .ToListAsync(ct);
+
+            var compañeroIds = compañeros.Select(u => u.Id).ToList();
+            var subsExistentes = await db.Subscriptions
+                .Where(s => compañeroIds.Contains(s.UserId))
+                .ToListAsync(ct);
+            var subsMap = subsExistentes.ToDictionary(s => s.UserId);
+
+            foreach (var compañero in compañeros)
+            {
+                if (subsMap.TryGetValue(compañero.Id, out var subCompañero))
+                {
+                    subCompañero.Plan = SubscriptionPlan.Institutional;
+                    subCompañero.Status = SubscriptionStatus.Active;
+                    subCompañero.IsTrial = false;
+                    subCompañero.CurrentPeriodStart = periodStart;
+                    subCompañero.CurrentPeriodEnd = periodStart.AddMonths(1);
+                    subCompañero.UpdatedAt = now;
+                }
+                else
+                {
+                    db.Subscriptions.Add(new Subscription
+                    {
+                        UserId = compañero.Id,
+                        Plan = SubscriptionPlan.Institutional,
+                        Status = SubscriptionStatus.Active,
+                        IsTrial = false,
+                        CurrentPeriodStart = periodStart,
+                        CurrentPeriodEnd = periodStart.AddMonths(1),
+                        UpdatedAt = now,
+                    });
+                }
+            }
+        }
+
         await db.SaveChangesAsync(ct);
 
         return TypedResults.Ok();
