@@ -47,6 +47,8 @@ docker buildx build \
 
 > ⚠️ **Crítico**: siempre usar `--platform linux/amd64`. Sin esto, Mac Apple Silicon genera una imagen `arm64` que no corre en Azure.
 
+> ⚠️ **Next.js 16 + Docker**: Next.js 16 usa Turbopack por defecto. En Docker, Turbopack falla porque el builder no tiene acceso a Google Fonts (`fonts.gstatic.com`). El Dockerfile ya incluye `-- --webpack` en el `npm run build` para evitar esto. No remover esa flag.
+
 ### 3. Actualizar el Container App
 ```bash
 az containerapp update \

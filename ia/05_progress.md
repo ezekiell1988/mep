@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-10 (rev 19)
+> **Última actualización:** 2026-05-10 (rev 21)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -90,6 +90,16 @@
 | F6 · `/dashboard/DashboardClient.tsx` — botón "Panel Dirección" condicional a `isDirector` → `router.push('/director')`; falsy `&&` convertidos a ternary | ✅ |
 | F6 · A11y `/director/DirectorClient.tsx` — botón acordeón: `aria-expanded` con literales `"true"`/`"false"` (dos `<button>` condicionales, no expresión); `aria-label` dinámico `"Ver/Ocultar grupos de {fullName}"`; `aria-controls` + `id` panel; SVG `aria-hidden="true"` | ✅ |
 | F6 · .NET build — 0 errores, 0 advertencias (validado post-Director feature) | ✅ |
+| F6 · Google Sign-In — proyecto `aulaia-mep` en Google Cloud; OAuth2 Client ID web configurado; conexión `google-oauth2` en Auth0 con Client ID/Secret propios; habilitada en `AulaIA Mobile` + `AulaIA Web`; test "Successful transaction" con claim `teacher` ✅ | ✅ |
+| F6 · Google Cloud en modo Testing — solo cuentas de prueba autorizadas hasta publicar la app (cuando haya usuarios reales) | ⚠️ |
+| F6 · `ExtractCurriculumJob` chunking — PDFs grandes (>300k chars) divididos en bloques de 300k con overlap de 30k; deduplicación interna por (Nivel, Trimestre, UnidadNumero); JSON inválido por chunk → continue | ✅ |
+| F6 · `ExtractCurriculumJob` hint por asignatura — `GetSubjectHint()` inyecta mapeo área→trimestre para Matemáticas III Ciclo (Números→T1, Geometría→T2, Relaciones y Álgebra→T3, Estadística y Probabilidad→T3); el LLM no inventa trimestres | ✅ |
+| F6 · Fix Docker Next.js 16 — `import { Geist } from "next/font/google"` descargaba fonts en build time sin internet; reemplazado por `geist` npm package local (`import { GeistSans } from "geist/font/sans"`) | ✅ |
+| F6 · Fix JSX `DashboardClient.tsx` — comentario JSX mal cerrado `{/* ... */` en línea 107; corregido a `{/* ... */}` | ✅ |
+| F6 · Curriculum Matemáticas III Ciclo — 12 unidades extraídas y validadas en BD: 4 áreas × 3 niveles (7°/8°/9°) con habilidades reales del PDF MEP | ✅ |
+| F6 · Curriculum completo — 130+ unidades validadas para todas las asignaturas; Matemáticas es la última en completarse | ✅ |
+| F6 · Deploy revisión `ca-aulaia-api--0000012` — imagen con chunking + hint asignatura + fix Docker fonts + fix JSX | ✅ |
+| F6 · Conectar `CurriculumUnit` validadas al `PlaneamientoAiService` — planeamiento anclado al programa oficial MEP | ⏳ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
 | F6 · Apple Sign-In | ⏳ |
 

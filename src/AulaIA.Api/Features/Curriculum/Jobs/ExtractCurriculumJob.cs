@@ -54,7 +54,7 @@ public sealed class ExtractCurriculumJob(
                 $"✅ {pdfText.Length:N0} caracteres — enviando a GPT-5.5");
 
             ctx.WriteLine($"🤖 Enviando a {aiOpts.Value.DeploymentName}...");
-            var (units, tokensUsed) = await ExtractUnitsWithAiAsync(pdfText, asignatura, ciclo, ct);
+            var (units, tokensUsed) = await ExtractUnitsWithAiAsync(pdfText, asignatura, ciclo, ctx, ct);
 
             if (units.Count == 0)
             {
@@ -87,25 +87,21 @@ public sealed class ExtractCurriculumJob(
             };
             db.CurriculumExtractions.Add(extraction);
 
-            // Deduplicar por (Nivel, Trimestre, UnidadNumero) por si GPT devuelve duplicados
-            var seen = new HashSet<(int, int, int)>();
             foreach (var unit in units)
             {
-                if (!seen.Add((unit.Nivel, unit.Trimestre, unit.UnidadNumero)))
-                    continue;
                 unit.ExtractionId = extraction.Id;
                 db.CurriculumUnits.Add(unit);
             }
 
-            extraction.UnidadCount = seen.Count;
+            extraction.UnidadCount = units.Count;
             await db.SaveChangesAsync(ct);
 
-            ctx.WriteLine($"📊 {seen.Count} unidades guardadas en curriculum_units ({tokensUsed:N0} tokens)");
+            ctx.WriteLine($"📊 {units.Count} unidades guardadas en curriculum_units ({tokensUsed:N0} tokens)");
             audit.LogEvent("ExtractCurriculumJob", "Completado",
-                $"✅ {seen.Count} unidades guardadas en curriculum_units (tokens: {tokensUsed:N0})",
-                new { asignatura, ciclo, count = seen.Count, tokensUsed, extractionId = extraction.Id });
+                $"✅ {units.Count} unidades guardadas en curriculum_units (tokens: {tokensUsed:N0})",
+                new { asignatura, ciclo, count = units.Count, tokensUsed, extractionId = extraction.Id });
 
-            logger.LogInformation("Extracción completada: {Count} unidades guardadas para {Asignatura}", seen.Count, asignatura);
+            logger.LogInformation("Extracción completada: {Count} unidades guardadas para {Asignatura}", units.Count, asignatura);
         }
         catch (Exception ex)
         {
@@ -140,16 +136,22 @@ public sealed class ExtractCurriculumJob(
         return sb.ToString();
     }
 
+    private const int ChunkSize    = 300_000; // ~75k tokens por chunk
+    private const int ChunkOverlap =  30_000; // overlap para no cortar unidades a mitad
+
     private async Task<(List<CurriculumUnit> Units, int TokensUsed)> ExtractUnitsWithAiAsync(
-        string pdfText, string asignatura, string ciclo, CancellationToken ct)
+        string pdfText, string asignatura, string ciclo, PerformContext? ctx, CancellationToken ct)
     {
-        var opts = aiOpts.Value;
+        var opts       = aiOpts.Value;
         var chatClient = aiClient.GetChatClient(opts.DeploymentName);
+
+        var subjectHint = GetSubjectHint(asignatura, ciclo);
 
         var systemPrompt = """
             Eres un extractor de programas de estudio del MEP de Costa Rica.
-            Dado el texto completo de un programa oficial, extrae TODAS las unidades didácticas
-            con su información estructurada. Devuelve ÚNICAMENTE JSON válido con este schema exacto,
+            Dado el texto (completo o parcial) de un programa oficial, extrae TODAS las unidades
+            didácticas que encuentres con su información estructurada.
+            Devuelve ÚNICAMENTE JSON válido con este schema exacto,
             sin texto adicional, sin markdown, sin bloques de código:
 
             [
@@ -172,47 +174,123 @@ public sealed class ExtractCurriculumJob(
             - Si un campo no está en el programa, usa array vacío [].
             - El campo "nivel" es el año escolar (7, 8, 9, 10, 11).
             - El campo "trimestre" es el período lectivo (1, 2, 3).
+            - NUNCA inventes trimestres: asigna el valor EXACTO indicado en las instrucciones de asignatura.
+            - Si no hay unidades en este fragmento, devuelve [].
             """;
 
-        // El texto del PDF puede ser largo; tomamos los primeros 350k caracteres (~87k tokens) para no superar el contexto
-        var truncatedText = pdfText.Length > 350_000 ? pdfText[..350_000] : pdfText;
+        // Para PDFs grandes: dividir en chunks con overlap para no perder unidades en los cortes
+        var chunks = BuildChunks(pdfText);
+        ctx?.WriteLine(chunks.Count == 1
+            ? $"   ↳ Procesando en 1 bloque ({pdfText.Length:N0} chars)"
+            : $"   ↳ PDF grande: procesando en {chunks.Count} bloques de ~{ChunkSize:N0} chars c/u");
 
-        var messages = new List<ChatMessage>
+        var allUnits   = new List<CurriculumUnit>();
+        var totalTokens = 0;
+        var seen       = new HashSet<(int, int, int)>(); // nivel, trimestre, unidadNumero
+
+        for (int i = 0; i < chunks.Count; i++)
         {
-            new SystemChatMessage(systemPrompt),
-            new UserChatMessage($"Asignatura: {asignatura}\nCiclo: {ciclo}\n\n---\n{truncatedText}")
+            if (chunks.Count > 1)
+                ctx?.WriteLine($"   ↳ 🤖 Bloque {i + 1}/{chunks.Count}...");
+
+            var userContent = new StringBuilder();
+            userContent.AppendLine($"Asignatura: {asignatura}");
+            userContent.AppendLine($"Ciclo: {ciclo}");
+            if (chunks.Count > 1) userContent.AppendLine($"Fragmento: {i + 1} de {chunks.Count}");
+            if (!string.IsNullOrEmpty(subjectHint)) userContent.AppendLine(subjectHint);
+            userContent.AppendLine($"\n---\n{chunks[i]}");
+
+            var messages = new List<ChatMessage>
+            {
+                new SystemChatMessage(systemPrompt),
+                new UserChatMessage(userContent.ToString())
+            };
+
+            var chatResult  = await chatClient.CompleteChatAsync(messages, cancellationToken: ct);
+            var json        = chatResult.Value.Content[0].Text.Trim();
+            totalTokens    += chatResult.Value.Usage?.TotalTokenCount ?? 0;
+
+            List<ExtractedUnit> extracted;
+            try
+            {
+                extracted = JsonSerializer.Deserialize<List<ExtractedUnit>>(json, JsonOpts) ?? [];
+            }
+            catch (JsonException ex)
+            {
+                var preview = json[..Math.Min(500, json.Length)];
+                audit.LogError("ExtractCurriculumJob",
+                    $"JSON inválido en bloque {i + 1}. Preview: {preview}", ex);
+                logger.LogError(ex, "Error parseando JSON bloque {Block}. Respuesta: {Json}", i + 1, preview);
+                continue; // intentar el siguiente chunk
+            }
+
+            foreach (var e in extracted)
+            {
+                if (!seen.Add((e.Nivel, e.Trimestre, e.UnidadNumero)))
+                    continue; // deduplicar (por overlap entre chunks)
+
+                allUnits.Add(new CurriculumUnit
+                {
+                    Asignatura            = asignatura,
+                    Ciclo                 = ciclo,
+                    Nivel                 = e.Nivel,
+                    Trimestre             = e.Trimestre,
+                    UnidadNumero          = e.UnidadNumero,
+                    UnidadNombre          = e.UnidadNombre,
+                    AprendizajesEsperados = e.AprendizajesEsperados,
+                    IndicadoresEvaluacion = e.IndicadoresEvaluacion,
+                    ContenidoConceptual   = e.ContenidoConceptual,
+                    ContenidoProcedimental = e.ContenidoProcedimental,
+                    ContenidoActitudinal  = e.ContenidoActitudinal,
+                    EstrategiasSugeridas  = e.EstrategiasSugeridas
+                });
+            }
+
+            if (chunks.Count > 1)
+                ctx?.WriteLine($"      ↳ {extracted.Count} unidades en este bloque ({totalTokens:N0} tokens acumulados)");
+        }
+
+        return (allUnits, totalTokens);
+    }
+
+    /// <summary>
+    /// Retorna instrucciones adicionales para asignaturas cuyo PDF usa una estructura
+    /// diferente al formato estándar (p.ej. Matemáticas usa áreas en vez de trimestres).
+    /// </summary>
+    private static string GetSubjectHint(string asignatura, string ciclo) =>
+        (asignatura, ciclo) switch
+        {
+            ("Matemáticas", "III Ciclo") =>
+                """
+
+                INSTRUCCIÓN ESPECIAL — Matemáticas III Ciclo:
+                El programa de Matemáticas NO usa trimestres explícitos.
+                Está organizado por ÁREAS MATEMÁTICAS. Usa la siguiente distribución estándar del MEP:
+                  • Área "Números"                    → trimestre=1, unidadNumero=1
+                  • Área "Geometría"                  → trimestre=2, unidadNumero=2
+                  • Área "Relaciones y Álgebra"        → trimestre=3, unidadNumero=3
+                  • Área "Estadística y Probabilidad" → trimestre=3, unidadNumero=4
+                Usa el nombre del área como "unidadNombre".
+                Los años son 7°, 8°, 9° → nivel=7, nivel=8, nivel=9.
+                NO inventes trimestres distintos a los indicados arriba.
+                """,
+            _ => string.Empty
         };
 
-        var chatResult = await chatClient.CompleteChatAsync(messages, cancellationToken: ct);
-        var json = chatResult.Value.Content[0].Text.Trim();
-        var totalTokens = chatResult.Value.Usage?.TotalTokenCount ?? 0;
+    private static List<string> BuildChunks(string text)
+    {
+        if (text.Length <= ChunkSize)
+            return [text];
 
-        try
+        var chunks = new List<string>();
+        int pos = 0;
+        while (pos < text.Length)
         {
-            var extracted = JsonSerializer.Deserialize<List<ExtractedUnit>>(json, JsonOpts) ?? [];
-            return (extracted.Select(e => new CurriculumUnit
-            {
-                Asignatura = asignatura,
-                Ciclo = ciclo,
-                Nivel = e.Nivel,
-                Trimestre = e.Trimestre,
-                UnidadNumero = e.UnidadNumero,
-                UnidadNombre = e.UnidadNombre,
-                AprendizajesEsperados = e.AprendizajesEsperados,
-                IndicadoresEvaluacion = e.IndicadoresEvaluacion,
-                ContenidoConceptual = e.ContenidoConceptual,
-                ContenidoProcedimental = e.ContenidoProcedimental,
-                ContenidoActitudinal = e.ContenidoActitudinal,
-                EstrategiasSugeridas = e.EstrategiasSugeridas
-            }).ToList(), totalTokens);
+            var end = Math.Min(pos + ChunkSize, text.Length);
+            chunks.Add(text[pos..end]);
+            pos += ChunkSize - ChunkOverlap; // avanzar con overlap
         }
-        catch (JsonException ex)
-        {
-            var preview = json[..Math.Min(500, json.Length)];
-            audit.LogError("ExtractCurriculumJob", $"JSON inválido devuelto por GPT-5.5. Preview: {preview}", ex);
-            logger.LogError(ex, "Error parseando JSON de la IA. Respuesta recibida: {Json}", preview);
-            return ([], totalTokens);
-        }
+        return chunks;
     }
 
     private sealed record ExtractedUnit(

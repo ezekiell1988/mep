@@ -104,7 +104,7 @@ export default function DashboardClient() {
 
       {resumen ? (
         <>
-          {/* Tarjetas de estadísticas */
+          {/* Tarjetas de estadísticas */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
             <StatCard
               label="Grupos activos"

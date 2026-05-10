@@ -1,6 +1,6 @@
 # 07 — Issues Conocidos
 
-> **Última actualización:** 2026-05-10 (rev 8)
+> **Última actualización:** 2026-05-10 (rev 9)
 
 ---
 
@@ -153,3 +153,52 @@ Navegar a `https://mep.ezekl.com/hangfire` en el browser devolvía 401 sin forma
 - Logs del dashboard confirmaron que el XML del BCCR llegaba correctamente (1633 chars) antes del fix de parse.
 - Deploy revisión `ca-aulaia-api--0000005` con parse corregido (imagen `6294008` reemplazada con nuevo contenido, mismo tag por falta de commit entre deploys).
 - Próxima ejecución diaria (12h UTC) debe guardar el TC en `exchange_rates`.
+
+---
+
+## ✅ ISSUE-007: ExtractCurriculumJob trunca PDFs grandes → IA devuelve `[]` (Matemáticas 1.26M chars)
+
+**Detectado:** 2026-05-10 (job 58 — Matemáticas III Ciclo)
+**Estado:** ✅ Resuelto
+**Componentes:** `ExtractCurriculumJob.cs`
+
+### Síntoma
+`ExtractCurriculumJob` para Matemáticas (PDF 1.26M chars) enviaba el texto completo en un único user message. GPT-5.5 procesaba solo los primeros ~350k chars (el inicio del PDF contiene I y II Ciclo; III Ciclo empieza en ~60% del archivo) y devolvía `[]` para el fragmento del III Ciclo, que quedaba truncado fuera del contexto.
+
+### Causa raíz
+El método `ExtractUnitsWithAiAsync` enviaba `pdfText` completo sin truncar ni dividir. Para PDFs > 350k chars, el contexto del LLM se llenaba con la parte inicial (currículo de primaria) y el contenido de III Ciclo nunca era visible para el modelo.
+
+### Fix aplicado
+- `ChunkSize = 300_000` / `ChunkOverlap = 30_000` — el texto se divide en bloques con overlap para no cortar unidades a mitad.
+- `BuildChunks()` — retorna lista de bloques; si el PDF cabe en uno solo, se comporta igual que antes.
+- Deduplicación por `(Nivel, Trimestre, UnidadNumero)` acumulada entre todos los bloques.
+- JSON inválido en un bloque → `continue` (no lanza excepción).
+
+### Verificación
+- Job 58 (re-run): 5 bloques procesados → 12 unidades extraídas → guardadas en BD.
+- 333.977 tokens consumidos en total.
+
+---
+
+## ✅ ISSUE-008: GPT inventa trimestres para Matemáticas (estructura PDF por áreas, no por trimestres)
+
+**Detectado:** 2026-05-10 (job 58 post-chunking — 13 unidades con trimestres incorrectos)
+**Estado:** ✅ Resuelto
+**Componentes:** `ExtractCurriculumJob.cs`
+
+### Síntoma
+Después de aplicar chunking (ISSUE-007), el job extrajo 13 unidades con trimestres inventados (7/T1 Estadística, 10/T1 Geometría, etc.). El PDF de Matemáticas MEP no usa trimestres explícitos — está organizado por 4 áreas matemáticas. GPT asignaba trimestres arbitrariamente.
+
+### Causa raíz
+El sistema prompt no contenía instrucciones específicas para asignaturas cuya estructura de PDF difiere del formato estándar MEP (trimestre 1/2/3 por unidad).
+
+### Fix aplicado
+- `GetSubjectHint(asignatura, ciclo)` — método privado que retorna instrucciones adicionales según la asignatura.
+- Para `("Matemáticas", "III Ciclo")`: inyecta el mapeo estándar MEP área→trimestre (Números→T1, Geometría→T2, Relaciones y Álgebra→T3, Estadística y Probabilidad→T3) en el user message.
+- Sistema prompt actualizado: añade regla `"NUNCA inventes trimestres: asigna el valor EXACTO indicado en las instrucciones de asignatura"`.
+- Datos incorrectos (13 unidades) eliminados manualmente de la BD; job re-ejecutado.
+
+### Verificación
+- Job 58 (re-run con hint): 12 unidades correctas (4 áreas × 3 niveles 7°/8°/9°) con trimestres exactos.
+- BD validada: `SELECT Nivel, Trimestre, UnidadNumero, UnidadNombre FROM curriculum_units WHERE Asignatura = 'Matemáticas' ORDER BY Nivel, Trimestre, UnidadNumero` → 12 filas correctas.
+
