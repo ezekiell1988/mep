@@ -29,6 +29,7 @@ else
 }
 
 app.UseStaticFiles();
+app.UseAulaIAHangfireCookieInjection(); // inyecta cookie → header ANTES de UseAuthentication
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAulaIAHangfire();

@@ -84,7 +84,19 @@ az containerapp logs show \
   --tail 50 --follow
 ```
 
-### 5. Limpiar imágenes antiguas del ACR (conservar últimas 4)
+### 5. Limpiar imágenes locales de Docker
+Después del push, la imagen local ya no es necesaria y puede ocupar varios GB.
+
+```bash
+# Eliminar todas las imágenes locales del repo aulaia-api
+docker images acrdemoitqs.azurecr.io/aulaia-api --format '{{.ID}}' \
+  | xargs -r docker rmi -f
+
+# Limpiar capas intermedias huérfanas (dangling)
+docker image prune -f
+```
+
+### 6. Limpiar imágenes antiguas del ACR (conservar últimas 4)
 Las revisiones del Container App se nombran `ca-aulaia-api--0000001`, `--0000002`, etc. — incrementan con cada `containerapp update`. Para poder hacer rollback a cualquiera de las últimas 4, conservamos los últimos 4 tags SHA en el ACR y borramos el resto.
 
 ```bash
@@ -159,8 +171,13 @@ TAGS_TO_DELETE=$(az acr repository show-tags \
   | grep -v "^latest$" | grep -v "buildcache" | tail -n +5) && \
 for TAG in $TAGS_TO_DELETE; do
   az acr repository delete --name acrdemoitqs --image aulaia-api:$TAG --yes --output none
-  echo "  Borrado: $TAG"
+  echo "  Borrado remoto: $TAG"
 done && \
+\
+echo "Limpiando imágenes locales..." && \
+docker images acrdemoitqs.azurecr.io/aulaia-api --format '{{.ID}}' \
+  | xargs -r docker rmi -f && \
+docker image prune -f && \
 echo "✓ Listo"
 ```
 

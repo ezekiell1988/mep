@@ -14,6 +14,7 @@ namespace AulaIA.Api.Features.Adecuaciones.Services;
 /// </summary>
 public sealed class AdecuacionAiService(
     IOptions<AiOptions> aiOpts,
+    AzureOpenAIClient aiClient,
     AulaIADbContext db,
     ILogger<AdecuacionAiService> logger)
 {
@@ -35,11 +36,7 @@ public sealed class AdecuacionAiService(
             .Take(10)
             .ToListAsync(ct);
 
-        var opts = aiOpts.Value;
-        var azureClient = new AzureOpenAIClient(
-            new Uri(opts.Endpoint),
-            new Azure.AzureKeyCredential(opts.ApiKey ?? ""));
-        var chatClient = azureClient.GetChatClient(opts.DeploymentName);
+        var chatClient = aiClient.GetChatClient(aiOpts.Value.DeploymentName);
 
         var tipoDescripcion = acc.Type switch
         {

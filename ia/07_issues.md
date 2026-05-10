@@ -1,6 +1,6 @@
 # 07 — Issues Conocidos
 
-> **Última actualización:** 2026-05-08 (rev 6)
+> **Última actualización:** 2026-05-10 (rev 7)
 
 ---
 
@@ -47,7 +47,45 @@ Dos problemas combinados:
 - `ExtractCurriculumJob.cs` — constructor ahora recibe `AzureOpenAIClient aiClient` inyectado; `ExtractUnitsWithAiAsync` usa el cliente del singleton en lugar de instanciar uno propio.
 
 ### Pendiente
-- `AdecuacionAiService.cs` (línea ~39) y `PlaneamientoAiService.cs` (línea ~49) también instancian `AzureOpenAIClient` por llamada — mismo riesgo potencial, no reportado como fallo todavía.
+~~`AdecuacionAiService.cs` y `PlaneamientoAiService.cs` también instancian `AzureOpenAIClient` por llamada~~ → **Resuelto 2026-05-08**: ambos servicios migrados a singleton inyectado por DI (ver ISSUE-004).
+
+---
+
+## ✅ ISSUE-004: AzureOpenAIClient por llamada en AdecuacionAiService y PlaneamientoAiService
+
+**Detectado:** 2026-05-08 (preventivo — mismo patrón que ISSUE-002)
+**Estado:** ✅ Resuelto
+**Componentes:** `AdecuacionAiService.cs`, `PlaneamientoAiService.cs`
+
+### Síntoma
+Ambos servicios instanciaban `new AzureOpenAIClient(...)` dentro de cada método de generación IA, creando un `HttpClient` sin pool por llamada. Riesgo de `NetworkTimeout` en producción bajo carga o PDFs grandes.
+
+### Fix aplicado
+`AdecuacionAiService` y `PlaneamientoAiService` — constructor recibe `AzureOpenAIClient aiClient` inyectado desde DI (singleton registrado en `OptionsExtensions.cs`). Se usa `aiClient.GetChatClient(aiOpts.Value.DeploymentName)` en lugar de instanciar propio.
+
+---
+
+## ✅ ISSUE-005: Hangfire dashboard sin auth browser-friendly en producción
+
+**Detectado:** 2026-05-08
+**Estado:** ✅ Resuelto
+**Componentes:** `HangfireExtensions.cs`, `Program.cs`, `callback/page.tsx`, `page.tsx`
+
+### Síntoma
+Navegar a `https://mep.ezekl.com/hangfire` en el browser devolvía 401 sin forma de autenticarse desde el navegador (solo con token JWT en header, imposible en browser estándar).
+
+### Causa raíz (múltiple, iterativa)
+1. **Middleware ejecutaba `AuthenticateAsync` después de `UseAuthentication()`** — JwtBearer ya había procesado el header vacío y cacheado el resultado fallido. Re-invocar retornaba el cache → siempre fallo.
+2. **CDN auth0-spa-js** (`createAuth0Client`) fallaba con `is not defined` — problema de CSP o carga del script externo.
+3. **Loop de encicle** — cuando el token en localStorage no se encontraba por clave exacta (el scope puede incluir claims extra), la página redirigía a `/?hangfire_return=1`, el SPA detectaba usuario autenticado y regresaba a `/hangfire-login` indefinidamente.
+
+### Fix aplicado
+- `UseAulaIAHangfireCookieInjection()` — middleware nuevo registrado **antes** de `UseAuthentication()` en `Program.cs`. Inyecta la cookie `hangfire_token` como `Authorization: Bearer` header para que JwtBearer lo procese en su primera pasada.
+- `UseAulaIAHangfire()` — solo lee `ctx.User.Identity.IsAuthenticated` + claim admin. No llama `AuthenticateAsync`.
+- `/hangfire-login` — HTML inline sin CDN. Lee token de localStorage por **prefijo** (`@@auth0spajs@@::<clientId>::`) escaneando todas las claves; resiste variaciones en el scope.
+- `/hangfire-session` (POST) — valida JWT, verifica rol admin, guarda cookie HttpOnly Secure SameSite=Strict 8h.
+- `page.tsx` — detecta `?hangfire_return=1`; si ya autenticado usa `getAccessTokenSilently()` (SDK Auth0, no localStorage) → POST directo a `/hangfire-session` → corta el loop.
+- `callback/page.tsx` — respeta `appState.returnTo` en lugar de siempre ir a `/`.
 
 ---
 
@@ -90,5 +128,5 @@ Dos problemas combinados:
 
 ### Verificación
 - Logs del dashboard confirmaron que el XML del BCCR llegaba correctamente (1633 chars) antes del fix de parse.
-- Deploy revisión `ca-aulaia-api--0000006` con parse corregido.
+- Deploy revisión `ca-aulaia-api--0000005` con parse corregido (imagen `6294008` reemplazada con nuevo contenido, mismo tag por falta de commit entre deploys).
 - Próxima ejecución diaria (12h UTC) debe guardar el TC en `exchange_rates`.

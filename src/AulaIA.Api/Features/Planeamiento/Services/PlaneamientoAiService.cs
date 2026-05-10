@@ -10,6 +10,7 @@ namespace AulaIA.Api.Features.Planeamiento.Services;
 
 public sealed class PlaneamientoAiService(
     IOptions<AiOptions> aiOpts,
+    AzureOpenAIClient aiClient,
     AulaIADbContext db,
     ILogger<PlaneamientoAiService> logger)
 {
@@ -45,11 +46,7 @@ public sealed class PlaneamientoAiService(
         var totalLecciones = plan.LeccionesPorSemana *
             (int)Math.Ceiling((plan.FechaFin.DayNumber - plan.FechaInicio.DayNumber) / 7.0);
 
-        var opts = aiOpts.Value;
-        var azureClient = new AzureOpenAIClient(
-            new Uri(opts.Endpoint),
-            new Azure.AzureKeyCredential(opts.ApiKey ?? ""));
-        var chatClient = azureClient.GetChatClient(opts.DeploymentName);
+        var chatClient = aiClient.GetChatClient(aiOpts.Value.DeploymentName);
 
         var accommodationRules = accommodations.Count > 0
             ? $"""

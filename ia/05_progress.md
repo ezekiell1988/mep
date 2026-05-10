@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-08 (rev 16)
+> **Última actualización:** 2026-05-10 (rev 17)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -71,7 +71,14 @@
 | F6 · Fix `ParseTipoCambio` (job 51 etapa 3) — BCCR devuelve `NUM_VALOR` como nodo hijo directo del SOAP (no string XML embebido); eliminado segundo `XDocument.Parse`; ahora busca `NUM_VALOR` en `doc.Descendants()` directamente | ✅ |
 | F6 · `UpdateExchangeRateJob`: si TC es null → lanza `InvalidOperationException` (job falla en rojo) en lugar de retornar silenciosamente con Succeeded | ✅ |
 | F6 · Fix BD Hangfire: job 51 tenía `invocationdata` con firma antigua `ExecuteAsync(CancellationToken)` — eliminado de `hangfire.job/state/jobparameter`; `LastJobId` limpiado en `hangfire.hash` | ✅ |
-| F6 · Deploy revisión `ca-aulaia-api--0000006` — imagen con `ParseTipoCambio` corregido + comportamiento de error correcto | ✅ |
+| F6 · Deploy revisión `ca-aulaia-api--0000005` — imagen `6294008` reemplazada con fix `ParseTipoCambio` + comportamiento de error correcto (mismo tag, nuevo contenido) | ✅ |
+| F6 · Fix `AdecuacionAiService` + `PlaneamientoAiService` — `AzureOpenAIClient` instanciado por llamada (mismo patrón que ISSUE-002); corregido a singleton inyectado por DI en ambos servicios | ✅ |
+| F6 · Hangfire browser login flow — `/hangfire` en prod exige cookie `hangfire_token` (JWT HttpOnly 8h); middleware `UseAulaIAHangfireCookieInjection` inyecta cookie como `Authorization: Bearer` **antes** de `UseAuthentication()` para que JwtBearer resuelva `ctx.User` en primera pasada | ✅ |
+| F6 · `/hangfire-login` — HTML inline sin CDN externo; lee token de `localStorage` por prefijo `@@auth0spajs@@::<clientId>::` (escaneo de todas las claves); si no hay sesión → redirige a `/?hangfire_return=1` | ✅ |
+| F6 · `/hangfire-session` (POST) — valida JWT con JwtBearer, verifica claim admin, guarda `hangfire_token` como cookie HttpOnly Secure SameSite=Strict 8h | ✅ |
+| F6 · `page.tsx` (SPA raíz) — detecta `?hangfire_return=1`; si no autenticado → `loginWithRedirect` con `appState.returnTo='/?hangfire_return=1'`; si autenticado → `getAccessTokenSilently` → POST `/hangfire-session` → redirect a `/hangfire`. Evita el loop de encicle | ✅ |
+| F6 · `callback/page.tsx` — usa `appState.returnTo` del resultado de `handleRedirectCallback()` en lugar de hardcodear `/` | ✅ |
+| F6 · Skill `mep-deploy` actualizado — agrega paso 5 (limpieza imágenes locales Docker) y paso 6 (ACR conserva últimas 4); script completo integra ambas limpiezas post-deploy | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
 | F6 · Subir PDFs al API admin + extracción IA por GPT-5.5 | ⏳ |
 | F6 · Panel de director: vista institucional | ⏳ |

@@ -13,8 +13,9 @@ export default function CallbackPage() {
 
     const params = new URLSearchParams(window.location.search);
     if (params.has('code') && params.has('state')) {
-      handleRedirectCallback().then(() => {
-        router.replace('/');
+      handleRedirectCallback().then((result) => {
+        const returnTo = (result?.appState as { returnTo?: string } | undefined)?.returnTo ?? '/';
+        router.replace(returnTo);
       });
     }
   }, [handleRedirectCallback, router]);

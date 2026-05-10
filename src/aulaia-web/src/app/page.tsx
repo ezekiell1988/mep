@@ -1,18 +1,66 @@
 'use client';
 
 import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
-  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+  const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
   const router = useRouter();
+  const [hangfireMsg, setHangfireMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (isLoading) return;
+    const params = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)
+      : null;
+    const isHangfireReturn = params?.get('hangfire_return') === '1';
+
+    if (isHangfireReturn) {
+      if (!isAuthenticated) {
+        // Sin sesión → ir a Auth0 y volver aquí
+        void loginWithRedirect({
+          authorizationParams: {
+            redirect_uri: window.location.origin + '/callback',
+            audience:     'https://api.aulaia.mep.go.cr',
+            scope:        'openid profile email',
+          },
+          appState: { returnTo: '/?hangfire_return=1' },
+        });
+        return;
+      }
+      // Ya autenticado: obtener token y crear cookie de Hangfire directamente
+      setHangfireMsg('Accediendo al dashboard…');
+      getAccessTokenSilently({ authorizationParams: { audience: 'https://api.aulaia.mep.go.cr' } })
+        .then(token => fetch('/hangfire-session', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token },
+        }))
+        .then(resp => {
+          if (resp.ok) {
+            window.location.replace('/hangfire');
+          } else if (resp.status === 403) {
+            setHangfireMsg('Acceso denegado: se requiere rol admin.');
+          } else {
+            setHangfireMsg('Error al verificar sesión (' + resp.status + ').');
+          }
+        })
+        .catch(() => setHangfireMsg('Error de red al conectar con Hangfire.'));
+      return;
+    }
+
+    if (isAuthenticated) {
       router.replace('/dashboard');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently, router]);
+
+  if (hangfireMsg) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-400">{hangfireMsg}</p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
