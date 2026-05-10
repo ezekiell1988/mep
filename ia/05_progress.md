@@ -103,7 +103,8 @@
 | F6 · `GET /api/planeamiento/curriculum-check?asignatura&nivel&trimestre` — devuelve `{ disponible, unidades }` (autenticado, no admin); usado por el formulario de nuevo planeamiento | ✅ |
 | F6 · Badge disponibilidad en `/planeamiento/nuevo` — badge reactivo (debounce 300ms): verde "Programa MEP validado — N unidades" / naranja "Sin programa validado — la IA usará conocimiento general" al cambiar asignatura/nivel/trimestre | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
-| F6 · Apple Sign-In | ⏳ |
+| F6 · Apple Sign-In — diferido: mayoría de docentes usa Android; requiere Apple Developer $99/año | ⏳ |
+| F6 · Cuenta Google Play Developer `ezekiell1988@gmail.com` — **cerrada por inactividad desde 2021, no reactivable** — requiere cuenta nueva (ver ISSUE-007) | 🚫 |
 
 ---
 
