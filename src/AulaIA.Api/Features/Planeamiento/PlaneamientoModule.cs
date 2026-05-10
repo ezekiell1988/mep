@@ -107,6 +107,25 @@ public static class PlaneamientoModule
         })
         .WithName("ListPlaneamientos");
 
+        // GET /api/planeamiento/curriculum-check — verifica si hay unidades validadas
+        // para una combinación asignatura/nivel/trimestre dada (disponible para docentes)
+        planeamiento.MapGet("/curriculum-check", async Task<Ok<CurriculumCheckResponse>> (
+            [FromQuery] string asignatura,
+            [FromQuery] int nivel,
+            [FromQuery] int trimestre,
+            AulaIADbContext db,
+            CancellationToken ct) =>
+        {
+            var count = await db.CurriculumUnits
+                .CountAsync(u => u.Asignatura == asignatura
+                              && u.Nivel == nivel
+                              && u.Trimestre == trimestre
+                              && u.ValidatedAt != null, ct);
+
+            return TypedResults.Ok(new CurriculumCheckResponse(count > 0, count));
+        })
+        .WithName("CheckCurriculumDisponible");
+
         return app;
     }
 
@@ -122,5 +141,6 @@ public static class PlaneamientoModule
 
     public record PlaneamientoResponse(Guid Id, string Status, string? Contenido);
     public record PlaneamientoListItem(Guid Id, string Asignatura, int Nivel, int Trimestre, string Status, DateTimeOffset CreatedAt);
+    public record CurriculumCheckResponse(bool Disponible, int Unidades);
 }
 

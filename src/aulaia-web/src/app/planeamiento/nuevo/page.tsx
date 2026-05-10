@@ -3,7 +3,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getGrupos, crearPlaneamiento, type Grupo } from '../../../lib/api';
+import { getGrupos, crearPlaneamiento, checkCurriculumDisponible, type Grupo, type CurriculumCheckResponse } from '../../../lib/api';
 
 const ASIGNATURAS = [
   'Artes Plásticas', 'Artes Musicales', 'Educación para el Hogar',
@@ -40,6 +40,8 @@ export default function NuevoPlaneamientoPage() {
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [curriculumCheck, setCurriculumCheck] = useState<CurriculumCheckResponse | null>(null);
+  const [checkingCurriculum, setCheckingCurriculum] = useState(false);
 
   const currentYear = new Date().getFullYear();
 
@@ -77,6 +79,22 @@ export default function NuevoPlaneamientoPage() {
 
   const set = (key: keyof typeof form, value: string | number) =>
     setForm(f => ({ ...f, [key]: value }));
+
+  // Verificar disponibilidad de programa MEP al cambiar asignatura/nivel/trimestre
+  useEffect(() => {
+    if (!isAuthenticated || isLoading) return;
+    let cancelled = false;
+    setCurriculumCheck(null);
+    setCheckingCurriculum(true);
+    const timer = setTimeout(() => {
+      getAccessTokenSilently()
+        .then(token => checkCurriculumDisponible(token, form.asignatura, form.nivel, form.trimestre))
+        .then(result => { if (!cancelled) setCurriculumCheck(result); })
+        .catch(() => { if (!cancelled) setCurriculumCheck(null); })
+        .finally(() => { if (!cancelled) setCheckingCurriculum(false); });
+    }, 300);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [isAuthenticated, isLoading, form.asignatura, form.nivel, form.trimestre, getAccessTokenSilently]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,6 +201,26 @@ export default function NuevoPlaneamientoPage() {
             </select>
           </InputField>
         </div>
+
+        {/* Badge disponibilidad programa MEP */}
+        {checkingCurriculum ? (
+          <div className="flex items-center gap-2 text-xs text-gray-400" aria-live="polite" aria-label="Verificando programa MEP">
+            <span aria-hidden="true" className="w-3.5 h-3.5 border-2 border-gray-300 border-t-transparent rounded-full animate-spin inline-block" />
+            Verificando programa MEP…
+          </div>
+        ) : curriculumCheck !== null ? (
+          curriculumCheck.disponible ? (
+            <div role="status" aria-live="polite" className="flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+              <span aria-hidden="true">✓</span>
+              <span>Programa MEP validado — <strong>{curriculumCheck.unidades} unidades</strong> del currículo oficial disponibles</span>
+            </div>
+          ) : (
+            <div role="status" aria-live="polite" className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              <span aria-hidden="true">⚠</span>
+              <span>Sin programa MEP validado para esta combinación — la IA usará conocimiento general</span>
+            </div>
+          )
+        ) : null}
 
         {/* Año lectivo y lecciones/semana */}
         <div className="grid grid-cols-2 gap-4">

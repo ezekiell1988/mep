@@ -86,6 +86,22 @@ export const listPlaneamientos = (token: string, groupId?: string) =>
     token,
   );
 
+export interface CurriculumCheckResponse {
+  disponible: boolean;
+  unidades: number;
+}
+
+export const checkCurriculumDisponible = (
+  token: string,
+  asignatura: string,
+  nivel: number,
+  trimestre: number,
+) =>
+  apiFetch<CurriculumCheckResponse>(
+    `/api/planeamiento/curriculum-check?asignatura=${encodeURIComponent(asignatura)}&nivel=${nivel}&trimestre=${trimestre}`,
+    token,
+  );
+
 // ─── Notas ────────────────────────────────────────────────────────────────────
 
 export interface ActividadResponse {

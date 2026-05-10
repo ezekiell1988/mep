@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-10 (rev 21)
+> **Última actualización:** 2026-05-10 (rev 22)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -99,7 +99,9 @@
 | F6 · Curriculum Matemáticas III Ciclo — 12 unidades extraídas y validadas en BD: 4 áreas × 3 niveles (7°/8°/9°) con habilidades reales del PDF MEP | ✅ |
 | F6 · Curriculum completo — 130+ unidades validadas para todas las asignaturas; Matemáticas es la última en completarse | ✅ |
 | F6 · Deploy revisión `ca-aulaia-api--0000012` — imagen con chunking + hint asignatura + fix Docker fonts + fix JSX | ✅ |
-| F6 · Conectar `CurriculumUnit` validadas al `PlaneamientoAiService` — planeamiento anclado al programa oficial MEP | ⏳ |
+| F6 · Conectar `CurriculumUnit` validadas al `PlaneamientoAiService` — planeamiento anclado al programa oficial MEP | ✅ |
+| F6 · `GET /api/planeamiento/curriculum-check?asignatura&nivel&trimestre` — devuelve `{ disponible, unidades }` (autenticado, no admin); usado por el formulario de nuevo planeamiento | ✅ |
+| F6 · Badge disponibilidad en `/planeamiento/nuevo` — badge reactivo (debounce 300ms): verde "Programa MEP validado — N unidades" / naranja "Sin programa validado — la IA usará conocimiento general" al cambiar asignatura/nivel/trimestre | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
 | F6 · Apple Sign-In | ⏳ |
 
