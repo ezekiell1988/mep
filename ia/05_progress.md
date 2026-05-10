@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-10 (rev 17)
+> **Última actualización:** 2026-05-10 (rev 18)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -79,8 +79,9 @@
 | F6 · `page.tsx` (SPA raíz) — detecta `?hangfire_return=1`; si no autenticado → `loginWithRedirect` con `appState.returnTo='/?hangfire_return=1'`; si autenticado → `getAccessTokenSilently` → POST `/hangfire-session` → redirect a `/hangfire`. Evita el loop de encicle | ✅ |
 | F6 · `callback/page.tsx` — usa `appState.returnTo` del resultado de `handleRedirectCallback()` en lugar de hardcodear `/` | ✅ |
 | F6 · Skill `mep-deploy` actualizado — agrega paso 5 (limpieza imágenes locales Docker) y paso 6 (ACR conserva últimas 4); script completo integra ambas limpiezas post-deploy | ✅ |
+| F6 · ISSUE-006 resuelto — `BlobSlugHelper.ToAsciiSlug()` en `Shared/Extensions/BlobSlugHelper.cs`; `SyncCurriculumJob` elimina `ToAsciiSlug()` privado; `CurriculumModule` corrige blob name en `POST /api/curriculum/upload` | ✅ |
+| F6 · Tab "Curriculum PDF" en `/admin` — selector asignatura/ciclo + file input + `uploadCurriculumPdf()` en `api.ts`; encola `ExtractCurriculumJob` y muestra Job ID resultante | ✅ |
 | F6 · Separar servicio de IA en Container App independiente | ⏳ |
-| F6 · Subir PDFs al API admin + extracción IA por GPT-5.5 | ⏳ |
 | F6 · Panel de director: vista institucional | ⏳ |
 | F6 · Plan institucional: gestión múltiples docentes | ⏳ |
 | F6 · Apple Sign-In | ⏳ |

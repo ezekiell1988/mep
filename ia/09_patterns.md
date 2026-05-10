@@ -89,23 +89,21 @@ var blobClient = new BlobClient(storageOpts.Value.ConnectionString, "curriculum"
 using var stream = await blobClient.OpenReadAsync(cancellationToken: ct);
 ```
 
-**Slug de blob sin acentos (`SyncCurriculumJob`):**
+**Slug de blob sin acentos — `BlobSlugHelper.ToAsciiSlug()` (helper compartido):**
 ```csharp
-// ✅ Siempre usar ToAsciiSlug() para generar el nombre de carpeta del blob
-private static string ToAsciiSlug(string asignatura)
-{
-    var normalized = asignatura.ToLowerInvariant().Normalize(NormalizationForm.FormD);
-    var sb = new StringBuilder();
-    foreach (var c in normalized)
-    {
-        if (CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.NonSpacingMark)
-            continue;   // elimina tildes, diéresis, etc.
-        sb.Append(c == ' ' ? '-' : c);
-    }
-    return sb.ToString().Normalize(NormalizationForm.FormC);
-}
+// ✅ Usar BlobSlugHelper.ToAsciiSlug() en cualquier lugar que genere blob names
+// Ubicación: AulaIA.Api/Shared/Extensions/BlobSlugHelper.cs
+using AulaIA.Api.Shared.Extensions;
+
+var blobName = $"{BlobSlugHelper.ToAsciiSlug(asignatura)}/{timestamp}.pdf";
 // Resultado: "Educación Física" → "educacion-fisica"
 //            "Artes Plásticas"  → "artes-plasticas"
+```
+
+**❌ NO usar nunca directamente:**
+```csharp
+// ❌ Preserva acentos → BlobNotFound en ExtractCurriculumJob (ISSUE-001, ISSUE-006)
+asignatura.ToLowerInvariant().Replace(" ", "-")
 ```
 
 **Regla crítica:** `Uri.AbsolutePath` **nunca** debe usarse directamente como blob name si el nombre puede tener caracteres no-ASCII. Siempre `Uri.UnescapeDataString(blobUri.AbsolutePath)` primero.

@@ -1,5 +1,6 @@
 using AulaIA.Api.Features.Curriculum.Jobs;
 using AulaIA.Api.Shared.Domain;
+using AulaIA.Api.Shared.Extensions;
 using AulaIA.Api.Shared.Options;
 using AulaIA.Api.Shared.Persistence;
 using Azure.Storage.Blobs;
@@ -62,7 +63,7 @@ public static class CurriculumModule
             if (file.Length > 50 * 1024 * 1024)
                 return TypedResults.BadRequest("El archivo no puede superar 50 MB.");
 
-            var blobName = $"{asignatura.ToLowerInvariant().Replace(" ", "-")}/{Guid.NewGuid()}.pdf";
+            var blobName = $"{BlobSlugHelper.ToAsciiSlug(asignatura)}/{Guid.NewGuid()}.pdf";
             var client = new BlobContainerClient(
                 storageOpts.Value.ConnectionString,
                 storageOpts.Value.ContainerCurriculum);

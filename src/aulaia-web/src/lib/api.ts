@@ -560,3 +560,34 @@ export const subirComprobante = async (token: string, paymentId: string, file: F
   );
   if (!res.ok) throw new Error(`Error subiendo comprobante: ${res.status}`);
 };
+
+// ── Curriculum (admin) ─────────────────────────────────────────────────────
+
+export interface UploadCurriculumResponse {
+  jobId: string;
+  blobUrl: string;
+}
+
+export const uploadCurriculumPdf = async (
+  token: string,
+  asignatura: string,
+  ciclo: string,
+  file: File,
+): Promise<UploadCurriculumResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const params = new URLSearchParams({ asignatura, ciclo });
+  const res = await fetch(
+    `${API_BASE}/api/curriculum/upload?${params.toString()}`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    },
+  );
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(`API ${res.status}: ${text}`);
+  }
+  return res.json() as Promise<UploadCurriculumResponse>;
+};

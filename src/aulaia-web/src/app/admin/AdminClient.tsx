@@ -12,12 +12,30 @@ import {
   getAdminComisiones,
   ejecutarCierreMensual,
   marcarComisionPagada,
+  uploadCurriculumPdf,
   type AdminPagoResponse,
   type AdminSuscripcionResponse,
   type AdminComisionResponse,
+  type UploadCurriculumResponse,
 } from '../../lib/api';
 
-type Tab = 'pagos' | 'suscripciones' | 'cierre' | 'comisiones';
+type Tab = 'pagos' | 'suscripciones' | 'cierre' | 'comisiones' | 'curriculum';
+
+const ASIGNATURAS = [
+  'Artes Plásticas',
+  'Artes Musicales',
+  'Educación para el Hogar',
+  'Educación Física',
+  'Matemáticas',
+  'Español',
+  'Ciencias',
+  'Estudios Sociales',
+  'Inglés',
+  'Francés',
+  'Orientación',
+] as const;
+
+const CICLOS = ['III Ciclo', 'I y II Ciclo', 'II Ciclo'] as const;
 
 export default function AdminClient() {
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
@@ -33,6 +51,12 @@ export default function AdminClient() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Curriculum upload form
+  const [currAsignatura, setCurrAsignatura] = useState<string>(ASIGNATURAS[0]);
+  const [currCiclo, setCurrCiclo] = useState<string>(CICLOS[0]);
+  const [currFile, setCurrFile] = useState<File | null>(null);
+  const [currResult, setCurrResult] = useState<UploadCurriculumResponse | null>(null);
 
   // Cierre mensual form
   const [cierreMonth, setCierreMonth] = useState(() => {
@@ -122,6 +146,24 @@ export default function AdminClient() {
     }
   };
 
+  const handleUploadCurriculum = async () => {
+    if (!currFile) { setError('Seleccioná un archivo PDF.'); return; }
+    setSaving(true);
+    setError(null);
+    setCurrResult(null);
+    try {
+      const token = await getAccessTokenSilently();
+      const result = await uploadCurriculumPdf(token, currAsignatura, currCiclo, currFile);
+      setCurrResult(result);
+      setCurrFile(null);
+      setSuccessMsg(`Job de extracción encolado (ID: ${result.jobId}). Revisá Hangfire para ver el progreso.`);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Error subiendo PDF');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleMarcarPagada = async (id: string) => {
     setSaving(true);
     try {
@@ -152,6 +194,7 @@ export default function AdminClient() {
     { id: 'suscripciones', label: 'Suscripciones' },
     { id: 'cierre', label: 'Cierre mensual' },
     { id: 'comisiones', label: 'Comisiones' },
+    { id: 'curriculum', label: 'Curriculum PDF' },
   ];
 
   return (
@@ -489,6 +532,92 @@ export default function AdminClient() {
                 </table>
               </div>
             )}
+          </section>
+        )}
+        {/* Tab: Curriculum */}
+        {tab === 'curriculum' && (
+          <section
+            role="tabpanel"
+            id="panel-curriculum"
+            tabIndex={0}
+            aria-labelledby="curriculum-heading"
+            className="max-w-lg"
+          >
+            <h2 id="curriculum-heading" className="text-lg font-semibold text-gray-900 mb-2">
+              Subir PDF de programa curricular MEP
+            </h2>
+            <p className="text-sm text-gray-600 mb-6">
+              Sube manualmente un PDF del MEP para extraer las unidades curriculares con GPT-5.5.
+              El job se encola en Hangfire (cola <code className="bg-gray-100 px-1 rounded">curriculum</code>).
+            </p>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+              <div>
+                <label htmlFor="curr-asignatura" className="block text-sm font-medium text-gray-700 mb-1">
+                  Asignatura
+                </label>
+                <select
+                  id="curr-asignatura"
+                  value={currAsignatura}
+                  onChange={e => setCurrAsignatura(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {ASIGNATURAS.map(a => (
+                    <option key={a} value={a}>{a}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="curr-ciclo" className="block text-sm font-medium text-gray-700 mb-1">
+                  Ciclo
+                </label>
+                <select
+                  id="curr-ciclo"
+                  value={currCiclo}
+                  onChange={e => setCurrCiclo(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {CICLOS.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="curr-file" className="block text-sm font-medium text-gray-700 mb-1">
+                  Archivo PDF (máx. 50 MB)
+                </label>
+                <input
+                  id="curr-file"
+                  type="file"
+                  accept="application/pdf"
+                  onChange={e => setCurrFile(e.target.files?.[0] ?? null)}
+                  className="w-full text-sm text-gray-700 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 file:text-sm hover:file:bg-blue-100"
+                />
+                {currFile && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {currFile.name} ({(currFile.size / 1024 / 1024).toFixed(2)} MB)
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => void handleUploadCurriculum()}
+                disabled={saving || !currFile}
+                className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saving ? 'Subiendo...' : 'Subir PDF y extraer con IA'}
+              </button>
+
+              {currResult && (
+                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-xs text-gray-600 space-y-1">
+                  <p><span className="font-medium">Job ID:</span> <code className="font-mono">{currResult.jobId}</code></p>
+                  <p><span className="font-medium">Blob URL:</span> <span className="break-all">{currResult.blobUrl}</span></p>
+                </div>
+              )}
+            </div>
           </section>
         )}
       </main>

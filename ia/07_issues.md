@@ -1,6 +1,6 @@
 # 07 — Issues Conocidos
 
-> **Última actualización:** 2026-05-10 (rev 7)
+> **Última actualización:** 2026-05-10 (rev 8)
 
 ---
 
@@ -27,6 +27,29 @@ Dos problemas combinados:
 - Blob `educación-física/20260508190108.pdf` existe en container `curriculum` (confirmado con `az storage blob list`).
 - Build compila sin errores ni advertencias.
 - Retry del job 38 en Hangfire dashboard debería pasar tras reiniciar la API con el fix.
+
+---
+
+## ✅ ISSUE-006: BlobName con acentos en `POST /api/curriculum/upload` (endpoint admin)
+
+**Detectado:** 2026-05-10 (revisión de código)
+**Estado:** ✅ Resuelto
+**Componentes:** `CurriculumModule.cs`, `SyncCurriculumJob.cs`, `Shared/Extensions/BlobSlugHelper.cs`
+
+### Síntoma
+El endpoint `POST /api/curriculum/upload` generaba el blob name con `asignatura.ToLowerInvariant().Replace(" ", "-")`, que preserva tildes y caracteres no-ASCII (mismo patrón que causó ISSUE-001 en `SyncCurriculumJob`). Un PDF subido para "Artes Plásticas" se guardaba como `artes-plásticas/<uuid>.pdf`, lo que habría causado BlobNotFound en `ExtractCurriculumJob` al procesar la URL.
+
+### Causa raíz
+`ToAsciiSlug()` se implementó como método privado en `SyncCurriculumJob` (fix de ISSUE-001) pero no se propagó al endpoint de upload manual en `CurriculumModule`. El código duplicado y sin el fix quedó en producción como deuda técnica silenciosa.
+
+### Fix aplicado
+- `Shared/Extensions/BlobSlugHelper.cs` — clase estática pública `BlobSlugHelper.ToAsciiSlug(string)` con la lógica NFD+strip NonSpacingMark. Fuente única de verdad.
+- `SyncCurriculumJob.cs` — eliminado método privado `ToAsciiSlug()`; usa `BlobSlugHelper.ToAsciiSlug()`.
+- `CurriculumModule.cs` — reemplazado `asignatura.ToLowerInvariant().Replace(" ", "-")` por `BlobSlugHelper.ToAsciiSlug(asignatura)`.
+
+### Verificación
+- Build: 0 errores, 0 advertencias.
+- Subir un PDF de "Artes Plásticas" genera blob name `artes-plasticas/<uuid>.pdf` (sin acento).
 
 ---
 
