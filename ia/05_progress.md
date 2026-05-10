@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-10 (rev 22)
+> **Última actualización:** 2026-05-10 (rev 23)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -102,9 +102,27 @@
 | F6 · Conectar `CurriculumUnit` validadas al `PlaneamientoAiService` — planeamiento anclado al programa oficial MEP | ✅ |
 | F6 · `GET /api/planeamiento/curriculum-check?asignatura&nivel&trimestre` — devuelve `{ disponible, unidades }` (autenticado, no admin); usado por el formulario de nuevo planeamiento | ✅ |
 | F6 · Badge disponibilidad en `/planeamiento/nuevo` — badge reactivo (debounce 300ms): verde "Programa MEP validado — N unidades" / naranja "Sin programa validado — la IA usará conocimiento general" al cambiar asignatura/nivel/trimestre | ✅ |
-| F6 · Separar servicio de IA en Container App independiente | ⏳ |
-| F6 · Apple Sign-In — diferido: mayoría de docentes usa Android; requiere Apple Developer $99/año | ⏳ |
-| F6 · Cuenta Google Play Developer `ezekiell1988@gmail.com` — **cerrada por inactividad desde 2021, no reactivable** — requiere cuenta nueva (ver ISSUE-007) | 🚫 |
+| F6 · Separar servicio de IA en Container App independiente — diferido hasta carga real | ⏳ |
+| F6 · Apple Sign-In — diferido hasta tener cuenta Apple Developer propia | ⏳ |
+| F6 · Cuenta Google Play Developer cerrada — resuelto con ADR-011: APK directo durante piloto, cuenta nueva antes del lanzamiento público | ✅ |
+
+---
+
+## 🔄 En progreso — Fase 7 (Lanzamiento Piloto)
+
+### PC-14: Fase 7 — Distribución y onboarding piloto
+| Tarea | Estado |
+|-------|--------|
+| F7 · Configurar `package` android + `bundleIdentifier` iOS en `app.json` | ⏳ |
+| F7 · Instalar EAS CLI + crear cuenta expo.dev | ⏳ |
+| F7 · Build APK Android (`eas build --platform android --profile preview`) | ⏳ |
+| F7 · Subir APK a Google Drive + redactar mensaje WhatsApp con instrucciones de instalación | ⏳ |
+| F7 · Build iOS ad-hoc con Xcode (cuenta gratuita, 7 días) — instalar en iPhone Adriana | ⏳ |
+| F7 · Onboarding Adriana: crear institución, grupos, primeros estudiantes | ⏳ |
+| F7 · Primera prueba de asistencia QR en clase real | ⏳ |
+| F7 · Landing page pública en `mep.ezekl.com` (antes del login, descripción del producto) | ⏳ |
+| F7 · Crear cuenta Google Play Developer nueva ($25) — decidir con Adriana | ⏳ |
+| F7 · Crear cuenta Apple Developer ($99/año) — decidir con Adriana | ⏳ |
 
 ---
 

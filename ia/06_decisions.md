@@ -4,6 +4,32 @@
 
 ---
 
+## ADR-011: Estrategia de distribución inicial — APK directo + Xcode ad-hoc
+
+**Fecha:** 2026-05-10
+**Estado:** ✅ Decidido
+**Decidido por:** Ezequiel Baltodano
+
+### Contexto
+La cuenta de Google Play Developer está cerrada permanentemente (ISSUE-007). La cuenta de Apple Developer no es propia ($99/año). Se necesita distribuir la app a Adriana y a docentes piloto del Colegio de Aserrí para validar el producto antes de invertir en cuentas de tiendas.
+
+### Decisión
+
+**Android:** Distribuir APK directamente vía enlace de Google Drive compartido por WhatsApp. Los docentes habilitan "Instalar apps de fuentes desconocidas" una sola vez.
+
+**iOS:** Instalar vía Xcode desde Mac con cuenta de Apple ID gratuita. El perfil de desarrollo expira en 7 días y hay que reinstalar conectando el iPhone por USB. Solo viable para el iPhone de Adriana y el propio durante el piloto.
+
+**Tiendas (diferido):** Abrir cuenta Google Play Developer nueva ($25 único) y cuenta Apple Developer ($99/año) una vez validado el producto con Adriana. La decisión de cuándo invertir se toma con ella tras las primeras semanas de uso real.
+
+### Consecuencias
+- ✅ Piloto arranca sin costo de cuentas de tiendas.
+- ✅ Adriana puede validar el producto antes de comprometer inversión.
+- ⚠️ iOS tiene que reinstalarse cada 7 días — solo viable a corto plazo para 1-2 dispositivos.
+- ⚠️ Android requiere que el docente active fuentes desconocidas — hay que incluir instrucciones en el mensaje de WhatsApp.
+- ⚠️ Sin actualizaciones automáticas — cada nueva versión hay que reenviar el APK.
+
+---
+
 ## ADR-008: Modelo de compensación para Adriana Guido (socia comercial)
 
 **Fecha:** 2026-05-07

@@ -1,28 +1,20 @@
 # 07 — Issues Conocidos
 
-> **Última actualización:** 2026-05-10 (rev 10)
+> **Última actualización:** 2026-05-10 (rev 11)
 
 ---
 
-## 🚫 ISSUE-007: Cuenta Google Play Developer cerrada — bloqueador para Play Store
+## ✅ ISSUE-007: Cuenta Google Play Developer cerrada
 
 **Detectado:** 2026-05-10
-**Estado:** 🚫 Bloqueador activo
+**Estado:** ✅ Resuelto con ADR-011
 **Componentes:** Distribución app Android
 
 ### Síntoma
-La cuenta de Google Play Developer asociada a `ezekiell1988@gmail.com` (developer ID `775838327654912002...`) está **cerrada por inactividad desde el 26 jul 2021** y Google indica que **no puede reactivarse**.
+La cuenta de Google Play Developer asociada a `ezekiell1988@gmail.com` está cerrada por inactividad desde 2021 y no puede reactivarse.
 
-### Opciones
-
-| Opción | Costo | Tiempo | Riesgo |
-|--------|-------|--------|--------|
-| **Crear cuenta nueva** con otra dirección Gmail | $25 USD único | 1–2 días (verificación) | Bajo — es el camino estándar |
-| Distribución directa APK (fuera de Play Store) | $0 | Inmediato | Medio — los docentes deben habilitar "fuentes desconocidas" |
-| Play Store mediante cuenta de otra persona | $25 USD | 1–2 días | Medio — titular legal es otra persona |
-
-### Decisión pendiente
-Elegir cuenta Gmail nueva para crear la cuenta de Play Developer antes del lanzamiento público. Mientras tanto, distribuir APK directo para las pruebas con Adriana.
+### Decisión
+Distribución directa por APK (Google Drive → WhatsApp) durante el piloto. Crear cuenta nueva de Play Developer ($25) una vez validado el producto con Adriana. Ver ADR-011.
 
 ---
 
