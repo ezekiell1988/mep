@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-10 (rev 23)
+> **Última actualización:** 2026-05-10 (rev 24)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -113,9 +113,15 @@
 ### PC-14: Fase 7 — Distribución y onboarding piloto
 | Tarea | Estado |
 |-------|--------|
-| F7 · Configurar `package` android + `bundleIdentifier` iOS en `app.json` | ⏳ |
-| F7 · Instalar EAS CLI + crear cuenta expo.dev | ⏳ |
-| F7 · Build APK Android (`eas build --platform android --profile preview`) | ⏳ |
+| F7 · Configurar `package` android + `bundleIdentifier` iOS en `app.json` | ✅ (`cr.ezekl.aulaia`) |
+| F7 · Instalar EAS CLI + crear cuenta expo.dev (`ezekiell1988`) | ✅ |
+| F7 · Vincular proyecto a expo.dev con `eas init` (projectId: `58d237e5-c82d-4ccf-9b05-27b66fcb6246`) | ✅ |
+| F7 · Eliminar `expo-barcode-scanner` deprecado (incompatible con RN 0.83 / Gradle 10) | ✅ |
+| F7 · Eliminar `newArchEnabled` y `edgeToEdgeEnabled` de `app.json` (campos inválidos SDK 55) | ✅ |
+| F7 · Alinear versiones: `react@19.2.0`, `react-native-safe-area-context@5.6.2`, `react-native-screens@4.23.0` | ✅ |
+| F7 · Skill `eas-cli` creado — login, init, build, errores frecuentes | ✅ |
+| F7 · Build APK Android exitoso — `eas build --platform android --profile preview` | ✅ (build `02bfafc1`) |
+| F7 · APK disponible: `https://expo.dev/artifacts/eas/kFQYasZPhh9dNq2cvtEdP.apk` (~30 días) | ✅ |
 | F7 · Subir APK a Google Drive + redactar mensaje WhatsApp con instrucciones de instalación | ⏳ |
 | F7 · Build iOS ad-hoc con Xcode (cuenta gratuita, 7 días) — instalar en iPhone Adriana | ⏳ |
 | F7 · Onboarding Adriana: crear institución, grupos, primeros estudiantes | ⏳ |
