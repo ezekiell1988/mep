@@ -74,20 +74,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             new User
             {
                 Id            = Users.Ezequiel,
-                Auth0Sub      = "auth0|69fae47c268da9d7e46c6d4b",   // actualizar tras F0-14
+                Auth0Sub      = "auth0|69fae47c268da9d7e46c6d4b",
                 Email         = "ezekiell1988@hotmail.com",
                 FullName      = "Ezequiel Baltodano",
                 Role          = UserRole.Admin,
-                InstitutionId = Institutions.LiceoAserri,
-                CreatedAt     = seed
-            },
-            new User
-            {
-                Id            = Users.Adriana,
-                Auth0Sub      = "auth0|PLACEHOLDER_ADRIANA",    // actualizar tras F0-14
-                Email         = "ezekiell1988@gmail.com",
-                FullName      = "Adriana Guido",
-                Role          = UserRole.Teacher,
                 InstitutionId = Institutions.LiceoAserri,
                 CreatedAt     = seed
             }

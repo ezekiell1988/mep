@@ -1,6 +1,30 @@
 # 07 — Issues Conocidos
 
-> **Última actualización:** 2026-05-10 (rev 11)
+> **Última actualización:** 2026-05-11 (rev 12)
+
+---
+
+## ✅ ISSUE-008: Sin provisioning de usuario Auth0 → BD (gap crítico para onboarding)
+
+**Detectado:** 2026-05-11
+**Estado:** ✅ Resuelto
+**Componentes:** `CurrentUserService.cs`, `Features/Users/UsersModule.cs`, `callback/page.tsx`, `UserConfiguration.cs`
+
+### Síntoma
+`CurrentUserService.ResolveAsync()` lanzaba `UnauthorizedAccessException` ("User with sub '...' not found") si el `auth0_sub` del JWT no tenía una fila correspondiente en la tabla `users`. Ningún mecanismo creaba el usuario automáticamente. Adriana se hubiera registrado en Auth0 y recibido 401 en todas las llamadas.
+
+### Causa raíz
+El seed data tenía a Adriana con `Auth0Sub = "auth0|PLACEHOLDER_ADRIANA"` — un sub ficticio que nunca coincidiría con su sub real de Auth0. Y no existía ningún endpoint ni middleware que creara el `User` al primer login.
+
+### Fix aplicado
+1. **`POST /api/auth/me`** (`Features/Users/UsersModule.cs`) — endpoint idempotente: busca por `auth0sub` en BD → si no existe, crea `User` nuevo con `Role = Teacher`. Requiere autenticación.
+2. **`callback/page.tsx`** — llama `ensureUserProfile(token)` justo después de `handleRedirectCallback()`, antes de redirigir. Provisioning garantizado en cada primer login.
+3. **`UserConfiguration.cs`** — Adriana eliminada del seed `HasData`. Solo queda Ezequiel con su sub real.
+4. **Migración `RemoveAdrianaFromSeed`** — reasigna grupos demo a Ezequiel (`UPDATE groups SET teacher_id/teacher_sub`) antes del `DELETE FROM users`; respeta FK Restrict.
+
+### Comportamiento post-fix
+- Usuario nuevo se registra en Auth0 → `/callback` llama `POST /api/auth/me` → fila `User` creada con `Role = Teacher` → todas las llamadas siguientes funcionan.
+- Endpoint es idempotente: si el user ya existe (segundo login), devuelve su perfil sin modificar nada.
 
 ---
 

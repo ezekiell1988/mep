@@ -1,7 +1,7 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-11 (rev 25)
-> **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
+> **Última actualización:** 2026-05-11 (rev 26)
+> **Fase activa:** Fase 7 — Onboarding Adriana en la web 🔄
 
 ---
 
@@ -19,9 +19,11 @@
 
 **Fase 5 — Monetización: Suscripciones, SINPE Móvil y Referidos** (2026-05-07)
 
+**Fase 6 — Escala: Container Apps + Nuevas Materias** (2026-05-11)
+
 ---
 
-## 🔄 En progreso — Fase 6
+## ✅ Completado — Fase 6 (detalle)
 
 ### PC-13: Fase 6 — Contenedorización (infraestructura)
 | Tarea | Estado |
@@ -108,7 +110,7 @@
 
 ---
 
-## 🔄 En progreso — Fase 7 (Lanzamiento Piloto)
+## 🔄 En progreso — Fase 7 (Onboarding Adriana en la web)
 
 > **Pivote 2026-05-11:** Adriana confirmó por WhatsApp que quiere usar la **web primero** para planeamiento desde su computadora. La app móvil (asistencia en el aula) la ve como un proyecto separado para más adelante. Ver ADR-012.
 
@@ -117,6 +119,12 @@
 #### Prioridad inmediata — Web app lista para Adriana
 | Tarea | Estado |
 |-------|--------|
+| F7 · **ISSUE-008 resuelto** — Gap crítico: `CurrentUserService.ResolveAsync()` lanzaba 401 si el user no existía en BD. Ningún endpoint creaba el user automáticamente al registrarse en Auth0 | ✅ |
+| F7 · `POST /api/auth/me` (endpoint de provisioning) — `Features/Users/UsersModule.cs`; lookup por `auth0sub` → si no existe crea `User` nuevo con `Role = Teacher`; idempotente | ✅ |
+| F7 · `ensureUserProfile()` en `src/aulaia-web/src/lib/api.ts` — tipo `UserProfile` + función que llama `POST /api/auth/me` | ✅ |
+| F7 · `callback/page.tsx` — llama `ensureUserProfile` justo después de `handleRedirectCallback` antes de redirigir; provisioning ocurre en cada primer login | ✅ |
+| F7 · Seed simplificado — Adriana eliminada del `HasData` en `UserConfiguration.cs`; solo queda Ezequiel | ✅ |
+| F7 · Migración `RemoveAdrianaFromSeed` — reasigna grupos demo a Ezequiel (UPDATE groups teacher_id/teacher_sub) antes del DELETE en `users`; respeta FK Restrict | ✅ |
 | F7 · Landing page pública en `mep.ezekl.com` — descripción del producto antes del login | ⏳ |
 | F7 · Onboarding Adriana en web: crear institución, grupos, primeros estudiantes | ⏳ |
 | F7 · Primera prueba de planeamiento con IA en clase real (Artes Plásticas, Colegio Aserrí) | ⏳ |

@@ -3,6 +3,7 @@ using System;
 using AulaIA.Api.Shared.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AulaIA.Api.Shared.Persistence.Migrations
 {
     [DbContext(typeof(AulaIADbContext))]
-    partial class AulaIADbContextModelSnapshot : ModelSnapshot
+    [Migration("20260511171323_RemoveAdrianaFromSeed")]
+    partial class RemoveAdrianaFromSeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

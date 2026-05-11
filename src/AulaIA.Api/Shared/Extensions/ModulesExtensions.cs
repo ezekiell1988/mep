@@ -1,4 +1,5 @@
 using AulaIA.Api.Features.Adecuaciones;
+using AulaIA.Api.Features.Users;
 using AulaIA.Api.Features.Asistencia;
 using AulaIA.Api.Features.Calendario;
 using AulaIA.Api.Features.Curriculum;
@@ -55,7 +56,8 @@ public static class ModulesExtensions
                .MapPowerSyncEndpoints()
                .MapSuscripcionesEndpoints()
                .MapPaymentsEndpoints()
-               .MapReferralsEndpoints();
+               .MapReferralsEndpoints()
+               .MapUsersEndpoints();
 
         /// <summary>Registra todos los recurring jobs de Hangfire.</summary>
         public void AddAulaIARecurringJobs()

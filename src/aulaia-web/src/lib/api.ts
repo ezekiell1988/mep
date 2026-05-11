@@ -39,6 +39,25 @@ export interface Estudiante {
   qrCode: string;
 }
 
+// ─── Auth / Provisioning ─────────────────────────────────────────────────────
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  role: 'Teacher' | 'Coordinator' | 'Admin';
+  institutionId: string | null;
+}
+
+/**
+ * Idempotente. Llama a POST /api/auth/me para crear o recuperar el perfil del
+ * usuario en la BD. Debe invocarse una vez por sesión, justo después del login.
+ */
+export const ensureUserProfile = (token: string) =>
+  apiFetch<UserProfile>('/api/auth/me', token, { method: 'POST' });
+
+// ─── Grupos ──────────────────────────────────────────────────────────────────
+
 export const getGrupos    = (token: string) => apiFetch<Grupo[]>('/api/grupos', token);
 export const getEstudiantes = (token: string, groupId: string) =>
   apiFetch<Estudiante[]>(`/api/grupos/${groupId}/estudiantes`, token);
