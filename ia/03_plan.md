@@ -1,13 +1,13 @@
 # 03 — Plan de Desarrollo
 
-> **Última actualización:** 2026-05-07 (rev 4)
-> **Estado general:** 🔄 Fase 6 en progreso — contenedorización completada, ACR + Container Apps pendientes
+> **Última actualización:** 2026-05-11 (rev 5)
+> **Estado general:** 🔄 Fase 7 en progreso — onboarding de Adriana en la web (web-first, ADR-012)
 
 ---
 
 ## Visión general
 
-El proyecto se construye en 5 fases progresivas. Las primeras dos fases producen un MVP funcional que Adriana Guido puede usar en el Colegio de Aserrí desde el primer trimestre. Las fases 3 y 4 consolidan los módulos diferenciadores. La Fase 5 migra la infraestructura a Container Apps para soportar escala.
+El proyecto se construye en fases progresivas. **Fase 7 (activa):** Adriana usa la web (`mep.ezekl.com`) para planeamiento desde su computadora — es la validación real del producto. La app móvil (asistencia QR offline) es la Fase 8, cuando la web ya esté validada. Ver ADR-012.
 
 ---
 
@@ -295,3 +295,5 @@ mep/
 | 4 | Adecuaciones e Informes | Informes CAE generados automáticamente | ✅ |
 | 5 | Monetización: Pagos + Referidos | Trial, SINPE, panel admin, panel comisiones Adriana | ✅ |
 | 6 | Escala + Nuevas materias | Container Apps + plan institucional | 🔄 |
+| 7 | **Piloto web con Adriana** | Adriana usa planeamiento en `mep.ezekl.com` desde computadora | 🔄 |
+| 8 | App móvil: asistencia QR offline | Adriana toma lista QR offline en el aula (diferido, ADR-012) | ⏳ |

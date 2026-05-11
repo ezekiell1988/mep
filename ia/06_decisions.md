@@ -4,10 +4,36 @@
 
 ---
 
+## ADR-012: Pivote web-first — Adriana usa la web, app móvil es fase futura
+
+**Fecha:** 2026-05-11
+**Estado:** ✅ Decidido
+**Decidido por:** Ezequiel Baltodano (basado en feedback directo de Adriana Guido)
+
+### Contexto
+Al mostrarle a Adriana la primera versión, ella respondió: *"Y si es solo para computadora? Total los planes es imposible manejarlos en teléfono"*. Confirmó que quiere usar la web para planeamiento desde su computadora. Sobre la app móvil (asistencia offline en el aula) dijo: *"Sip ese si pero ese sería otro proyecto"* — lo ve útil pero no como su prioridad inmediata.
+
+### Decisión
+**Prioridad Fase 7: web app funcionando para Adriana** (`mep.ezekl.com`).
+
+- Enfocar onboarding de Adriana completamente en la web: institución, grupos, primer planeamiento con IA.
+- App móvil (asistencia QR offline) se mantiene construida pero se difiere como producto para una segunda fase de adopción — cuando Adriana ya use la web con fluidez.
+- No invertir tiempo en distribuir APK ni en build iOS hasta que la web esté validada con Adriana.
+- Las cuentas de tiendas (Google Play $25, Apple Developer $99) se deciden después de la validación web.
+
+### Consecuencias
+- ✅ Reduce fricción del piloto — Adriana empieza a usar el producto esta semana desde su computadora, sin instalar nada.
+- ✅ El diferenciador principal (planeamiento con IA) es 100% funcional en web — es lo que Adriana quiere probar.
+- ✅ Evita el costo de $99/año Apple Developer hasta tener validación real.
+- ⚠️ La app móvil queda sin piloto real por ahora — el ciclo de feedback de asistencia QR se retrasa.
+- ⚠️ ADR-011 sigue vigente como plan para cuando la app móvil sea la prioridad — se ejecuta en Fase 8.
+
+---
+
 ## ADR-011: Estrategia de distribución inicial — APK directo + Xcode ad-hoc
 
 **Fecha:** 2026-05-10
-**Estado:** ✅ Decidido
+**Estado:** ✅ Decidido — ejecución diferida a Fase 8 (ver ADR-012)
 **Decidido por:** Ezequiel Baltodano
 
 ### Contexto

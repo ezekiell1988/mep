@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-10 (rev 24)
+> **Última actualización:** 2026-05-11 (rev 25)
 > **Fase activa:** Fase 6 — Escala: Container Apps + Nuevas Materias 🔄
 
 ---
@@ -110,7 +110,20 @@
 
 ## 🔄 En progreso — Fase 7 (Lanzamiento Piloto)
 
-### PC-14: Fase 7 — Distribución y onboarding piloto
+> **Pivote 2026-05-11:** Adriana confirmó por WhatsApp que quiere usar la **web primero** para planeamiento desde su computadora. La app móvil (asistencia en el aula) la ve como un proyecto separado para más adelante. Ver ADR-012.
+
+### PC-14: Fase 7 — Onboarding Adriana en la web
+
+#### Prioridad inmediata — Web app lista para Adriana
+| Tarea | Estado |
+|-------|--------|
+| F7 · Landing page pública en `mep.ezekl.com` — descripción del producto antes del login | ⏳ |
+| F7 · Onboarding Adriana en web: crear institución, grupos, primeros estudiantes | ⏳ |
+| F7 · Primera prueba de planeamiento con IA en clase real (Artes Plásticas, Colegio Aserrí) | ⏳ |
+| F7 · Revisar UX del formulario de planeamiento en desktop — mejorar según feedback Adriana | ⏳ |
+| F7 · Revisar UX de notas y reportes en desktop | ⏳ |
+
+#### App móvil — diferida (no es prioridad para Adriana en este momento)
 | Tarea | Estado |
 |-------|--------|
 | F7 · Configurar `package` android + `bundleIdentifier` iOS en `app.json` | ✅ (`cr.ezekl.aulaia`) |
@@ -122,13 +135,11 @@
 | F7 · Skill `eas-cli` creado — login, init, build, errores frecuentes | ✅ |
 | F7 · Build APK Android exitoso — `eas build --platform android --profile preview` | ✅ (build `02bfafc1`) |
 | F7 · APK disponible: `https://expo.dev/artifacts/eas/kFQYasZPhh9dNq2cvtEdP.apk` (~30 días) | ✅ |
-| F7 · Subir APK a Google Drive + redactar mensaje WhatsApp con instrucciones de instalación | ⏳ |
-| F7 · Build iOS ad-hoc con Xcode (cuenta gratuita, 7 días) — instalar en iPhone Adriana | ⏳ |
-| F7 · Onboarding Adriana: crear institución, grupos, primeros estudiantes | ⏳ |
-| F7 · Primera prueba de asistencia QR en clase real | ⏳ |
-| F7 · Landing page pública en `mep.ezekl.com` (antes del login, descripción del producto) | ⏳ |
-| F7 · Crear cuenta Google Play Developer nueva ($25) — decidir con Adriana | ⏳ |
-| F7 · Crear cuenta Apple Developer ($99/año) — decidir con Adriana | ⏳ |
+| F7 · `@journeyapps/react-native-quick-sqlite` instalado + `ios/` regenerado con prebuild | ✅ |
+| F7 · Subir APK a Google Drive + mensaje WhatsApp instrucciones — diferido (Adriana prefiere web primero) | ⏳ |
+| F7 · Build iOS ad-hoc Xcode — diferido (Adriana no necesita app móvil ahora) | ⏳ |
+| F7 · Crear cuenta Google Play Developer nueva ($25) — diferido hasta validar con Adriana | ⏳ |
+| F7 · Crear cuenta Apple Developer ($99/año) — diferido hasta validar con Adriana | ⏳ |
 
 ---
 
