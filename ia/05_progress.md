@@ -143,6 +143,7 @@
 | F7 · `.vscode/tasks.json` — tarea previa `0. Local — Liberar puertos 3000/8000`; el launch limpia procesos viejos antes de compilar y arrancar `local-spa` | ✅ |
 | F7 · Auth0 Dev Tunnel 8000 — `AulaIA Web` permite `https://glc38qtc-8000.use2.devtunnels.ms/callback`, origin, web origin y logout para login desde celular; `ia/00_context.md` documenta Dev Tunnels para `localhost:8000` | ✅ |
 | DOC · `docs/mac-iphone-copy-paste.md` — guía para activar y diagnosticar Portapapeles universal Mac-iPhone con comandos macOS y checklist iPhone | ✅ |
+| DOC · `AGENTS.md` + `.github/copilot-instructions.md` — documentan que el launch local sirve el SPA estático desde `wwwroot`; para ver cambios en `src/aulaia-web` hay que recompilar con el launch o la tarea full stack | ✅ |
 
 #### App móvil — diferida (no es prioridad para Adriana en este momento)
 | Tarea | Estado |

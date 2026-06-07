@@ -72,7 +72,20 @@ de `examples/` incluidos en el skill, nunca vía GET.
 
 ---
 
-## 3. Referencia rápida de los archivos `ia/`
+## 3. Desarrollo local del SPA
+
+El launch único de VS Code es `.vscode/launch.json` → **`AulaIA local — SPA + API`**.
+Ese launch ejecuta antes la tarea **`5. Full Stack — Build completo: Web → wwwroot + API (default)`**,
+que compila `src/aulaia-web` y copia `src/aulaia-web/out/` a `src/AulaIA.Api/wwwroot/`.
+Luego arranca la API con el perfil **`local-spa`**, sirviendo el SPA estático desde `wwwroot`.
+
+> **Regla:** para ver cambios locales del SPA, hay que recompilar. Después de editar archivos en
+> `src/aulaia-web`, volver a ejecutar el launch o la tarea de build completo para que la API tome
+> la versión nueva copiada a `wwwroot`. No esperar hot reload del SPA en este modo.
+
+---
+
+## 4. Referencia rápida de los archivos `ia/`
 
 | Archivo | Leer cuando… |
 |---------|--------------|

@@ -6,6 +6,30 @@
 
 ---
 
+## TASK-DOC-02: Documentar recompilación obligatoria del SPA local
+
+**Estado:** ✅ Completado
+**Módulo:** Documentación local de desarrollo
+
+### Context
+
+El launch único de VS Code (`.vscode/launch.json`) ejecuta el perfil `local-spa` de la API y sirve el SPA estático desde `src/AulaIA.Api/wwwroot`. Antes de arrancar, la tarea `5. Full Stack — Build completo: Web → wwwroot + API (default)` compila Next.js y copia `src/aulaia-web/out/` a `wwwroot/`. Por eso, los cambios locales del SPA no se reflejan por hot reload: hay que recompilar para que la API sirva la versión nueva.
+
+### Steps
+
+1. Revisar `.vscode/launch.json` y `.vscode/tasks.json`.
+2. Confirmar que el launch usa `preLaunchTask` para compilar y copiar el SPA a `wwwroot`.
+3. Documentar en `AGENTS.md` y `.github/copilot-instructions.md` que para ver cambios locales del SPA hay que recompilar.
+4. Actualizar `ia/05_progress.md` con el resultado de la sesión.
+
+### Expected Output
+
+✅ `AGENTS.md` y `.github/copilot-instructions.md` documentan que el SPA local se sirve como build estático desde `wwwroot` mediante el launch `AulaIA local — SPA + API`, y que tras editar `src/aulaia-web` se debe volver a ejecutar el launch o la tarea `5. Full Stack — Build completo: Web → wwwroot + API (default)` para que la API tome los cambios. También aclaran que en este modo no hay hot reload del SPA.
+
+### Implementation hint
+
+Referenciar explícitamente el launch `AulaIA local — SPA + API`, el perfil `local-spa` y la tarea `5. Full Stack — Build completo: Web → wwwroot + API (default)`.
+
 ## TASK-F7-06: Autorizar Dev Tunnel 8000 en Auth0
 
 **Estado:** ✅ Completado
