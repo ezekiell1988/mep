@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { listPlaneamientos, type PlaneamientoListItem } from '../../lib/api';
+import { TourButton } from '../../components/TourButton';
 
 const NIVEL_LABEL: Record<number, string> = {
   7: '7°', 8: '8°', 9: '9°', 10: '10°', 11: '11°', 12: '12°',
@@ -59,13 +60,17 @@ export default function PlaneamientoListPage() {
           </button>
           <h1 className="text-2xl font-bold text-gray-900">Planeamientos</h1>
         </div>
-        <button
-          type="button"
-          onClick={() => router.push('/planeamiento/nuevo')}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
-        >
-          + Nuevo planeamiento
-        </button>
+        <div className="flex items-center gap-2">
+          <TourButton tourKey="planeamiento" />
+          <button
+            id="tour-plan-nuevo"
+            type="button"
+            onClick={() => router.push('/planeamiento/nuevo')}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
+          >
+            + Nuevo planeamiento
+          </button>
+        </div>
       </div>
 
       {error !== null ? (
@@ -79,7 +84,7 @@ export default function PlaneamientoListPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-3">
+      <div id="tour-plan-list" className="grid gap-3">
         {items.map((item) => {
           const badge = STATUS_BADGE[item.status] ?? STATUS_BADGE['Pending'];
           return (

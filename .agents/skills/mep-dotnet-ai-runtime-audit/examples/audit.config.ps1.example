@@ -1,0 +1,25 @@
+#!/usr/bin/env pwsh
+# audit.config.ps1 — Configuración del skill llm-audit-runtime para este proyecto
+# Copiar a la raíz del repo y ajustar los valores.
+# Los scripts de examples/ lo cargan automáticamente si existe.
+
+$AuditConfig = @{
+    # Ruta al archivo llm-audit.md (relativa al directorio donde se ejecuta el script)
+    AuditFile        = "src/AulaIA.Api/logs/llm-audit.md"
+
+    # URL base de la API en desarrollo
+    BaseUrl          = "http://localhost:8000"
+
+    # Prefijo de los endpoints de diagnóstico
+    DiagPath         = "/api/diag"
+
+    # Archivo de appsettings con la ConnectionString (para scripts de BD)
+    SettingsFile     = "src/AulaIA.Api/appsettings.Development.json"
+
+    # Ruta JSON dentro del settings file hasta el connection string (Npgsql)
+    # Ejemplo: "Database.ConnectionString" → $settings.Database.ConnectionString
+    SettingsKeyPath  = "Database.ConnectionString"
+
+    # Directorio del proyecto de tests (para debug-job.ps1)
+    TestsPath        = "src/AulaIA.Tests"
+}

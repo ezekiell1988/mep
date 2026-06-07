@@ -8,6 +8,7 @@ import {
   getDocenteResumen,
   type DocenteResumenResponse,
 } from '../../lib/api';
+import { TourButton } from '../../components/TourButton';
 
 const CALENDAR_EVENT_LABELS: Record<string, string> = {
   Holiday:        'Feriado',
@@ -76,7 +77,9 @@ export default function DashboardClient() {
           {user?.name ? <p className="text-sm text-gray-500 mt-0.5">{user.name}</p> : null}
         </div>
         <div className="flex items-center gap-3">
+          <TourButton tourKey="dashboard" />
           <button
+            id="tour-nav-grupos"
             type="button"
             onClick={() => router.push('/grupos')}
             className="text-sm border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium px-4 py-2 rounded-lg transition-colors"
@@ -109,7 +112,7 @@ export default function DashboardClient() {
       {resumen ? (
         <>
           {/* Tarjetas de estadísticas */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+          <div id="tour-stats" className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
             <StatCard
               label="Grupos activos"
               value={resumen.totalGrupos}
@@ -150,7 +153,7 @@ export default function DashboardClient() {
 
           {/* Próximos eventos */}
           {resumen.proximosEventos.length > 0 && (
-            <section aria-labelledby="proximos-heading">
+            <section id="tour-eventos" aria-labelledby="proximos-heading">
               <h2 id="proximos-heading" className="text-lg font-semibold text-gray-800 mb-3">
                 Próximos eventos — 14 días
               </h2>

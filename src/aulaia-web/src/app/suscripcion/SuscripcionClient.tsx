@@ -12,6 +12,7 @@ import {
   type PaymentRequestResponse,
   type SubscriptionPlan,
 } from '../../lib/api';
+import { TourButton } from '../../components/TourButton';
 
 const PLAN_LABELS: Record<string, string> = {
   Trial: 'Trial',
@@ -116,9 +117,12 @@ export default function SuscripcionClient() {
           <button onClick={() => router.push('/dashboard')} className="text-xl font-bold text-blue-600">
             AulaIA
           </button>
-          <button onClick={() => router.back()} className="text-sm text-gray-500 hover:text-gray-700">
-            ← Volver
-          </button>
+          <div className="flex items-center gap-3">
+            <TourButton tourKey="suscripcion" />
+            <button onClick={() => router.back()} className="text-sm text-gray-500 hover:text-gray-700">
+              ← Volver
+            </button>
+          </div>
         </div>
       </header>
 
@@ -127,7 +131,7 @@ export default function SuscripcionClient() {
 
         {/* Estado actual */}
         {estado && (
-          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+          <div id="tour-sus-estado" className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
             <h2 className="font-semibold text-gray-700 mb-3">Estado actual</h2>
             {estado.hasSubscription ? (
               <div className="space-y-1 text-sm text-gray-700">
@@ -158,7 +162,7 @@ export default function SuscripcionClient() {
 
         {/* Activar trial (si no tiene suscripción) */}
         {!estado?.hasSubscription && !payment && !successMsg && (
-          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+          <div id="tour-sus-trial" className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
             <h2 className="font-semibold text-gray-900 mb-2">Comenzar gratis</h2>
             <p className="text-sm text-gray-600 mb-4">
               Activa tu <strong>trial gratuito de 30 días</strong> sin necesidad de pago.

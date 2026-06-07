@@ -17,6 +17,7 @@ import {
   type AccommodationType,
   type Estudiante,
 } from '../../../lib/api';
+import { TourButton } from '../../../components/TourButton';
 
 const STATUS_BADGE: Record<string, string> = {
   Draft:      'bg-gray-100 text-gray-600',
@@ -215,6 +216,9 @@ export default function AdecuacionesPage({ params }: { params: Promise<{ grupoId
           <h1 className="text-2xl font-bold text-gray-900">Adecuaciones Curriculares</h1>
           <p className="text-sm text-gray-500">{nombre}</p>
         </div>
+        <div className="ml-auto">
+          <TourButton tourKey="adecuaciones" />
+        </div>
       </div>
 
       {error !== null && (
@@ -222,13 +226,13 @@ export default function AdecuacionesPage({ params }: { params: Promise<{ grupoId
       )}
 
       {/* Lista estudiantes */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div id="tour-adec-lista" className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <table className="w-full text-sm" aria-label="Estudiantes y sus adecuaciones curriculares">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
               <th scope="col" className="text-left px-4 py-3 font-semibold text-gray-700">Estudiante</th>
               <th scope="col" className="text-left px-4 py-3 font-semibold text-gray-700">Expediente</th>
-              <th scope="col" className="text-left px-4 py-3 font-semibold text-gray-700">Tipo</th>
+              <th id="tour-adec-tipos" scope="col" className="text-left px-4 py-3 font-semibold text-gray-700">Tipo</th>
               <th scope="col" className="text-left px-4 py-3 font-semibold text-gray-700">Estado</th>
               <th scope="col" className="px-4 py-3" aria-label="Acciones" />
             </tr>

@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-06-07 (rev 27)
+> **Última actualización:** 2026-06-07 (rev 28)
 > **Fase activa:** Fase 7 — Onboarding Adriana en la web 🔄
 
 ---
@@ -135,6 +135,7 @@
 | F7 · Primera prueba de planeamiento con IA en clase real (Artes Plásticas, Colegio Aserrí) | ⏳ |
 | F7 · Revisar UX del formulario de planeamiento en desktop — mejorar según feedback Adriana | ⏳ |
 | F7 · Revisar UX de notas y reportes en desktop | ⏳ |
+| F7 · **Tour interactivo web** — `driver.js` instalado; `src/lib/tours.ts` con 11 tours (dashboard, grupos, planeamiento, planeamiento-nuevo, asistencia, notas, calendario, adecuaciones, qrs, suscripcion, perfil); `src/components/TourButton.tsx` reutilizable con carga dinámica; botón ❓ Guía en todas las páginas; CSS `driver.css` en `layout.tsx`; build 0 errores | ✅ |
 
 #### App móvil — diferida (no es prioridad para Adriana en este momento)
 | Tarea | Estado |

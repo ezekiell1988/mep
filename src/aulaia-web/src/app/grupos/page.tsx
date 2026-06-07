@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getGrupos, type Grupo } from '../../lib/api';
+import { TourButton } from '../../components/TourButton';
 
 export default function GruposPage() {
   const { isAuthenticated, isLoading, loginWithRedirect, logout, getAccessTokenSilently, user } = useAuth0();
@@ -51,7 +52,9 @@ export default function GruposPage() {
           {user?.name && <p className="text-sm text-gray-500 mt-1">{user.name}</p>}
         </div>
         <div className="flex items-center gap-3">
+          <TourButton tourKey="grupos" />
           <button
+            id="tour-grupos-planeamiento"
             type="button"
             onClick={() => router.push('/planeamiento')}
             className="text-sm border border-blue-300 text-blue-600 hover:bg-blue-50 font-medium px-4 py-2 rounded-lg transition-colors"
@@ -76,14 +79,14 @@ export default function GruposPage() {
         <p className="text-center text-gray-400 mt-16">No hay grupos activos.</p>
       ) : null}
 
-      <div className="grid gap-4">
-        {grupos.map((g) => (
+      <div id="tour-grupos-list" className="grid gap-4">
+        {grupos.map((g, i) => (
           <div key={g.id} className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between shadow-sm">
             <div>
               <p className="font-semibold text-gray-900">{g.name}</p>
               <p className="text-sm text-gray-500 mt-0.5">{g.subject} · {g.level} · {g.schoolYear}</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div id={i === 0 ? 'tour-grupos-acciones' : undefined} className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => router.push(`/asistencia/${g.id}?nombre=${encodeURIComponent(g.name)}`)}

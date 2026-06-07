@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState, useCallback, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getHistorialAsistencia, getReporteAsistenciaUrl, type HistorialAsistenciaResponse } from '../../../lib/api';
+import { TourButton } from '../../../components/TourButton';
 
 const STATUS_LABEL: Record<string, string> = {
   Present:    'P',
@@ -116,10 +117,13 @@ export default function HistorialAsistenciaPage({ params }: { params: Promise<{ 
           ← Grupos
         </button>
         <h1 className="text-xl font-bold text-gray-900">Asistencia — {nombre}</h1>
+        <div className="ml-auto">
+          <TourButton tourKey="asistencia" />
+        </div>
       </div>
 
       {/* Filtro de rango */}
-      <div className="flex flex-wrap items-end gap-4 mb-6 bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+      <div id="tour-asist-filtros" className="flex flex-wrap items-end gap-4 mb-6 bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
         <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
           Desde
           <input
@@ -145,7 +149,7 @@ export default function HistorialAsistenciaPage({ params }: { params: Promise<{ 
         >
           Buscar
         </button>
-        <div className="ml-auto flex gap-2">
+        <div id="tour-asist-descargar" className="ml-auto flex gap-2">
           <button
             type="button"
             onClick={() => handleDescargar('xlsx')}
@@ -170,7 +174,7 @@ export default function HistorialAsistenciaPage({ params }: { params: Promise<{ 
       ) : null}
 
       {/* Leyenda */}
-      <div className="flex flex-wrap gap-3 mb-4 text-xs">
+      <div id="tour-asist-leyenda" className="flex flex-wrap gap-3 mb-4 text-xs">
         {(['Present', 'Absent', 'Late', 'Justified'] as const).map(s => (
           <span key={s} className={`px-2 py-0.5 rounded font-semibold ${STATUS_CLASS[s]}`}>
             {STATUS_LABEL[s]} = {s === 'Present' ? 'Presente' : s === 'Absent' ? 'Ausente' : s === 'Late' ? 'Tardanza' : 'Justificado'}
@@ -182,7 +186,7 @@ export default function HistorialAsistenciaPage({ params }: { params: Promise<{ 
       {data === null || data.fechas.length === 0 ? (
         <p className="text-center text-gray-400 mt-16">No hay registros de asistencia en el rango seleccionado.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+        <div id="tour-asist-tabla" className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
           <table className="min-w-max text-sm border-collapse">
             <thead>
               <tr className="bg-gray-50">

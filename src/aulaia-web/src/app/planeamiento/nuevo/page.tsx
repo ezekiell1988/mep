@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getGrupos, crearPlaneamiento, checkCurriculumDisponible, type Grupo, type CurriculumCheckResponse } from '../../../lib/api';
+import { TourButton } from '../../../components/TourButton';
 
 const ASIGNATURAS = [
   'Artes Plásticas', 'Artes Musicales', 'Educación para el Hogar',
@@ -21,9 +22,9 @@ const NIVELES = [
   { value: 5, label: '5° (II Ciclo)' }, { value: 6, label: '6° (II Ciclo)' },
 ];
 
-function InputField({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function InputField({ label, error, id, children }: { label: string; error?: string; id?: string; children: React.ReactNode }) {
   return (
-    <div>
+    <div id={id}>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       {children}
       {error ? <p className="text-xs text-red-500 mt-1">{error}</p> : null}
@@ -134,6 +135,10 @@ export default function NuevoPlaneamientoPage() {
       </button>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Nuevo planeamiento</h1>
 
+      <div className="flex justify-end mb-4">
+        <TourButton tourKey="planeamiento-nuevo" />
+      </div>
+
       {apiError !== null ? (
         <div role="alert" className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6 text-sm">{apiError}</div>
       ) : null}
@@ -161,7 +166,7 @@ export default function NuevoPlaneamientoPage() {
         </InputField>
 
         {/* Asignatura */}
-        <InputField label="Asignatura">
+        <InputField id="tour-pnuevo-asignatura" label="Asignatura">
           <select
             aria-label="Asignatura"
             value={form.asignatura}
@@ -174,7 +179,7 @@ export default function NuevoPlaneamientoPage() {
         </InputField>
 
         {/* Nivel y Trimestre */}
-        <div className="grid grid-cols-2 gap-4">
+        <div id="tour-pnuevo-nivel" className="grid grid-cols-2 gap-4">
           <InputField label="Nivel">
             <select
               aria-label="Nivel"
@@ -223,7 +228,7 @@ export default function NuevoPlaneamientoPage() {
         ) : null}
 
         {/* Año lectivo y lecciones/semana */}
-        <div className="grid grid-cols-2 gap-4">
+        <div id="tour-pnuevo-lecciones" className="grid grid-cols-2 gap-4">
           <InputField label="Año lectivo">
             <input
               aria-label="Año lectivo"
@@ -252,7 +257,7 @@ export default function NuevoPlaneamientoPage() {
         </div>
 
         {/* Fechas */}
-        <div className="grid grid-cols-2 gap-4">
+        <div id="tour-pnuevo-fechas" className="grid grid-cols-2 gap-4">
           <InputField label="Fecha inicio">
             <input
               aria-label="Fecha de inicio"
@@ -277,6 +282,7 @@ export default function NuevoPlaneamientoPage() {
         </div>
 
         <button
+          id="tour-pnuevo-submit"
           type="submit"
           disabled={submitting || grupos.length === 0}
           className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"

@@ -130,6 +130,40 @@ GROUP BY g."Nombre";
 
 ---
 
+## Scripts PowerShell
+
+Los siguientes scripts automatizan el acceso y la inspección de la BD. Leen las credenciales automáticamente desde `appsettings.Development.json`.
+
+| Script | Propósito |
+|--------|-----------|
+| [examples/connect.ps1](./examples/connect.ps1) | Abre sesión `psql` interactiva |
+| [examples/query.ps1](./examples/query.ps1) | Ejecuta un SQL y muestra el resultado (`-Sql "..."`, `-Format table\|csv\|json`) |
+| [examples/inspect.ps1](./examples/inspect.ps1) | Inspecciona tablas clave: curriculum\_units, planeamientos, asistencia (`-Table all\|curriculum\|planeamientos\|asistencia`) |
+| [examples/cleanup-dev.ps1](./examples/cleanup-dev.ps1) | Limpia datos de prueba en desarrollo (`-Target curriculum-unvalidated\|all`, `-Confirm`) |
+
+### Ejemplos de uso
+
+```powershell
+# Sesion interactiva
+.\.agents\skills\mep-db-access\examples\connect.ps1
+
+# Consulta rapida
+.\.agents\skills\mep-db-access\examples\query.ps1 -Sql "SELECT COUNT(*) FROM curriculum_units"
+
+# Inspeccionar todas las tablas clave
+.\.agents\skills\mep-db-access\examples\inspect.ps1
+
+# Solo planeamientos
+.\.agents\skills\mep-db-access\examples\inspect.ps1 -Table planeamientos
+
+# Limpiar unidades no validadas (pide confirmacion)
+.\.agents\skills\mep-db-access\examples\cleanup-dev.ps1 -Target curriculum-unvalidated
+```
+
+> Los scripts requieren `pwsh` (PowerShell 7+) y `psql` en el PATH (`brew install libpq`).
+
+---
+
 ## Integración con dotnet ef (migraciones)
 
 Ejecutar siempre desde `src/AulaIA.Api/`:

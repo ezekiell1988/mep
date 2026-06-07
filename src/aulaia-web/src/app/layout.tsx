@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import Providers from "./providers";
 import "./globals.css";
+import "driver.js/dist/driver.css";
 
 const geistSans = GeistSans;
 

@@ -23,6 +23,7 @@ public sealed class AulaIADbContext(DbContextOptions<AulaIADbContext> options) :
     public DbSet<ReferralCode> ReferralCodes => Set<ReferralCode>();
     public DbSet<Commission> Commissions => Set<Commission>();
     public DbSet<ExchangeRate> ExchangeRates => Set<ExchangeRate>();
+    public DbSet<LlmAuditEntry> LlmAuditEntries => Set<LlmAuditEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

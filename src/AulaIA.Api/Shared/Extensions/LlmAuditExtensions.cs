@@ -2,9 +2,7 @@ using AulaIA.Api.Shared.Options;
 using AulaIA.Api.Shared.Persistence;
 using AulaIA.Api.Shared.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Runtime.InteropServices;
-using System.Security.Claims;
 using System.Text.Json;
 
 namespace AulaIA.Api.Shared.Extensions;
@@ -31,35 +29,18 @@ public static class LlmAuditExtensions
         {
             if (!app.Environment.IsDevelopment()) return app;
 
+            // Solo endpoints de ESCRITURA — no GET de datos.
+            // El LLM lee directamente desde el archivo MD o la BD (psql / PS1).
             var group = app.MapGroup("/api/diag").AllowAnonymous();
 
-            group.MapGet("/audit", (ILlmAuditService audit) =>
-                Results.Text(
-                    File.Exists(audit.LogPath) ? File.ReadAllText(audit.LogPath) : "# (empty)",
-                    "text/markdown"));
-
+            // ── Limpiar audit log (archivo + BD si PersistToDb) ─────────────
             group.MapDelete("/audit", (ILlmAuditService audit) =>
             {
                 audit.Clear();
                 return Results.NoContent();
             });
 
-            group.MapGet("/context", (IOptions<LlmAuditOptions> opts, IWebHostEnvironment env) =>
-                Results.Ok(new
-                {
-                    environment = env.EnvironmentName,
-                    timestamp = DateTimeOffset.UtcNow,
-                    llmAudit = new
-                    {
-                        opts.Value.Enabled,
-                        logPath = Path.GetFullPath(opts.Value.LogPath),
-                        logFileExists = File.Exists(opts.Value.LogPath),
-                        logFileSizeKb = File.Exists(opts.Value.LogPath)
-                            ? Math.Round(new FileInfo(opts.Value.LogPath).Length / 1024.0, 1)
-                            : 0
-                    }
-                }));
-
+            // ── Agregar evento desde frontend (Next.js / React Native) ──────
             group.MapPost("/audit-event", async (HttpRequest req, ILlmAuditService audit) =>
             {
                 var dto = await req.ReadFromJsonAsync<AuditEventDto>();
@@ -83,46 +64,6 @@ public static class LlmAuditExtensions
                 }
 
                 return Results.NoContent();
-            });
-
-            // ── Auth0 test — requiere token válido ──────────────────────────
-            group.MapGet("/auth-test", (HttpContext ctx, ILlmAuditService audit) =>
-            {
-                var principal = ctx.User;
-                var sub = principal.FindFirstValue("sub")
-                       ?? principal.FindFirstValue(ClaimTypes.NameIdentifier)
-                       ?? "(no sub)";
-                var claims = principal.Claims
-                    .Select(c => new { type = c.Type, value = c.Value })
-                    .ToList();
-
-                audit.LogEvent(
-                    "Auth0",
-                    "auth-test ejecutado",
-                    $"✅ sub={sub} | total_claims={claims.Count} | roles=[{string.Join(",", principal.FindAll(ClaimTypes.Role).Select(c => c.Value))}]",
-                    new { sub, claimCount = claims.Count });
-
-                return Results.Ok(new { sub, claims });
-            }).RequireAuthorization();
-
-            // ── User lookup — busca el usuario en BD por email o sub ────────
-            group.MapGet("/user-lookup", async (string? email, string? sub, AulaIADbContext db, ILlmAuditService audit) =>
-            {
-                var query = db.Users.AsNoTracking();
-                if (!string.IsNullOrEmpty(email))
-                    query = query.Where(u => u.Email == email);
-                else if (!string.IsNullOrEmpty(sub))
-                    query = query.Where(u => u.Auth0Sub == sub);
-                else
-                    return Results.BadRequest("Requiere ?email= o ?sub=");
-
-                var users = await query
-                    .Select(u => new { u.Id, u.Auth0Sub, u.Email, u.FullName, Role = u.Role.ToString() })
-                    .ToListAsync();
-
-                audit.LogEvent("UserLookup", $"Búsqueda por {(email is not null ? $"email={email}" : $"sub={sub}")}", $"{users.Count} resultado(s)");
-
-                return Results.Ok(users);
             });
 
             // ── Patch auth0Sub — solo dev, une BD con el sub real del token ─
@@ -153,7 +94,8 @@ public static class LlmAuditExtensions
                 $"Auth0 Authority: {app.Configuration["Auth:Authority"]}",
                 $"Auth0 Audience: {app.Configuration["Auth:Audience"]}",
                 $"Módulos registrados: Grupos, Estudiantes, Asistencia, Notas, Planeamiento, Curriculum, Reportes, PowerSync",
-                $"Diag endpoints: GET /api/diag/audit, GET /api/diag/context, GET /api/diag/auth-test, DELETE /api/diag/audit, POST /api/diag/audit-event"
+                $"Diag endpoints (solo escritura): DELETE /api/diag/audit, POST /api/diag/audit-event, PATCH /api/diag/user-fix-sub",
+                $"LLM lee datos desde: archivo MD ({app.Configuration["LlmAudit:LogPath"] ?? "logs/llm-audit.md"}) o tabla llm_audit_entries (si PersistToDb=true)"
             ]);
             return app;
         }

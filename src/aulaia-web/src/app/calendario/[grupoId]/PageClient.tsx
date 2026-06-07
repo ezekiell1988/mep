@@ -14,6 +14,7 @@ import {
   type LeccionesDisponiblesResponse,
   type CalendarEventType,
 } from '../../../lib/api';
+import { TourButton } from '../../../components/TourButton';
 
 const TYPE_COLOR: Record<CalendarEventType, string> = {
   Holiday:        'bg-red-100 text-red-700 border-red-300',
@@ -201,6 +202,9 @@ export default function CalendarioPage({ params }: { params: Promise<{ grupoId: 
             <h1 className="text-xl font-bold">📅 Calendario escolar</h1>
             <p className="text-indigo-200 text-sm">{nombre}</p>
           </div>
+          <div className="ml-auto">
+            <TourButton tourKey="calendario" className="text-sm border border-indigo-400 text-indigo-200 hover:bg-indigo-700 font-medium px-3 py-2 rounded-lg transition-colors flex items-center gap-1" />
+          </div>
         </div>
       </div>
 
@@ -208,7 +212,7 @@ export default function CalendarioPage({ params }: { params: Promise<{ grupoId: 
         {/* ── Columna izquierda: calendario grilla ── */}
         <div className="lg:col-span-2 space-y-4">
           {/* Navegación mes */}
-          <div className="bg-white rounded-xl shadow-sm p-4">
+          <div id="tour-cal-nav" className="bg-white rounded-xl shadow-sm p-4">
             <div className="flex items-center justify-between mb-4">
               <button type="button" aria-label="Mes anterior" onClick={prevMonth} className="px-3 py-1 text-gray-600 hover:text-gray-900 text-lg" aria-controls="calendar-grid">‹</button>
               <h2 id="calendar-heading" className="text-lg font-semibold text-gray-800">
@@ -326,8 +330,7 @@ export default function CalendarioPage({ params }: { params: Promise<{ grupoId: 
           )}
 
           {/* Agregar evento */}
-          <div className="bg-white rounded-xl shadow-sm p-4">
-            <h3 className="font-semibold text-gray-800 mb-3">➕ Agregar evento</h3>
+          <div id="tour-cal-form" className="bg-white rounded-xl shadow-sm p-4">
             <form onSubmit={handleAddEvent} className="space-y-3">
               <div>
                 <label htmlFor="evt-date" className="block text-xs text-gray-600 mb-1">Fecha inicio</label>
@@ -365,7 +368,7 @@ export default function CalendarioPage({ params }: { params: Promise<{ grupoId: 
           </div>
 
           {/* Calcular lecciones disponibles */}
-          <div className="bg-white rounded-xl shadow-sm p-4">
+          <div id="tour-cal-lecciones" className="bg-white rounded-xl shadow-sm p-4">
             <h3 className="font-semibold text-gray-800 mb-1">📊 Lecciones disponibles</h3>
             <p className="text-xs text-gray-500 mb-3">Calcula cuántas lecciones hay en un período, descontando días no lectivos.</p>
             <form onSubmit={handleCalcLecciones} className="space-y-3">

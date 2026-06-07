@@ -13,6 +13,7 @@ import {
   type ReferralPanelResponse,
   type ComisionResponse,
 } from '../../lib/api';
+import { TourButton } from '../../components/TourButton';
 
 export default function PerfilClient() {
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently, user } = useAuth0();
@@ -84,9 +85,12 @@ export default function PerfilClient() {
           <button onClick={() => router.push('/dashboard')} className="text-xl font-bold text-blue-600">
             AulaIA
           </button>
-          <button onClick={() => router.back()} className="text-sm text-gray-500 hover:text-gray-700">
-            ← Volver
-          </button>
+          <div className="flex items-center gap-3">
+            <TourButton tourKey="perfil" />
+            <button onClick={() => router.back()} className="text-sm text-gray-500 hover:text-gray-700">
+              ← Volver
+            </button>
+          </div>
         </div>
       </header>
 
@@ -117,7 +121,7 @@ export default function PerfilClient() {
         </section>
 
         {/* Suscripción */}
-        <section aria-labelledby="sus-heading" className="bg-white rounded-xl border border-gray-200 p-6">
+        <section id="tour-perfil-suscripcion" aria-labelledby="sus-heading" className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-3">
             <h2 id="sus-heading" className="font-semibold text-gray-900">Suscripción</h2>
             <button
@@ -161,7 +165,7 @@ export default function PerfilClient() {
         </section>
 
         {/* Código de referido */}
-        <section aria-labelledby="ref-heading" className="bg-white rounded-xl border border-gray-200 p-6">
+        <section id="tour-perfil-referido" aria-labelledby="ref-heading" className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 id="ref-heading" className="font-semibold text-gray-900 mb-3">Código de referido</h2>
           {codigoReferido ? (
             <div className="space-y-3">

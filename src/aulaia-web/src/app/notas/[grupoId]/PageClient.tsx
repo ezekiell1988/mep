@@ -8,6 +8,7 @@ import {
   getGrupoById, actualizarPonderacion, getInformeDirectorUrl,
   type ResumenGrupoResponse, type ActividadResponse, type ResumenEstudianteResponse,
 } from '../../../lib/api';
+import { TourButton } from '../../../components/TourButton';
 
 const TIPOS_ACTIVIDAD = [
   'Prueba Escrita', 'Prueba Oral', 'Trabajo Cotidiano',
@@ -274,12 +275,14 @@ export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: 
             {descargando === 'informe' ? 'Generando…' : '↓ Informe Dirección'}
           </button>
           <button
+            id="tour-notas-nueva"
             type="button"
             onClick={() => setShowModal(true)}
             className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
             + Nueva actividad
           </button>
+          <TourButton tourKey="notas" />
         </div>
       </div>
 
@@ -288,7 +291,7 @@ export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: 
       ) : null}
 
       {/* Panel ponderación configurable */}
-      <div className="mb-5">
+      <div id="tour-notas-ponderacion" className="mb-5">
         <button
           type="button"
           onClick={() => { setShowPond(v => !v); setPondDraft(ponderacion); }}
@@ -355,7 +358,7 @@ export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: 
 
       {/* Resumen de peso */}
       {actividades.length > 0 ? (
-        <div className="mb-4 flex flex-wrap gap-2">
+        <div id="tour-notas-actividades" className="mb-4 flex flex-wrap gap-2">
           {actividades.map(a => (
             <span key={a.id} className="text-xs bg-gray-100 text-gray-600 rounded-full px-3 py-1">
               {a.name} <span className="font-medium">{a.percentage}%</span>
@@ -369,7 +372,7 @@ export default function LibroNotasPage({ params }: { params: Promise<{ grupoId: 
 
       {/* Tabla */}
       {resumen && resumen.estudiantes.length > 0 ? (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+        <div id="tour-notas-tabla" className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>

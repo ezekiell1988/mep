@@ -5,6 +5,7 @@ import { useEffect, useState, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import QRCode from 'qrcode';
 import { getEstudiantes, type Estudiante } from '../../lib/api';
+import { TourButton } from '../../components/TourButton';
 
 // ── Componente interno (necesita useSearchParams, debe estar en Suspense) ────
 
@@ -77,7 +78,9 @@ function QrsContent() {
           <h1 className="text-xl font-bold text-gray-900">{groupName}</h1>
           <p className="text-sm text-gray-500">{level} · {estudiantes.length} estudiantes</p>
         </div>
+        <TourButton tourKey="qrs" />
         <button
+          id="tour-qrs-print"
           onClick={() => window.print()}
           className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl text-sm transition-colors"
         >
@@ -97,7 +100,7 @@ function QrsContent() {
           <p className="text-sm text-gray-600">{level} — Códigos QR de asistencia</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 sm:grid-cols-4">
+        <div id="tour-qrs-grid" className="grid grid-cols-3 gap-4 sm:grid-cols-4">
           {estudiantes.map((e) => (
             <div
               key={e.studentId}

@@ -98,6 +98,29 @@ docker images acrdemoitqs.azurecr.io/aulaia-api --format '{{.ID}}' \
 docker image prune -f
 ```
 
+---
+
+## Scripts PowerShell
+
+Los siguientes scripts automatizan el proceso completo. Ejecutarlos desde la raíz del repo.
+
+| Script | Propósito |
+|--------|-----------|
+| [examples/deploy.ps1](./examples/deploy.ps1) | Deploy completo: login ACR → build → push → actualizar Container App |
+| [examples/verify.ps1](./examples/verify.ps1) | Verifica endpoints tras el deploy (health, SPA, Scalar) |
+| [examples/cleanup.ps1](./examples/cleanup.ps1) | Elimina imágenes locales de Docker después del deploy |
+
+### Flujo típico
+
+```powershell
+# Desde la raíz del repo:
+.\.agents\skills\mep-deploy\examples\deploy.ps1
+.\.agents\skills\mep-deploy\examples\verify.ps1
+.\.agents\skills\mep-deploy\examples\cleanup.ps1
+```
+
+> Los scripts requieren `pwsh` (PowerShell 7+), `az` CLI y `docker` en el PATH.
+
 ### 6. Limpiar imágenes antiguas del ACR (conservar últimas 4)
 Las revisiones del Container App se nombran `ca-aulaia-api--0000001`, `--0000002`, etc. — incrementan con cada `containerapp update`. Para poder hacer rollback a cualquiera de las últimas 4, conservamos los últimos 4 tags SHA en el ACR y borramos el resto.
 
