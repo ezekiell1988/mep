@@ -141,6 +141,8 @@
 | F7 · Migración EF `AddLlmAuditEntries` — corrige `PendingModelChangesWarning` creando `llm_audit_entries`; startup local validado en `http://localhost:3000` | ✅ |
 | F7 · VS Code localhost integrado — `serverReadyAction` abre la URL del backend y `workbench.externalUriOpeners` usa Simple Browser para `localhost`; raíz `http://localhost:3000/` validada con Playwright | ✅ |
 | F7 · `.vscode/tasks.json` — tarea previa `0. Local — Liberar puertos 3000/8000`; el launch limpia procesos viejos antes de compilar y arrancar `local-spa` | ✅ |
+| F7 · Auth0 Dev Tunnel 8000 — `AulaIA Web` permite `https://glc38qtc-8000.use2.devtunnels.ms/callback`, origin, web origin y logout para login desde celular | ✅ |
+| DOC · `docs/mac-iphone-copy-paste.md` — guía para activar y diagnosticar Portapapeles universal Mac-iPhone con comandos macOS y checklist iPhone | ✅ |
 
 #### App móvil — diferida (no es prioridad para Adriana en este momento)
 | Tarea | Estado |

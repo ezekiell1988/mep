@@ -6,6 +6,55 @@
 
 ---
 
+## TASK-F7-06: Autorizar Dev Tunnel 8000 en Auth0
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+Para probar el login desde un celular usando VS Code Dev Tunnels, el origin público del túnel debe estar autorizado en la aplicación SPA `AulaIA Web` de Auth0. El túnel configurado para esta sesión es `https://glc38qtc-8000.use2.devtunnels.ms`, asociado al puerto local `8000`.
+
+### Steps
+
+1. Confirmar el `client_id` activo del SPA web desde `src/aulaia-web/.env.local`.
+2. Leer la configuración actual de la aplicación `AulaIA Web` en Auth0.
+3. Agregar el callback del túnel sin eliminar `localhost` ni producción.
+4. Agregar el origin del túnel en logout, allowed origins y web origins.
+5. Verificar que Auth0 persistió la configuración.
+
+### Expected Output
+
+✅ Auth0 `AulaIA Web` (`client_id=onUw2TnTZSwUX6K43KtSgt7kQ9lBlJl4`) permite `https://glc38qtc-8000.use2.devtunnels.ms/callback` como callback y `https://glc38qtc-8000.use2.devtunnels.ms` como allowed origin, web origin y logout URL, preservando `http://localhost:3000` y `https://mep.ezekl.com`.
+
+### Implementation hint
+
+Usar Auth0 CLI con `auth0 apps update <client_id> --callbacks ... --logout-urls ... --origins ... --web-origins ...`, pasando siempre la lista completa para no reemplazar URLs existentes.
+
+## TASK-DOC-01: Documentar portapapeles universal Mac-iPhone
+
+**Estado:** ✅ Completado
+**Módulo:** Documentación local de desarrollo
+
+### Context
+
+El portapapeles universal entre Mac y iPhone puede fallar aunque Wi-Fi y Bluetooth estén encendidos. En el Mac se detectó `ClipboardSharingEnabled = 0`, por lo que se necesita una guía corta para activar y diagnosticar Copy/Paste entre macOS e iOS.
+
+### Steps
+
+1. Crear un documento en `docs/` con los requisitos de Continuity.
+2. Documentar la verificación y activación desde macOS.
+3. Incluir reinicio de servicios de Continuity.
+4. Agregar checklist para iPhone y pasos de prueba.
+
+### Expected Output
+
+✅ `docs/mac-iphone-copy-paste.md` documenta requisitos de Continuity, checklist de iPhone/Mac, comandos para verificar y activar `ClipboardSharingEnabled`, reinicio de servicios `useractivityd`, `sharingd`, `rapportd`, prueba final y troubleshooting.
+
+### Implementation hint
+
+Usar los comandos validados en macOS: `defaults write com.apple.coreservices.useractivityd ClipboardSharingEnabled -bool true` y reinicio de `useractivityd`, `sharingd`, `rapportd`.
+
 ## TASK-F7-05: Liberar puertos antes del launch local
 
 **Estado:** ✅ Completado
