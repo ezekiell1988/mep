@@ -1,6 +1,7 @@
 using AulaIA.Api.Shared.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using static AulaIA.Api.Shared.Persistence.SeedData;
 
 namespace AulaIA.Api.Shared.Persistence.Configurations;
 
@@ -62,5 +63,7 @@ public sealed class StudentConfiguration : IEntityTypeConfiguration<Student>
                .HasForeignKey(x => x.GroupId)
                .OnDelete(DeleteBehavior.Cascade)
                .HasConstraintName("fk_students_group");
+
+        builder.HasData(DemoPlaneamiento.EstudiantesArtesPlasticas7_1);
     }
 }

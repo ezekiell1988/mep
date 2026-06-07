@@ -1,6 +1,28 @@
 # 07 — Issues Conocidos
 
-> **Última actualización:** 2026-06-07 (rev 14)
+> **Última actualización:** 2026-06-07 (rev 15)
+
+---
+
+## ⚠️ ISSUE-012: Tests backend dependen de API externa en `localhost:8000`
+
+**Detectado:** 2026-06-07
+**Estado:** ⚠️ Pendiente
+**Componentes:** `src/AulaIA.Tests`, entorno local de verificación
+
+### Síntoma
+`dotnet test src/AulaIA.Tests/AulaIA.Tests.csproj` compila el proyecto de tests, pero falla con `HttpRequestException: Connection refused (localhost:8000)` en pruebas de `/health`, `/api/grupos`, `/api/planeamiento`, `/api/curriculum` y `/api/docente/resumen`.
+
+### Causa raíz
+La suite actual no levanta la API con `WebApplicationFactory`; espera que exista un backend ya corriendo en `localhost:8000`.
+
+### Workaround
+Levantar la API en el puerto esperado antes de correr la suite, o migrar los tests a host in-memory para que sean autónomos.
+
+### Verificación de esta sesión
+- `dotnet build src/AulaIA.Api/AulaIA.Api.csproj` ✅ 0 errores, 0 advertencias.
+- `dotnet ef migrations has-pending-model-changes --project src/AulaIA.Api --startup-project src/AulaIA.Api --verbose` ✅ sin cambios pendientes.
+- `dotnet test src/AulaIA.Tests/AulaIA.Tests.csproj` ❌ por API no escuchando en `localhost:8000`.
 
 ---
 

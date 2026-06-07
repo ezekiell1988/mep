@@ -1,10 +1,64 @@
 # 04 — Tareas Accionables
 
-> **Última actualización:** 2026-05-04
-> **Prioridad actual:** Fase 0 — Infraestructura Azure y setup del proyecto
+> **Última actualización:** 2026-06-07
+> **Prioridad actual:** Fase 7 — Onboarding Adriana en la web
 > **Resource Group:** `rg-ezequiel` | **Convención:** prefijo `demo`
 
 ---
+
+## TASK-F7-07: Seed EF para prueba real de planeamiento con Ezequiel
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+Para ejecutar una prueba real de creación de planeamiento desde la cuenta por defecto `ezekiell1988@hotmail.com`, el sistema debe traer datos base listos al aplicar migraciones: un grupo de Artes Plásticas de 7° año, lista de estudiantes suficiente para simular una sección real y eventos de calendario institucionales para validar el flujo que pidió Adriana.
+
+### Steps
+
+1. Agregar IDs determinísticos en `SeedData` para el grupo de prueba, estudiantes y eventos.
+2. Sembrar un grupo `7-1 Artes Plásticas` asignado al usuario Ezequiel (`auth0|69fae47c268da9d7e46c6d4b`).
+3. Sembrar 40 estudiantes activos con códigos de expediente únicos y QR determinístico.
+4. Sembrar eventos de calendario institucional del grupo para I Trimestre 2026.
+5. Generar migración EF Core para aplicar el seed en bases existentes.
+6. Validar build y ausencia de cambios pendientes de modelo.
+
+### Expected Output
+
+✅ `SeedData` ahora define el grupo `7-1 Artes Plásticas` para `ezekiell1988@hotmail.com` (`auth0|69fae47c268da9d7e46c6d4b`), 40 estudiantes activos con expediente `AP7-2026-###`, QR determinístico, y 5 eventos institucionales para I Trimestre 2026. La migración `20260607212516_SeedEzequielPlaneamientoDemo` inserta esos datos en `groups`, `students` y `calendar_events`; `AulaIADbContextModelSnapshot` queda sincronizado sin cambios pendientes.
+
+### Implementation hint
+
+- Archivos: `src/AulaIA.Api/Shared/Persistence/SeedData.cs`, `GroupConfiguration.cs`, `StudentConfiguration.cs`, `CalendarEventConfiguration.cs`.
+- Usar IDs fijos y `CreatedAt = 2026-01-01 UTC`.
+- Grupo: asignatura `Artes Plásticas`, nivel `7° Año`, año lectivo `2026`, institución `LiceoAserri`.
+- Mantener `TeacherId = SeedData.Users.Ezequiel` y `TeacherSub = auth0|69fae47c268da9d7e46c6d4b`.
+
+## TASK-F7-08: Quitar referencia default de Adriana del seed actual
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+Adriana se registrará por el flujo real de Auth0 y `POST /api/auth/me`, por lo que el modelo EF actual no debe conservar ninguna referencia default a un usuario semilla de Adriana. Las migraciones históricas ya aplicadas mantienen su historial y la migración `RemoveAdrianaFromSeed` elimina la fila antigua.
+
+### Steps
+
+1. Revisar referencias actuales a Adriana en código fuente y migraciones.
+2. Eliminar del seed actual cualquier constante o referencia de usuario default de Adriana.
+3. Verificar que el modelo EF no requiera migración nueva.
+4. Validar build.
+
+### Expected Output
+
+✅ El seed actual solo conserva a Ezequiel como usuario por defecto. Se eliminó la constante `SeedData.Users.Adriana`; Adriana ya no existe como usuario default en el modelo actual y se creará al registrarse con Auth0. No hizo falta una migración nueva porque no hubo cambio de modelo EF.
+
+### Implementation hint
+
+- Archivo: `src/AulaIA.Api/Shared/Persistence/SeedData.cs`.
+- No editar migraciones históricas salvo que una migración nueva sea necesaria.
 
 ## TASK-DOC-02: Documentar recompilación obligatoria del SPA local
 

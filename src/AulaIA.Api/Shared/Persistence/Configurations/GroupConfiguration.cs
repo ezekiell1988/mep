@@ -1,6 +1,7 @@
 using AulaIA.Api.Shared.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using static AulaIA.Api.Shared.Persistence.SeedData;
 
 namespace AulaIA.Api.Shared.Persistence.Configurations;
 
@@ -99,5 +100,7 @@ public sealed class GroupConfiguration : IEntityTypeConfiguration<Group>
                .HasForeignKey(x => x.InstitutionId)
                .OnDelete(DeleteBehavior.Restrict)
                .HasConstraintName("fk_groups_institution");
+
+        builder.HasData(DemoPlaneamiento.GrupoArtesPlasticas);
     }
 }

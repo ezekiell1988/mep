@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-06-07 (rev 28)
+> **Última actualización:** 2026-06-07 (rev 30)
 > **Fase activa:** Fase 7 — Onboarding Adriana en la web 🔄
 
 ---
@@ -124,6 +124,7 @@
 | F7 · `ensureUserProfile()` en `src/aulaia-web/src/lib/api.ts` — tipo `UserProfile` + función que llama `POST /api/auth/me` | ✅ |
 | F7 · `callback/page.tsx` — llama `ensureUserProfile` justo después de `handleRedirectCallback` antes de redirigir; provisioning ocurre en cada primer login | ✅ |
 | F7 · Seed simplificado — Adriana eliminada del `HasData` en `UserConfiguration.cs`; solo queda Ezequiel | ✅ |
+| F7 · SeedData actual sin usuario default de Adriana — eliminada constante `SeedData.Users.Adriana`; Adriana se crea solo por registro Auth0 + `POST /api/auth/me` | ✅ |
 | F7 · Migración `RemoveAdrianaFromSeed` — reasigna grupos demo a Ezequiel (UPDATE groups teacher_id/teacher_sub) antes del DELETE en `users`; respeta FK Restrict | ✅ |
 | F7 · Landing page pública en `mep.ezekl.com` — descripción del producto antes del login | ✅ |
 | F7 · **ISSUE-009 resuelto** — `InstitutionId` en `User` era `Guid` NOT NULL; `EnsureUserAsync` intentaba insertar con `Guid.Empty` → FK constraint violation → API 500. Corregido a `Guid?` nullable con migración `MakeInstitutionIdNullable` (SHA `486bc79`) | ✅ |
@@ -142,6 +143,7 @@
 | F7 · VS Code localhost integrado — `serverReadyAction` abre la URL del backend y `workbench.externalUriOpeners` usa Simple Browser para `localhost`; raíz `http://localhost:3000/` validada con Playwright | ✅ |
 | F7 · `.vscode/tasks.json` — tarea previa `0. Local — Liberar puertos 3000/8000`; el launch limpia procesos viejos antes de compilar y arrancar `local-spa` | ✅ |
 | F7 · Auth0 Dev Tunnel 8000 — `AulaIA Web` permite `https://glc38qtc-8000.use2.devtunnels.ms/callback`, origin, web origin y logout para login desde celular; `ia/00_context.md` documenta Dev Tunnels para `localhost:8000` | ✅ |
+| F7 · Seed EF para prueba real de planeamiento — `SeedEzequielPlaneamientoDemo` agrega grupo `7-1 Artes Plásticas` para `ezekiell1988@hotmail.com`, 40 estudiantes activos y 5 eventos de calendario I Trimestre 2026 | ✅ |
 | DOC · `docs/mac-iphone-copy-paste.md` — guía para activar y diagnosticar Portapapeles universal Mac-iPhone con comandos macOS y checklist iPhone | ✅ |
 | DOC · `AGENTS.md` + `.github/copilot-instructions.md` — documentan que el launch local sirve el SPA estático desde `wwwroot`; para ver cambios en `src/aulaia-web` hay que recompilar con el launch o la tarea full stack | ✅ |
 

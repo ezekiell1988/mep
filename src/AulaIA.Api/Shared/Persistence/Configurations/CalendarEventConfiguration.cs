@@ -1,6 +1,7 @@
 using AulaIA.Api.Shared.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using static AulaIA.Api.Shared.Persistence.SeedData;
 
 namespace AulaIA.Api.Shared.Persistence.Configurations;
 
@@ -34,5 +35,7 @@ public sealed class CalendarEventConfiguration : IEntityTypeConfiguration<Calend
 
         builder.HasIndex(x => new { x.GroupId, x.Date });
         builder.HasIndex(x => new { x.SchoolYear, x.GroupId });
+
+        builder.HasData(DemoPlaneamiento.EventosArtesPlasticas7_1);
     }
 }

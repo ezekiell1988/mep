@@ -1,3 +1,5 @@
+using AulaIA.Api.Shared.Domain;
+
 namespace AulaIA.Api.Shared.Persistence;
 
 /// <summary>
@@ -7,6 +9,8 @@ namespace AulaIA.Api.Shared.Persistence;
 /// </summary>
 public static class SeedData
 {
+    public static readonly DateTime CreatedAt = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
     // ── Códigos de Dirección Regional (DRE) ──────────────────────────────
     // Los 27 DREs oficiales del MEP de Costa Rica
     public static class RegionCodes
@@ -45,9 +49,7 @@ public static class SeedData
     {
         /// <summary>Ezequiel Baltodano — Admin de plataforma</summary>
         public static readonly Guid Ezequiel = new("bb000001-0000-0000-0000-000000000001");
-
-        /// <summary>Adriana Guido — Docente, Liceo de Aserrí, Artes Plásticas</summary>
-        public static readonly Guid Adriana  = new("bb000001-0000-0000-0000-000000000002");
+        public const string EzequielAuth0Sub = "auth0|69fae47c268da9d7e46c6d4b";
     }
 
     // ── Instituciones (colegios públicos MEP) ────────────────────────────
@@ -120,5 +122,123 @@ public static class SeedData
         // ── DRE San José Oeste ────────────────────────────────────────────
         /// <summary>Liceo de Escazú — San José Oeste</summary>
         public static readonly Guid LiceoEscazu = new("aa000001-0000-0000-0000-000000000020");
+    }
+
+    public static class DemoPlaneamiento
+    {
+        public static readonly Guid GrupoArtesPlasticas7_1 = new("cc000002-0000-0000-0000-000000000001");
+
+        public static Group GrupoArtesPlasticas => new()
+        {
+            Id = GrupoArtesPlasticas7_1,
+            Name = "7-1 Artes Plásticas",
+            Level = "7° Año",
+            Subject = "Artes Plásticas",
+            SchoolYear = 2026,
+            TeacherId = Users.Ezequiel,
+            TeacherSub = Users.EzequielAuth0Sub,
+            InstitutionId = Institutions.LiceoAserri,
+            IsActive = true,
+            CreatedAt = CreatedAt,
+            PctCotidiano = 20m,
+            PctPruebas = 45m,
+            PctExtraclase = 20m,
+            PctOtros = 15m
+        };
+
+        public static Student[] EstudiantesArtesPlasticas7_1 => CreateStudents();
+
+        public static CalendarEvent[] EventosArtesPlasticas7_1 =>
+        [
+            CreateEvent(1, new DateOnly(2026, 2, 23), null, "Acto cívico institucional", CalendarEventType.Civic),
+            CreateEvent(2, new DateOnly(2026, 3, 16), new DateOnly(2026, 3, 20), "Semana de exámenes I Trimestre", CalendarEventType.Exam),
+            CreateEvent(3, new DateOnly(2026, 3, 27), null, "Consejo de profesores", CalendarEventType.TeacherMeeting),
+            CreateEvent(4, new DateOnly(2026, 4, 13), new DateOnly(2026, 4, 17), "FEA institucional", CalendarEventType.SportWeek),
+            CreateEvent(5, new DateOnly(2026, 4, 24), null, "Capacitación institucional", CalendarEventType.Institutional)
+        ];
+
+        private static Student[] CreateStudents()
+        {
+            string[] names =
+            [
+                "Valeria Arias Montero",
+                "Sebastián Barrantes Solís",
+                "María José Brenes Castro",
+                "Diego Calderón Vargas",
+                "Camila Campos Rojas",
+                "Andrés Cordero Jiménez",
+                "Sofía Delgado Mora",
+                "Daniela Díaz Hernández",
+                "Samuel Fernández Chaves",
+                "Lucía Flores Quesada",
+                "Mateo García López",
+                "Isabella Gómez Arce",
+                "Emiliano Gutiérrez Salazar",
+                "Natalia Herrera Ulate",
+                "Gabriel Jiménez Rodríguez",
+                "Paula León Sánchez",
+                "Julián López Núñez",
+                "Mariana Martínez Vega",
+                "Esteban Méndez Castro",
+                "Ana Lucía Molina Rojas",
+                "José Pablo Mora Alfaro",
+                "Daniel Navarro Céspedes",
+                "Fernanda Núñez Chacón",
+                "Adrián Pacheco Soto",
+                "Nicole Pérez Bonilla",
+                "Luis Diego Quesada Ramírez",
+                "Laura Ramírez Fallas",
+                "Fabián Rojas Hidalgo",
+                "Daniela Salazar Picado",
+                "Christopher Sánchez Vargas",
+                "Michelle Segura Campos",
+                "Kevin Solano Aguilar",
+                "Ariana Soto Morales",
+                "Brandon Torres Rivas",
+                "Melissa Ureña Castro",
+                "Anthony Valverde Mora",
+                "Karla Vargas Esquivel",
+                "Jeremy Vega Delgado",
+                "Tatiana Villalobos Cordero",
+                "Santiago Zamora Ruiz"
+            ];
+
+            return names.Select((name, index) =>
+            {
+                var number = index + 1;
+                var id = StudentId(number);
+                return new Student
+                {
+                    Id = id,
+                    FullName = name,
+                    StudentCode = $"AP7-2026-{number:000}",
+                    QrCode = id.ToString("N"),
+                    GroupId = GrupoArtesPlasticas7_1,
+                    IsActive = true,
+                    CreatedAt = CreatedAt
+                };
+            }).ToArray();
+        }
+
+        private static Guid StudentId(int number) =>
+            Guid.Parse($"dd000002-0000-0000-0000-{number:000000000000}");
+
+        private static CalendarEvent CreateEvent(
+            int number,
+            DateOnly date,
+            DateOnly? endDate,
+            string title,
+            CalendarEventType type) => new()
+            {
+                Id = Guid.Parse($"ff000002-0000-0000-0000-{number:000000000000}"),
+                GroupId = GrupoArtesPlasticas7_1,
+                Date = date,
+                EndDate = endDate,
+                Title = title,
+                Type = type,
+                SchoolYear = 2026,
+                CreatedByAuth0Sub = Users.EzequielAuth0Sub,
+                CreatedAt = CreatedAt
+            };
     }
 }
