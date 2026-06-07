@@ -17,11 +17,12 @@ export default function CallbackPage() {
       handleRedirectCallback().then(async (result) => {
         // Provisionar el perfil en la BD (idempotente; crea el user si es su primer login)
         try {
-          const token = await getAccessTokenSilently();
+          const token = await getAccessTokenSilently({ authorizationParams: { audience: 'https://api.aulaia.mep.go.cr' } });
           await ensureUserProfile(token);
-        } catch {
+        } catch (err) {
           // No bloqueamos el flujo de login si el provisioning falla;
           // los endpoints de la app mostrarán error 401 y el usuario puede reintentar.
+          console.error('[callback] ensureUserProfile failed:', err);
         }
         const returnTo = (result?.appState as { returnTo?: string } | undefined)?.returnTo ?? '/';
         router.replace(returnTo);

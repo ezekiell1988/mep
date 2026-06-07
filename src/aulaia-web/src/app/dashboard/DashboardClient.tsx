@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  ensureUserProfile,
   getDocenteResumen,
   type DocenteResumenResponse,
 } from '../../lib/api';
@@ -40,6 +41,9 @@ export default function DashboardClient() {
     void (async () => {
       try {
         const token = await getAccessTokenSilently();
+        if (cancelled) return;
+        // Idempotente: crea el perfil si es primer login o si el callback falló
+        await ensureUserProfile(token);
         if (cancelled) return;
         const data = await getDocenteResumen(token);
         if (cancelled) return;
