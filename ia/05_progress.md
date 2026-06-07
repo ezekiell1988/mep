@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-05-11 (rev 26)
+> **Última actualización:** 2026-06-07 (rev 27)
 > **Fase activa:** Fase 7 — Onboarding Adriana en la web 🔄
 
 ---
@@ -125,7 +125,12 @@
 | F7 · `callback/page.tsx` — llama `ensureUserProfile` justo después de `handleRedirectCallback` antes de redirigir; provisioning ocurre en cada primer login | ✅ |
 | F7 · Seed simplificado — Adriana eliminada del `HasData` en `UserConfiguration.cs`; solo queda Ezequiel | ✅ |
 | F7 · Migración `RemoveAdrianaFromSeed` — reasigna grupos demo a Ezequiel (UPDATE groups teacher_id/teacher_sub) antes del DELETE en `users`; respeta FK Restrict | ✅ |
-| F7 · Landing page pública en `mep.ezekl.com` — descripción del producto antes del login | ⏳ |
+| F7 · Landing page pública en `mep.ezekl.com` — descripción del producto antes del login | ✅ |
+| F7 · **ISSUE-009 resuelto** — `InstitutionId` en `User` era `Guid` NOT NULL; `EnsureUserAsync` intentaba insertar con `Guid.Empty` → FK constraint violation → API 500. Corregido a `Guid?` nullable con migración `MakeInstitutionIdNullable` (SHA `486bc79`) | ✅ |
+| F7 · `DashboardClient.tsx` — llama `ensureUserProfile(token)` antes de `getDocenteResumen` como fallback idempotente; garantiza provisioning aunque `/callback` haya fallado silenciosamente | ✅ |
+| F7 · `callback/page.tsx` — `getAccessTokenSilently` con `audience` explícito para asegurar token con `api` claim | ✅ |
+| F7 · Flujo completo validado end-to-end: usuario nuevo registrado en Auth0 → `/callback` → `POST /api/auth/me` → fila creada en BD (`institution_id` NULL, `role = Teacher`) → `/dashboard/` sin API 500 ✅ | ✅ |
+| F7 · Deploy `486bc79` activo en `ca-aulaia-api` — migración aplicada automáticamente en startup | ✅ |
 | F7 · Onboarding Adriana en web: crear institución, grupos, primeros estudiantes | ⏳ |
 | F7 · Primera prueba de planeamiento con IA en clase real (Artes Plásticas, Colegio Aserrí) | ⏳ |
 | F7 · Revisar UX del formulario de planeamiento en desktop — mejorar según feedback Adriana | ⏳ |

@@ -1,6 +1,6 @@
 # 07 — Issues Conocidos
 
-> **Última actualización:** 2026-05-11 (rev 12)
+> **Última actualización:** 2026-06-07 (rev 13)
 
 ---
 
@@ -25,6 +25,42 @@ El seed data tenía a Adriana con `Auth0Sub = "auth0|PLACEHOLDER_ADRIANA"` — u
 ### Comportamiento post-fix
 - Usuario nuevo se registra en Auth0 → `/callback` llama `POST /api/auth/me` → fila `User` creada con `Role = Teacher` → todas las llamadas siguientes funcionan.
 - Endpoint es idempotente: si el user ya existe (segundo login), devuelve su perfil sin modificar nada.
+
+---
+
+## ✅ ISSUE-009: FK violation al provisionar usuario nuevo — `InstitutionId` NOT NULL
+
+**Detectado:** 2026-06-07
+**Estado:** ✅ Resuelto
+**Componentes:** `Shared/Domain/User.cs`, `Shared/Persistence/Configurations/UserConfiguration.cs`, `Features/Dashboard/DirectorModule.cs`, `Features/Grupos/GruposModule.cs`
+
+### Síntoma
+Después de resolver ISSUE-008 (endpoint `POST /api/auth/me` creado), el API seguía retornando 500 al navegar al dashboard tras un registro nuevo. El usuario aparecía autenticado (email en header) pero se mostraba `alert: "API 500:"`.
+
+### Causa raíz
+`User.InstitutionId` era `Guid` (non-nullable) con FK NOT NULL a la tabla `institutions` + constraint `fk_users_institution`. Cuando `EnsureUserAsync` creaba un usuario nuevo sin `InstitutionId`, EF Core insertaba `'00000000-0000-0000-0000-000000000000'` — un Guid vacío que viola la FK (no existe esa institución) → `PostgresException: foreign key constraint "fk_users_institution"` → 500.
+
+### Fix aplicado
+1. **`User.InstitutionId`** → `Guid?` nullable en `Shared/Domain/User.cs`.
+2. **`UserConfiguration.cs`** → `IsRequired(false)` en la propiedad y `IsRequired(false)` en la relación `HasOne/WithMany`.
+3. **`DirectorModule.cs`** → `director.InstitutionId ?? Guid.Empty` para `ResumenInstitucionalResponse`.
+4. **`GruposModule.cs`** → `user.InstitutionId ?? Guid.Empty` al asignar `InstitutionId` al nuevo grupo.
+5. **Migración `MakeInstitutionIdNullable`** (SHA `486bc79`) — altera columna `institution_id` a nullable en PostgreSQL; aplicada automáticamente en startup.
+
+### Comportamiento post-fix
+- `POST /api/auth/me` crea usuario con `institution_id = NULL` y `role = Teacher`. Sin FK violation.
+- El usuario puede luego asociarse a una institución desde el onboarding.
+- Usuarios existentes con institución asignada (seed, Ezequiel) no se ven afectados.
+
+### Verificación
+```sql
+SELECT column_name, is_nullable FROM information_schema.columns
+WHERE table_name='users' AND column_name='institution_id';
+-- institution_id | YES
+
+SELECT id, email, auth0_sub, role, institution_id FROM users ORDER BY created_at DESC LIMIT 3;
+-- nuevo usuario: institution_id = NULL, role = Teacher ✅
+```
 
 ---
 
