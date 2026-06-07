@@ -22,10 +22,11 @@ Para probar el login desde un celular usando VS Code Dev Tunnels, el origin púb
 3. Agregar el callback del túnel sin eliminar `localhost` ni producción.
 4. Agregar el origin del túnel en logout, allowed origins y web origins.
 5. Verificar que Auth0 persistió la configuración.
+6. Documentar en `ia/00_context.md` que Dev Tunnels es el mecanismo local para probar `localhost:8000` desde celular.
 
 ### Expected Output
 
-✅ Auth0 `AulaIA Web` (`client_id=onUw2TnTZSwUX6K43KtSgt7kQ9lBlJl4`) permite `https://glc38qtc-8000.use2.devtunnels.ms/callback` como callback y `https://glc38qtc-8000.use2.devtunnels.ms` como allowed origin, web origin y logout URL, preservando `http://localhost:3000` y `https://mep.ezekl.com`.
+✅ Auth0 `AulaIA Web` (`client_id=onUw2TnTZSwUX6K43KtSgt7kQ9lBlJl4`) permite `https://glc38qtc-8000.use2.devtunnels.ms/callback` como callback y `https://glc38qtc-8000.use2.devtunnels.ms` como allowed origin, web origin y logout URL, preservando `http://localhost:3000` y `https://mep.ezekl.com`. `ia/00_context.md` registra que las pruebas locales desde celular usan VS Code Dev Tunnels exponiendo `localhost:8000`.
 
 ### Implementation hint
 

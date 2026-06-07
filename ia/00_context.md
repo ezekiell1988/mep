@@ -1,6 +1,6 @@
 # 00 — Contexto del Proyecto
 
-> **Última actualización:** 2026-05-08 (rev 5)
+> **Última actualización:** 2026-06-07 (rev 6)
 > **Scope:** `/` (raíz del repositorio)
 
 ---
@@ -44,6 +44,7 @@
 | Almacenamiento de archivos | Azure Blob Storage | Decidido — ver ADR-003 en `06_decisions.md` |
 | Hosting | Azure Container Apps | **Activo desde Fase 6.** Container App `ca-aulaia-api` en env `cae-demo-itqs` (eastus). Dominio: `mep.ezekl.com` (cert gestionado `mc-cae-demo-itqs-mep-ezekl-com-6484`). App Service `app-demo-api` activo como fallback. Ver ADR-010. |
 | Deploy | Manual — `mep-deploy` skill | `docker buildx build --platform linux/amd64` + `az containerapp update`. Sin CI/CD automatizado (cuenta con MFA corporativo, no hay Service Principal disponible). |
+| Desarrollo local externo | VS Code Dev Tunnels | Para probar la app local desde celular sin deploy, se usa el launch único de `.vscode/launch.json` y se expone `localhost:8000` con Dev Tunnels. El origin público del túnel debe agregarse en Auth0 (`callbacks`, `allowed_origins`, `web_origins`, `allowed_logout_urls`). Túnel validado: `https://glc38qtc-8000.use2.devtunnels.ms`. |
 | Notificaciones push | Firebase Cloud Messaging (FCM) | iOS y Android |
 | DNS / CDN / Proxy | Cloudflare | Dominio `mep.ezekl.com`; WAF, SSL, caché de borde |
 | Pasarela de pagos | SINPE Móvil (manual) | Sin API; flujo: usuario transfiere → sube comprobante → admin aprueba. Ver ADR-009. |
