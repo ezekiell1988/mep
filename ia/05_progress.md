@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-06-07 (rev 30)
+> **Última actualización:** 2026-06-07 (rev 31)
 > **Fase activa:** Fase 7 — Onboarding Adriana en la web 🔄
 
 ---
@@ -144,6 +144,7 @@
 | F7 · `.vscode/tasks.json` — tarea previa `0. Local — Liberar puertos 3000/8000`; el launch limpia procesos viejos antes de compilar y arrancar `local-spa` | ✅ |
 | F7 · Auth0 Dev Tunnel 8000 — `AulaIA Web` permite `https://glc38qtc-8000.use2.devtunnels.ms/callback`, origin, web origin y logout para login desde celular; `ia/00_context.md` documenta Dev Tunnels para `localhost:8000` | ✅ |
 | F7 · Seed EF para prueba real de planeamiento — `SeedEzequielPlaneamientoDemo` agrega grupo `7-1 Artes Plásticas` para `ezekiell1988@hotmail.com`, 40 estudiantes activos y 5 eventos de calendario I Trimestre 2026 | ✅ |
+| F7 · Descarga PDF real de planeamientos — `PlaneamientoPdfService` + `GET /api/planeamiento/{id}/pdf`; `/planeamiento/detalle` descarga PDF autenticado con estado de carga/error; build API/web y EF sin cambios pendientes | ✅ |
 | DOC · `docs/mac-iphone-copy-paste.md` — guía para activar y diagnosticar Portapapeles universal Mac-iPhone con comandos macOS y checklist iPhone | ✅ |
 | DOC · `AGENTS.md` + `.github/copilot-instructions.md` — documentan que el launch local sirve el SPA estático desde `wwwroot`; para ver cambios en `src/aulaia-web` hay que recompilar con el launch o la tarea full stack | ✅ |
 

@@ -1,6 +1,32 @@
 # 07 — Issues Conocidos
 
-> **Última actualización:** 2026-06-07 (rev 15)
+> **Última actualización:** 2026-06-07 (rev 16)
+
+---
+
+## ✅ ISSUE-013: Botón PDF de planeamiento no descargaba archivo real
+
+**Detectado:** 2026-06-07
+**Estado:** ✅ Resuelto
+**Componentes:** `src/aulaia-web/src/app/planeamiento/detalle/page.tsx`, `Features/Planeamiento`
+
+### Síntoma
+El botón `Imprimir / PDF` en `/planeamiento/detalle` usaba `window.print()`. En el navegador integrado de VS Code no abría el diálogo de impresión ni descargaba archivo, bloqueando la prueba real de planeamiento para Adriana.
+
+### Causa raíz
+La pantalla dependía del flujo de impresión del navegador en lugar de un endpoint backend que generara un PDF descargable.
+
+### Fix aplicado
+1. `PlaneamientoPdfService` genera PDFs con QuestPDF desde `LessonPlan` en estado `Ready`.
+2. `GET /api/planeamiento/{id}/pdf` descarga el PDF solo para el docente autenticado dueño del planeamiento.
+3. `/planeamiento/detalle` reemplaza impresión por descarga autenticada con token Bearer, estado de carga/error y filename del backend.
+
+### Verificación
+- `dotnet build src/AulaIA.Api/AulaIA.Api.csproj` ✅ 0 errores, 0 advertencias.
+- `npm run build` en `src/aulaia-web` ✅.
+- `dotnet ef migrations has-pending-model-changes --project src/AulaIA.Api --startup-project src/AulaIA.Api` ✅ sin cambios pendientes.
+- `curl http://localhost:8000/api/planeamiento/77c023d5-cd77-403b-bf98-9c9a1c817fb9/pdf` sin token responde `401 Unauthorized` ✅.
+- BD: planeamiento `77c023d5-cd77-403b-bf98-9c9a1c817fb9` está `Ready`, asignatura `Artes Plásticas`, contenido generado `13180` chars ✅.
 
 ---
 

@@ -99,6 +99,9 @@ export const crearPlaneamiento = (token: string, body: CrearPlaneamientoRequest)
 export const getPlaneamiento = (token: string, id: string) =>
   apiFetch<PlaneamientoResponse>(`/api/planeamiento/${id}`, token);
 
+export const getPlaneamientoPdfUrl = (id: string) =>
+  `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/planeamiento/${id}/pdf`;
+
 export const listPlaneamientos = (token: string, groupId?: string) =>
   apiFetch<PlaneamientoListItem[]>(
     groupId ? `/api/planeamiento?groupId=${groupId}` : '/api/planeamiento',

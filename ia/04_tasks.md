@@ -60,6 +60,33 @@ Adriana se registrará por el flujo real de Auth0 y `POST /api/auth/me`, por lo 
 - Archivo: `src/AulaIA.Api/Shared/Persistence/SeedData.cs`.
 - No editar migraciones históricas salvo que una migración nueva sea necesaria.
 
+## TASK-F7-09: Descarga PDF real para planeamientos
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+En `/planeamiento/detalle`, el botón `Imprimir / PDF` usa `window.print()`. En el navegador integrado de VS Code no abre el diálogo de impresión y no descarga ningún archivo, por lo que no sirve para validar el flujo real con Adriana.
+
+### Steps
+
+1. Crear un servicio backend que genere PDF de un `LessonPlan` listo usando QuestPDF.
+2. Agregar endpoint autenticado `GET /api/planeamiento/{id}/pdf` que solo permita descargar planeamientos del docente actual.
+3. Agregar función frontend para descargar el PDF con token Bearer.
+4. Reemplazar el botón de impresión por descarga real de PDF con estado de carga/error.
+5. Validar build backend/frontend y comprobar que el planeamiento de Artes Plásticas puede descargar PDF.
+
+### Expected Output
+
+✅ Botón de PDF descarga un archivo `.pdf` real desde backend para planeamientos `Ready`, sin depender del diálogo de impresión del navegador. Se agregó endpoint autenticado `GET /api/planeamiento/{id}/pdf`, generación con QuestPDF y descarga frontend con token Bearer, estado de carga/error y filename del backend. Validado con `dotnet build`, `npm run build`, `dotnet ef migrations has-pending-model-changes`; el endpoint responde `401` sin token y la BD tiene un planeamiento `Ready` de Artes Plásticas con contenido generado.
+
+### Implementation hint
+
+- Backend: `Features/Planeamiento/Services/PlaneamientoPdfService.cs` + `PlaneamientoModule.cs`.
+- Frontend: `src/aulaia-web/src/lib/api.ts` + `src/app/planeamiento/detalle/page.tsx`.
+- Patrón de descarga autenticada similar a reportes de asistencia/notas.
+
 ## TASK-DOC-02: Documentar recompilación obligatoria del SPA local
 
 **Estado:** ✅ Completado

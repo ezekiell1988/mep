@@ -15,6 +15,7 @@ public static class PlaneamientoModule
     public static IServiceCollection AddPlaneamientoModule(this IServiceCollection services)
     {
         services.AddScoped<PlaneamientoAiService>();
+        services.AddScoped<PlaneamientoPdfService>();
         services.AddScoped<GenerarPlaneamientoJob>();
         return services;
     }
@@ -85,6 +86,32 @@ public static class PlaneamientoModule
         })
         .WithName("GetPlaneamiento");
 
+        // GET /api/planeamiento/{id}/pdf — descarga PDF real del planeamiento generado
+        planeamiento.MapGet("/{id:guid}/pdf", async Task<IResult> (
+            Guid id,
+            ICurrentUserService currentUser,
+            PlaneamientoPdfService pdfService,
+            CancellationToken ct) =>
+        {
+            var user = await currentUser.ResolveAsync(ct);
+            if (user is null) return TypedResults.NotFound();
+
+            try
+            {
+                var (bytes, fileName) = await pdfService.GenerateAsync(id, user.Auth0Sub, ct);
+                return Results.File(bytes, "application/pdf", fileName);
+            }
+            catch (KeyNotFoundException)
+            {
+                return TypedResults.NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return TypedResults.BadRequest(ex.Message);
+            }
+        })
+        .WithName("DescargarPlaneamientoPdf");
+
         // GET /api/planeamiento — lista planeamientos del docente
         planeamiento.MapGet("/", async Task<Ok<List<PlaneamientoListItem>>> (
             [FromQuery] Guid? groupId,
@@ -143,4 +170,3 @@ public static class PlaneamientoModule
     public record PlaneamientoListItem(Guid Id, string Asignatura, int Nivel, int Trimestre, string Status, DateTimeOffset CreatedAt);
     public record CurriculumCheckResponse(bool Disponible, int Unidades);
 }
-
