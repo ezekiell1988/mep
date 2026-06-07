@@ -597,3 +597,35 @@ manager.AddOrUpdate<SyncCurriculumJob>(
 - Dashboard en dev: `LocalRequestsOnlyAuthorizationFilter` (sin JWT). En prod: `HangfireAdminAuthFilter` con JWT.
 - Si el dashboard muestra 0 recurring jobs pero la BD tiene datos en `hangfire.hash`: ver skill `hangfire-reset`.
 
+---
+
+## PATTERN-09: Playwright E2E para flujos Auth0 sin login real
+
+**Contexto:** Los tests E2E de la web deben validar flujos de docente sin depender de Auth0, usuarios reales, backend, Hangfire ni llamadas IA. Para ello se activa un bypass explícito solo en ambiente E2E y se mockean las APIs con `page.route()`.
+
+**Validado:** 2026-06-07 — `src/aulaia-web`, Next.js 16 + Playwright Chromium.
+
+**Provider Auth0 de test:**
+```tsx
+if (process.env.NEXT_PUBLIC_E2E_AUTH_BYPASS === '1') {
+  return <Auth0Context.Provider value={e2eAuth}>{children}</Auth0Context.Provider>;
+}
+```
+
+**Playwright config:**
+```ts
+webServer: {
+  command: 'npm run dev -- --hostname 127.0.0.1 --port 3000',
+  url: 'http://127.0.0.1:3000',
+  env: {
+    NEXT_PUBLIC_E2E_AUTH_BYPASS: '1',
+    NEXT_PUBLIC_API_URL: '',
+  },
+}
+```
+
+**Reglas:**
+- El bypass debe depender de `NEXT_PUBLIC_E2E_AUTH_BYPASS === '1'`; nunca debe activarse por defecto.
+- Las rutas `/api/*` del flujo probado se interceptan con `page.route()` y devuelven JSON mínimo.
+- El test debe verificar el payload enviado al backend, no solo que el botón navegue.
+- Usar `npm run test:e2e` como comando estándar.

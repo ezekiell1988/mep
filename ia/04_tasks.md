@@ -6,6 +6,33 @@
 
 ---
 
+## TASK-F7-01: Test E2E frontend para crear planeamiento
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+Adriana quiere validar primero el flujo web de creación de planeamiento. Antes de pedirle que cree un usuario y pruebe en `mep.ezekl.com`, se necesita un test frontend repetible que confirme que el formulario de `/planeamiento/nuevo` carga grupos, verifica disponibilidad curricular, envía los parámetros correctos y redirige al detalle del planeamiento creado.
+
+### Steps
+
+1. Agregar infraestructura mínima de Playwright en `src/aulaia-web`.
+2. Evitar dependencia de Auth0 real durante E2E con un bypass controlado por variable pública de test.
+3. Mockear APIs del flujo: `GET /api/grupos`, `GET /api/planeamiento/curriculum-check` y `POST /api/planeamiento`.
+4. Completar el formulario con Artes Plásticas, 7°, I Trimestre, fechas y lecciones por semana.
+5. Verificar el payload enviado y la navegación a `/planeamiento/detalle?id=...`.
+
+### Expected Output
+
+✅ Implementado en `src/aulaia-web/tests/e2e/planeamiento-crear.spec.ts`. El test corre con `npm run test:e2e`, mockea Auth0 y las APIs del flujo, valida disponibilidad curricular, completa el formulario de planeamiento y confirma el payload enviado al backend + redirección a `/planeamiento/detalle?id=...`.
+
+### Implementation hint
+
+Usar `@playwright/test` con `webServer` de Next.js y `page.route()` para interceptar las rutas `/api/*`. Activar el bypass con `NEXT_PUBLIC_E2E_AUTH_BYPASS=1`; fuera de E2E, `Providers` debe seguir usando `Auth0Provider` normal.
+
+---
+
 ## TASK-F0-01: Crear Storage Account `stdemo` y contenedores
 
 **Estado:** ⏳ Pendiente

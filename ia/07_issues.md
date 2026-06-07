@@ -4,6 +4,26 @@
 
 ---
 
+## ⚠️ ISSUE-010: `npm run lint` global falla por `react-hooks/set-state-in-effect` en pantallas existentes
+
+**Detectado:** 2026-06-07
+**Estado:** ⚠️ Pendiente
+**Componentes:** `asistencia/[grupoId]/PageClient.tsx`, `grupos/page.tsx`, `notas/[grupoId]/PageClient.tsx`, `page.tsx`, `planeamiento/detalle/page.tsx`, `planeamiento/nuevo/page.tsx`, `planeamiento/page.tsx`, `qrs/page.tsx`
+
+### Síntoma
+Al ejecutar `npm run lint` en `src/aulaia-web`, ESLint reporta 8 errores de `react-hooks/set-state-in-effect`.
+
+### Impacto
+No bloquea el build ni el nuevo test E2E de planeamiento. Los archivos modificados para el test (`providers.tsx`, `playwright.config.ts`, `tests/e2e/planeamiento-crear.spec.ts`) sí pasan ESLint específico.
+
+### Verificación
+- `npm run build` ✅
+- `npm run test:e2e` ✅
+- `npx eslint src/app/providers.tsx tests/e2e/planeamiento-crear.spec.ts playwright.config.ts` ✅
+- `npm run lint` ❌ por deuda existente en pantallas no relacionadas
+
+---
+
 ## ✅ ISSUE-008: Sin provisioning de usuario Auth0 → BD (gap crítico para onboarding)
 
 **Detectado:** 2026-05-11
@@ -275,4 +295,3 @@ El sistema prompt no contenía instrucciones específicas para asignaturas cuya 
 ### Verificación
 - Job 58 (re-run con hint): 12 unidades correctas (4 áreas × 3 niveles 7°/8°/9°) con trimestres exactos.
 - BD validada: `SELECT Nivel, Trimestre, UnidadNumero, UnidadNombre FROM curriculum_units WHERE Asignatura = 'Matemáticas' ORDER BY Nivel, Trimestre, UnidadNumero` → 12 filas correctas.
-
