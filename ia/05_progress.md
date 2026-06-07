@@ -137,6 +137,10 @@
 | F7 · Revisar UX de notas y reportes en desktop | ⏳ |
 | F7 · **Tour interactivo web** — `driver.js` instalado; `src/lib/tours.ts` con 11 tours (dashboard, grupos, planeamiento, planeamiento-nuevo, asistencia, notas, calendario, adecuaciones, qrs, suscripcion, perfil); `src/components/TourButton.tsx` reutilizable con carga dinámica; botón ❓ Guía en todas las páginas; CSS `driver.css` en `layout.tsx`; build 0 errores | ✅ |
 | F7 · Test E2E Playwright para crear planeamiento — `tests/e2e/planeamiento-crear.spec.ts` valida `/planeamiento/nuevo` con Auth0 bypass E2E, APIs mockeadas, payload POST y redirección al detalle | ✅ |
+| F7 · `.vscode/launch.json` simplificado — un solo launch `AulaIA local — SPA + API`, con preLaunchTask que compila/copia el SPA a `wwwroot` y perfil backend `local-spa` en `http://localhost:3000` | ✅ |
+| F7 · Migración EF `AddLlmAuditEntries` — corrige `PendingModelChangesWarning` creando `llm_audit_entries`; startup local validado en `http://localhost:3000` | ✅ |
+| F7 · VS Code localhost integrado — `serverReadyAction` abre la URL del backend y `workbench.externalUriOpeners` usa Simple Browser para `localhost`; raíz `http://localhost:3000/` validada con Playwright | ✅ |
+| F7 · `.vscode/tasks.json` — tarea previa `0. Local — Liberar puertos 3000/8000`; el launch limpia procesos viejos antes de compilar y arrancar `local-spa` | ✅ |
 
 #### App móvil — diferida (no es prioridad para Adriana en este momento)
 | Tarea | Estado |

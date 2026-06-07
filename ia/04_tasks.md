@@ -6,6 +6,103 @@
 
 ---
 
+## TASK-F7-05: Liberar puertos antes del launch local
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+Al alternar entre perfiles locales, quedaron procesos previos escuchando en `3000` o `8000`. Esto causa confusión porque el launch esperado puede no arrancar en el puerto correcto o el navegador puede abrir una instancia vieja.
+
+### Steps
+
+1. Agregar una tarea VS Code previa que inspeccione los puertos `3000` y `8000`.
+2. Terminar procesos que estén escuchando en esos puertos antes del build/launch.
+3. Encadenar esa tarea al build completo usado por `.vscode/launch.json`.
+4. Validar JSON y que la tarea pueda ejecutarse sin fallar cuando no hay procesos.
+
+### Expected Output
+
+✅ `.vscode/tasks.json` incluye la tarea `0. Local — Liberar puertos 3000/8000`, que revisa procesos en escucha con `lsof`, intenta cerrarlos con `kill` y usa `kill -9` solo como fallback. La tarea `5. Full Stack — Build completo: Web → wwwroot + API (default)` la ejecuta primero, por lo que el launch único limpia puertos antes de compilar y arrancar `local-spa`.
+
+### Implementation hint
+
+Usar `lsof -ti tcp:<port> -sTCP:LISTEN` para detectar PIDs en macOS, `kill` para terminar normal y `kill -9` solo como fallback si el proceso sigue vivo. Mantener el launch apuntando a `local-spa`.
+
+## TASK-F7-04: Abrir localhost en browser integrado y validar puerto local
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+El entorno local debía abrir las URLs `localhost` dentro del navegador integrado de VS Code y había confusión porque `http://localhost:3000/` no cargaba mientras sí existía un proceso del backend escuchando en `http://localhost:8000`.
+
+### Steps
+
+1. Configurar el launch único para abrir la URL detectada por Kestrel con `serverReadyAction`.
+2. Configurar VS Code para usar Simple Browser con URLs locales.
+3. Verificar qué puertos están escuchando y qué responde en `:3000` y `:8000`.
+4. Levantar el perfil `local-spa` y validar `http://localhost:3000/`.
+
+### Expected Output
+
+✅ `.vscode/launch.json` detecta `Now listening on: ...` y abre la URL. El perfil `local-spa` no abre navegador por su cuenta; VS Code maneja la apertura. La configuración global de VS Code usa `simpleBrowser.open` para `localhost` y `127.0.0.1`. Se confirmó que el proceso viejo estaba en `:8000`, y que `dotnet run --launch-profile local-spa` levanta correctamente en `http://localhost:3000/` con HTML 200, `/health` 200 y render completo validado con Playwright.
+
+### Implementation hint
+
+Usar `serverReadyAction` en el launch y `workbench.externalUriOpeners` con patrones `http://localhost:*`, `https://localhost:*`, `http://127.0.0.1:*`, `https://127.0.0.1:*` apuntando a `simpleBrowser.open`.
+
+## TASK-F7-03: Corregir migración pendiente del modelo EF Core
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+Al levantar localmente el backend con el perfil `production`, el startup falla en `RunMigrationsAsync()` con `PendingModelChangesWarning`. EF Core detecta que el modelo actual de `AulaIADbContext` no coincide con el snapshot de migraciones, por lo que `MigrateAsync()` bloquea la actualización de la base de datos.
+
+### Steps
+
+1. Identificar el cambio pendiente entre el modelo actual y `AulaIADbContextModelSnapshot`.
+2. Generar una migración EF Core mínima para sincronizar el snapshot y la base de datos.
+3. Ajustar el launch local para servir el SPA desde la API sin perder configuración de desarrollo.
+4. Verificar que el proyecto compile.
+5. Confirmar que ya no hay cambios pendientes de modelo y que el startup local llegue a `http://localhost:3000`.
+
+### Expected Output
+
+✅ Se agregó la migración `AddLlmAuditEntries`, que crea la tabla `llm_audit_entries` con sus índices y actualiza `AulaIADbContextModelSnapshot`. `dotnet ef migrations has-pending-model-changes` confirma que no quedan cambios pendientes. Además, el launch único usa el perfil `local-spa`, que escucha en `http://localhost:3000` con `ASPNETCORE_ENVIRONMENT=Development`, permitiendo servir el SPA desde `wwwroot` con la configuración local.
+
+### Implementation hint
+
+Usar `dotnet ef migrations add` en `src/AulaIA.Api` con el `IDesignTimeDbContextFactory<AulaIADbContext>` existente. No suprimir `PendingModelChangesWarning`; el fix correcto es versionar la migración faltante.
+
+## TASK-F7-02: Simplificar launch local para servir SPA desde API
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+El entorno local de VS Code tenía varias configuraciones separadas para Next.js dev, API HTTP/HTTPS y modo producción local. Para validar la app igual que en el server, se necesita un único launch que compile el SPA estático, lo copie al `wwwroot` del backend y levante la API sirviendo el SPA desde el mismo proceso.
+
+### Steps
+
+1. Revisar `.vscode/launch.json`, `.vscode/tasks.json` y el perfil `production` del backend.
+2. Dejar una sola configuración de launch en VS Code.
+3. Usar el build completo existente como `preLaunchTask` para generar `wwwroot`.
+4. Arrancar `src/AulaIA.Api` con el perfil `production`.
+
+### Expected Output
+
+✅ `.vscode/launch.json` queda con una sola configuración: `AulaIA local — SPA + API`. El launch ejecuta antes la tarea `"5. Full Stack — Build completo: Web → wwwroot + API (default)"`, que compila el SPA y lo copia al `wwwroot` del backend, y luego arranca `src/AulaIA.Api` con el perfil `production` en `http://localhost:3000`, igual que el modelo de server donde la API sirve el SPA estático.
+
+### Implementation hint
+
+Reutilizar la tarea `"5. Full Stack — Build completo: Web → wwwroot + API (default)"` y el `launchSettingsProfile` `"production"` de `src/AulaIA.Api/Properties/launchSettings.json`, que escucha en `http://localhost:3000` con `ASPNETCORE_ENVIRONMENT=Production`.
+
 ## TASK-F7-01: Test E2E frontend para crear planeamiento
 
 **Estado:** ✅ Completado

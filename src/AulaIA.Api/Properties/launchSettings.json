@@ -19,13 +19,13 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "production": {
+    "local-spa": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
+      "launchBrowser": false,
       "applicationUrl": "http://localhost:3000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Production"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }

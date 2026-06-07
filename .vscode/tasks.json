@@ -2,6 +2,17 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "0. Local — Liberar puertos 3000/8000",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "for port in 3000 8000; do pids=$(lsof -ti tcp:$port -sTCP:LISTEN || true); if [ -z \"$pids\" ]; then echo \"Puerto $port libre\"; continue; fi; echo \"Liberando puerto $port: $pids\"; kill $pids 2>/dev/null || true; sleep 1; for pid in $pids; do if kill -0 $pid 2>/dev/null; then echo \"Forzando cierre de PID $pid\"; kill -9 $pid 2>/dev/null || true; fi; done; done"
+      ],
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
       "label": "1. Web — Instalar dependencias (npm install)",
       "type": "shell",
       "command": "npm install",
@@ -36,6 +47,7 @@
     {
       "label": "5. Full Stack — Build completo: Web → wwwroot + API (default)",
       "dependsOn": [
+        "0. Local — Liberar puertos 3000/8000",
         "2. Web — Compilar SPA estático (next build → out/)",
         "4. Web — Copiar SPA a wwwroot del backend (out/ → wwwroot/)",
         "3. API — Compilar backend .NET (dotnet build)"

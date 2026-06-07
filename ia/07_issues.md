@@ -1,6 +1,31 @@
 # 07 — Issues Conocidos
 
-> **Última actualización:** 2026-06-07 (rev 13)
+> **Última actualización:** 2026-06-07 (rev 14)
+
+---
+
+## ✅ ISSUE-011: `PendingModelChangesWarning` al arrancar API local
+
+**Detectado:** 2026-06-07
+**Estado:** ✅ Resuelto
+**Componentes:** `AulaIADbContext`, `LlmAuditEntry`, migraciones EF Core, `.vscode/launch.json`, `launchSettings.json`
+
+### Síntoma
+Al levantar el backend local, `RunMigrationsAsync()` fallaba con `InvalidOperationException` por `Microsoft.EntityFrameworkCore.Migrations.PendingModelChangesWarning`. EF Core detectaba cambios pendientes en el modelo de `AulaIADbContext` y bloqueaba `MigrateAsync()`.
+
+### Causa raíz
+El modelo ya incluía `DbSet<LlmAuditEntry>` y `LlmAuditEntryConfiguration`, pero no existía una migración que versionara la tabla `llm_audit_entries` en el snapshot ni en la base de datos. Además, el launch local apuntaba al perfil `production`, que sirve el SPA en `:3000` pero no carga `appsettings.Development.json`, dejando el connection string vacío.
+
+### Fix aplicado
+1. Migración `AddLlmAuditEntries` — crea la tabla `llm_audit_entries` con índices por `category`, `created_at` e `is_error`.
+2. `AulaIADbContextModelSnapshot` actualizado con la entidad `LlmAuditEntry`.
+3. `launchSettings.json` — perfil local `local-spa` en `http://localhost:3000` con `ASPNETCORE_ENVIRONMENT=Development`.
+4. `.vscode/launch.json` — el launch único usa `local-spa`.
+
+### Verificación
+- `dotnet build src/AulaIA.Api/AulaIA.Api.csproj` ✅ 0 errores, 0 advertencias.
+- `dotnet ef migrations has-pending-model-changes` ✅ sin cambios pendientes.
+- `dotnet run --launch-profile local-spa` ✅ aplicó `20260607182245_AddLlmAuditEntries` y arrancó en `http://localhost:3000`.
 
 ---
 
