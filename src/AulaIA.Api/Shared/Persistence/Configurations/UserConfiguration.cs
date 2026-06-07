@@ -38,7 +38,8 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
                .HasDefaultValue(UserRole.Teacher);
 
         builder.Property(x => x.InstitutionId)
-               .HasColumnName("institution_id");
+               .HasColumnName("institution_id")
+               .IsRequired(false);
 
         builder.Property(x => x.CreatedAt)
                .HasColumnName("created_at")
@@ -63,6 +64,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasOne(x => x.Institution)
                .WithMany(i => i.Users)
                .HasForeignKey(x => x.InstitutionId)
+               .IsRequired(false)
                .OnDelete(DeleteBehavior.Restrict)
                .HasConstraintName("fk_users_institution");
 

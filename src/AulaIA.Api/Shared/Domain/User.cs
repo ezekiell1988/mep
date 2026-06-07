@@ -9,7 +9,7 @@ public sealed class User
     public required string Email { get; set; }
     public required string FullName { get; set; }
     public UserRole Role { get; set; } = UserRole.Teacher;
-    public Guid InstitutionId { get; set; }
+    public Guid? InstitutionId { get; set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
     /// <summary>Código de referido usado al registrarse (null si llegó orgánico).</summary>

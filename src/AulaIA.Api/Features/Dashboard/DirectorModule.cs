@@ -70,7 +70,7 @@ public static class DirectorModule
             : (int)Math.Max(0, (subInstitucional.CurrentPeriodEnd - DateTime.UtcNow).TotalDays);
 
         return TypedResults.Ok(new ResumenInstitucionalResponse(
-            InstitutionId:      director.InstitutionId,
+            InstitutionId:      director.InstitutionId ?? Guid.Empty,
             InstitutionName:    institution?.Name ?? "—",
             TotalDocentes:      docentes.Count,
             TotalGrupos:        grupos.Count,

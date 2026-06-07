@@ -61,7 +61,7 @@ public static class UsersModule
             user.Email,
             user.FullName,
             user.Role.ToString(),
-            user.InstitutionId == Guid.Empty ? null : user.InstitutionId
+            user.InstitutionId
         ));
     }
 }

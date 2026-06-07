@@ -68,7 +68,7 @@ public static class GruposModule
             SchoolYear    = request.SchoolYear,
             TeacherId     = user.Id,
             TeacherSub    = currentUser.Auth0Sub,
-            InstitutionId = user.InstitutionId
+            InstitutionId = user.InstitutionId ?? Guid.Empty
         };
 
         db.Groups.Add(grupo);
