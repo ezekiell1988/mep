@@ -1,6 +1,59 @@
 # 07 — Issues Conocidos
 
-> **Última actualización:** 2026-06-07 (rev 16)
+> **Última actualización:** 2026-06-07 (rev 18)
+
+---
+
+## ⚠️ ISSUE-015: Extractor de currículo falla o deriva niveles erróneos con Religión III Ciclo
+
+**Detectado:** 2026-06-07
+**Estado:** ⚠️ Pendiente
+**Componentes:** `Features/Curriculum/Jobs/ExtractCurriculumJob.cs`, PDF `assets/PROGRAMA_ESTUDIOS_EDUCACIÓN_RELIGIOSA_2024_ISBN_978-9977-60-561-6.pdf`
+
+### Síntoma
+El nuevo flujo local `POST /api/curriculum/dev/import-local` logra subir y encolar el PDF de `Religión`, pero `ExtractCurriculumJob` no deja una extracción utilizable para `III Ciclo`.
+
+### Causa raíz
+El PDF de Educación Religiosa mezcla III Ciclo y Diversificada y usa una estructura de microcurrículo por año/eje distinta a la mayoría de materias. El LLM:
+- en un intento interpretó `1.1` como `nivel = 11` y devolvió `trimestre = 0/null`,
+- y tras acotar el texto a `Sétimo`–`Noveno`, terminó devolviendo `0` unidades.
+
+### Impacto
+La infraestructura local para importar PDFs desde `assets/` ya funciona, pero `Religión` todavía no queda disponible en `/planeamiento/nuevo` porque la extracción necesita una estrategia específica para ese formato.
+
+### Workaround
+- Usar el endpoint local para materias con PDFs estándar en `assets/`.
+- Para `Religión`, implementar parsing/guiado más específico por año/unidad antes de validar la materia.
+- `Español` no está afectado por este issue; sus 60 unidades ya quedaron validadas en dev.
+
+### Verificación
+- Endpoint dev: [CurriculumModule.cs](/Users/ezequielbaltodanocubillo/Documents/ezekl/mep/src/AulaIA.Api/Features/Curriculum/CurriculumModule.cs:130)
+- Job extractor: [ExtractCurriculumJob.cs](/Users/ezequielbaltodanocubillo/Documents/ezekl/mep/src/AulaIA.Api/Features/Curriculum/Jobs/ExtractCurriculumJob.cs:28)
+
+---
+
+## ⚠️ ISSUE-014: Badge de planeamiento promete “conocimiento general”, pero backend falla sin currículo validado
+
+**Detectado:** 2026-06-07
+**Estado:** ⚠️ Pendiente
+**Componentes:** `src/aulaia-web/src/app/planeamiento/nuevo/page.tsx`, `Features/Planeamiento/PlaneamientoModule.cs`, `Features/Planeamiento/Services/PlaneamientoAiService.cs`
+
+### Síntoma
+Cuando una combinación asignatura/nivel/trimestre no tiene unidades validadas, el formulario muestra: “Sin programa MEP validado para esta combinación — la IA usará conocimiento general”.
+
+### Causa raíz
+El badge del frontend se basa en `GET /api/planeamiento/curriculum-check`, que solo cuenta unidades con `ValidatedAt != null`. Pero `PlaneamientoAiService` no tiene fallback a conocimiento general: si no encuentra unidades validadas, lanza `InvalidOperationException` y aborta la generación.
+
+### Impacto
+La interfaz comunica una capacidad que hoy no existe realmente para planeamiento. Puede inducir al docente a pensar que el plan sí se generará aunque no haya currículo validado.
+
+### Workaround
+Validar primero las unidades correspondientes en `curriculum_units`, o cambiar el texto del badge para reflejar que la generación quedará bloqueada.
+
+### Verificación
+- Badge: [page.tsx](/Users/ezequielbaltodanocubillo/Documents/ezekl/mep/src/aulaia-web/src/app/planeamiento/nuevo/page.tsx:225)
+- Conteo backend: [PlaneamientoModule.cs](/Users/ezequielbaltodanocubillo/Documents/ezekl/mep/src/AulaIA.Api/Features/Planeamiento/PlaneamientoModule.cs:139)
+- Falla real: [PlaneamientoAiService.cs](/Users/ezequielbaltodanocubillo/Documents/ezekl/mep/src/AulaIA.Api/Features/Planeamiento/Services/PlaneamientoAiService.cs:21)
 
 ---
 

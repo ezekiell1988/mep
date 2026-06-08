@@ -1,6 +1,6 @@
 # 05 — Progreso del Proyecto
 
-> **Última actualización:** 2026-06-07 (rev 31)
+> **Última actualización:** 2026-06-07 (rev 34)
 > **Fase activa:** Fase 7 — Onboarding Adriana en la web 🔄
 
 ---
@@ -145,6 +145,10 @@
 | F7 · Auth0 Dev Tunnel 8000 — `AulaIA Web` permite `https://glc38qtc-8000.use2.devtunnels.ms/callback`, origin, web origin y logout para login desde celular; `ia/00_context.md` documenta Dev Tunnels para `localhost:8000` | ✅ |
 | F7 · Seed EF para prueba real de planeamiento — `SeedEzequielPlaneamientoDemo` agrega grupo `7-1 Artes Plásticas` para `ezekiell1988@hotmail.com`, 40 estudiantes activos y 5 eventos de calendario I Trimestre 2026 | ✅ |
 | F7 · Descarga PDF real de planeamientos — `PlaneamientoPdfService` + `GET /api/planeamiento/{id}/pdf`; `/planeamiento/detalle` descarga PDF autenticado con estado de carga/error; build API/web y EF sin cambios pendientes | ✅ |
+| F7 · Plantilla PDF de planeamiento mejorada — `PlaneamientoPdfService` ahora compone un documento QuestPDF con encabezado institucional, hero, ficha tecnica y tablas markdown renderizadas como tablas reales en lugar de lineas estilo Markdown | ✅ |
+| F7 · Currículo de Matemáticas III Ciclo validado en dev — 12 unidades existentes (`7°`–`9°`) marcadas con `ValidatedAt`, habilitando el badge y la generación real de planeamiento para Matemáticas | ✅ |
+| F7 · Import local de currículos desde `assets/` — nuevo endpoint dev `POST /api/curriculum/dev/import-local` sube PDFs locales a Blob y encola `ExtractCurriculumJob`; probado con Religión (`job 96`) | ✅ |
+| F7 · `Español` habilitado en dev — 60 unidades ya extraídas quedaron validadas manualmente para destrabar la materia en `/planeamiento/nuevo` | ✅ |
 | DOC · `docs/mac-iphone-copy-paste.md` — guía para activar y diagnosticar Portapapeles universal Mac-iPhone con comandos macOS y checklist iPhone | ✅ |
 | DOC · `AGENTS.md` + `.github/copilot-instructions.md` — documentan que el launch local sirve el SPA estático desde `wwwroot`; para ver cambios en `src/aulaia-web` hay que recompilar con el launch o la tarea full stack | ✅ |
 

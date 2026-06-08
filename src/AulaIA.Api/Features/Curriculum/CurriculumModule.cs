@@ -8,6 +8,7 @@ using Hangfire;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace AulaIA.Api.Features.Curriculum;
@@ -124,6 +125,60 @@ public static class CurriculumModule
             return TypedResults.NoContent();
         })
         .WithName("ValidateCurriculumUnit");
+
+        if (app.ServiceProvider.GetRequiredService<IHostEnvironment>().IsDevelopment())
+        {
+            // Importa un PDF local de assets/ al blob privado y dispara la extracción sin depender de URLs externas.
+            app.MapPost("/api/curriculum/dev/import-local",
+                async Task<Results<Accepted<UploadResponse>, BadRequest<string>>> (
+                    [FromQuery] string localPath,
+                    [FromQuery] string asignatura,
+                    [FromQuery] string ciclo,
+                    IHostEnvironment env,
+                    IOptions<StorageOptions> storageOpts,
+                    IBackgroundJobClient jobs,
+                    CancellationToken ct) =>
+                {
+                    if (string.IsNullOrWhiteSpace(localPath))
+                        return TypedResults.BadRequest("Debe indicar localPath.");
+
+                    if (string.IsNullOrWhiteSpace(asignatura) || string.IsNullOrWhiteSpace(ciclo))
+                        return TypedResults.BadRequest("Debe indicar asignatura y ciclo.");
+
+                    var assetsRoot = Path.GetFullPath(Path.Combine(env.ContentRootPath, "..", "..", "assets"));
+                    var requestedPath = Path.GetFullPath(Path.Combine(assetsRoot, localPath));
+
+                    if (!requestedPath.StartsWith(assetsRoot, StringComparison.Ordinal))
+                        return TypedResults.BadRequest("El archivo debe estar dentro de la carpeta assets.");
+
+                    if (!File.Exists(requestedPath))
+                        return TypedResults.BadRequest($"No existe el archivo local: {localPath}");
+
+                    if (!string.Equals(Path.GetExtension(requestedPath), ".pdf", StringComparison.OrdinalIgnoreCase))
+                        return TypedResults.BadRequest("Solo se aceptan archivos PDF.");
+
+                    var blobName = $"{BlobSlugHelper.ToAsciiSlug(asignatura)}/{Guid.NewGuid()}.pdf";
+                    var client = new BlobContainerClient(
+                        storageOpts.Value.ConnectionString,
+                        storageOpts.Value.ContainerCurriculum);
+
+                    await client.CreateIfNotExistsAsync(cancellationToken: ct);
+
+                    await using var stream = File.OpenRead(requestedPath);
+                    await client.UploadBlobAsync(blobName, stream, ct);
+
+                    var blobUrl = client.GetBlobClient(blobName).Uri.ToString();
+
+                    var jobId = jobs.Enqueue<ExtractCurriculumJob>(
+                        "curriculum",
+                        j => j.ExecuteAsync(blobUrl, asignatura, ciclo, null, CancellationToken.None));
+
+                    return TypedResults.Accepted("/api/curriculum/jobs", new UploadResponse(jobId, blobUrl));
+                })
+                .WithTags("Curriculum")
+                .WithName("ImportLocalCurriculum")
+                .AllowAnonymous();
+        }
 
         return app;
     }

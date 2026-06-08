@@ -87,6 +87,86 @@ En `/planeamiento/detalle`, el botón `Imprimir / PDF` usa `window.print()`. En 
 - Frontend: `src/aulaia-web/src/lib/api.ts` + `src/app/planeamiento/detalle/page.tsx`.
 - Patrón de descarga autenticada similar a reportes de asistencia/notas.
 
+## TASK-F7-10: Mejorar plantilla visual del PDF de planeamiento
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+El PDF actual del planeamiento descarga correctamente, pero visualmente se percibe como markdown renderizado línea por línea. Para la prueba real con Adriana, el documento debe verse como un formato docente formal: encabezado institucional, ficha técnica clara, jerarquía visual de secciones y tablas legibles.
+
+### Steps
+
+1. Analizar la estructura real del markdown generado por `PlaneamientoAiService`.
+2. Reemplazar el render línea-a-línea por una plantilla QuestPDF con bloques visuales y mejor tipografía.
+3. Interpretar tablas markdown comunes (`Datos Generales`, `Contenidos`, `Estrategias`) como tablas reales del PDF.
+4. Mantener compatibilidad con listas, citas y separadores del contenido existente.
+5. Validar build backend y revisar que el PDF de Artes Plásticas siga generándose.
+
+### Expected Output
+
+✅ PDF de planeamiento con apariencia de documento profesional docente: encabezado institucional, hero con resumen pedagógico, ficha tecnica con datos reales del grupo/docente, secciones jerarquizadas y tablas markdown renderizadas como tablas reales en QuestPDF. El parser ahora interpreta encabezados, listas, citas, separadores y tablas del contenido generado, y el backend compila sin cambios pendientes de EF.
+
+### Implementation hint
+
+- Archivo principal: `src/AulaIA.Api/Features/Planeamiento/Services/PlaneamientoPdfService.cs`.
+- Reutilizar patrones visuales de `InformeAdecuacionService` e `InformeDirectorService`.
+- Priorizar un layout robusto para markdown consistente antes que soporte completo de todos los casos edge.
+
+## TASK-F7-11: Validar currículo de Matemáticas para la prueba local
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+En `/planeamiento/nuevo`, la combinación `Matemáticas` + III Ciclo muestra “Sin programa MEP validado...”. La extracción del currículo ya existe en `curriculum_units`, pero ninguna unidad tiene `ValidatedAt`, por lo que el badge y el backend de planeamiento la consideran no aprobada.
+
+### Steps
+
+1. Verificar en BD cuántas unidades de Matemáticas existen por nivel y trimestre.
+2. Confirmar que la fuente oficial `curriculum_sources` para Matemáticas está activa.
+3. Marcar como validadas las unidades extraídas de Matemáticas para III Ciclo en la base de desarrollo.
+4. Verificar que el conteo del badge pase a reportar unidades disponibles para 7°, 8° y 9°.
+5. Registrar cualquier desajuste UX encontrado entre el badge y el comportamiento real del backend.
+
+### Expected Output
+
+✅ En la BD de desarrollo, las 12 unidades existentes de `Matemáticas` para III Ciclo (`7°`, `8°`, `9°`) quedaron validadas con `ValidatedAt` y `ValidatedBy = dev:manual-validation`. El conteo por combinación ahora reporta unidades disponibles (`7° T1=1`, `7° T2=1`, `7° T3=2`, y análogo para `8°` y `9°`). También se confirmó una inconsistencia UX: el badge habla de “conocimiento general”, pero el backend de planeamiento realmente falla si no hay currículo validado.
+
+### Implementation hint
+
+- Cambio de datos en PostgreSQL `curriculum_units` / `curriculum_sources`.
+- Si aparece inconsistencia UX, registrarla en `ia/07_issues.md`.
+
+## TASK-F7-12: Importar currículos desde PDFs locales en desarrollo
+
+**Estado:** ✅ Completado
+**Módulo:** Fase 7 — Onboarding Adriana en la web
+
+### Context
+
+Varios currículos ya existen como PDFs locales en `assets/`, pero algunas URLs históricas del MEP no son confiables o ya no apuntan a los archivos correctos. Para no depender de enlaces externos, el entorno local necesita una forma directa de subir un PDF local al contenedor Blob y encolar `ExtractCurriculumJob`.
+
+### Steps
+
+1. Agregar un endpoint solo para desarrollo que acepte `localPath`, `asignatura` y `ciclo`.
+2. Subir el archivo local al contenedor `curriculum` usando el mismo patrón de blob del endpoint admin.
+3. Encolar `ExtractCurriculumJob` con el `blobUrl` generado.
+4. Usar el endpoint para importar el PDF local de Religión.
+5. Aprovechar los PDFs locales ya extraídos para validar materias pendientes cuando aplique.
+
+### Expected Output
+
+✅ En desarrollo local ya existe `POST /api/curriculum/dev/import-local`, disponible solo en `Development`, para importar un PDF desde `assets/` sin depender de URLs del MEP. El endpoint sube el archivo a Blob Storage con el mismo slug del flujo admin y encola `ExtractCurriculumJob`. Se probó con `assets/PROGRAMA_ESTUDIOS_EDUCACIÓN_RELIGIOSA_2024_ISBN_978-9977-60-561-6.pdf`, confirmando `202 Accepted` y ejecución del job. Además, `Español` quedó habilitado en dev al validar sus 60 unidades ya extraídas. La importación de `Religión` avanzó hasta el extractor, pero su PDF requiere un ajuste adicional de parsing/extracción (registrado aparte como issue).
+
+### Implementation hint
+
+- Archivo principal: `src/AulaIA.Api/Features/Curriculum/CurriculumModule.cs`.
+- Endpoint solo en `Development`.
+- Reutilizar `BlobSlugHelper.ToAsciiSlug()` y la lógica ya existente de upload.
+
 ## TASK-DOC-02: Documentar recompilación obligatoria del SPA local
 
 **Estado:** ✅ Completado

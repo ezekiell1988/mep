@@ -49,6 +49,8 @@ public sealed class ExtractCurriculumJob(
                 return;
             }
 
+            pdfText = ApplySubjectPreprocessing(pdfText, asignatura, ciclo);
+
             ctx.WriteLine($"📄 PDF extraído: {pdfText.Length:N0} caracteres");
             audit.LogEvent("ExtractCurriculumJob", "PDF extraído",
                 $"✅ {pdfText.Length:N0} caracteres — enviando a GPT-5.5");
@@ -174,6 +176,7 @@ public sealed class ExtractCurriculumJob(
             - Si un campo no está en el programa, usa array vacío [].
             - El campo "nivel" es el año escolar (7, 8, 9, 10, 11).
             - El campo "trimestre" es el período lectivo (1, 2, 3).
+            - Si la asignatura no explicita trimestres y tampoco hay instrucción especial, puedes devolver null.
             - NUNCA inventes trimestres: asigna el valor EXACTO indicado en las instrucciones de asignatura.
             - Si no hay unidades en este fragmento, devuelve [].
             """;
@@ -226,7 +229,11 @@ public sealed class ExtractCurriculumJob(
 
             foreach (var e in extracted)
             {
-                if (!seen.Add((e.Nivel, e.Trimestre, e.UnidadNumero)))
+                var trimestre = ResolveTrimestre(asignatura, ciclo, e);
+                if (trimestre is null)
+                    continue;
+
+                if (!seen.Add((e.Nivel, trimestre.Value, e.UnidadNumero)))
                     continue; // deduplicar (por overlap entre chunks)
 
                 allUnits.Add(new CurriculumUnit
@@ -234,7 +241,7 @@ public sealed class ExtractCurriculumJob(
                     Asignatura            = asignatura,
                     Ciclo                 = ciclo,
                     Nivel                 = e.Nivel,
-                    Trimestre             = e.Trimestre,
+                    Trimestre             = trimestre.Value,
                     UnidadNumero          = e.UnidadNumero,
                     UnidadNombre          = e.UnidadNombre,
                     AprendizajesEsperados = e.AprendizajesEsperados,
@@ -274,8 +281,53 @@ public sealed class ExtractCurriculumJob(
                 Los años son 7°, 8°, 9° → nivel=7, nivel=8, nivel=9.
                 NO inventes trimestres distintos a los indicados arriba.
                 """,
+            ("Religión", "III Ciclo") =>
+                """
+
+                INSTRUCCIÓN ESPECIAL — Religión III Ciclo:
+                Extrae SOLO unidades de Sétimo, Octavo y Noveno año. Ignora Décimo y Undécimo.
+                Este programa está organizado por unidades didácticas por año y no muestra trimestre explícito.
+                Usa esta distribución fija por número de unidad:
+                  • unidadNumero 1-2 → trimestre=1
+                  • unidadNumero 3-4 → trimestre=2
+                  • unidadNumero 5+  → trimestre=3
+                Los años son 7°, 8°, 9° → nivel=7, nivel=8, nivel=9.
+                NO devuelvas trimestre null para esta asignatura.
+                """,
             _ => string.Empty
         };
+
+    private static int? ResolveTrimestre(string asignatura, string ciclo, ExtractedUnit unit) =>
+        (asignatura, ciclo) switch
+        {
+            ("Religión", "III Ciclo") => unit.Trimestre ?? unit.UnidadNumero switch
+            {
+                <= 2 => 1,
+                <= 4 => 2,
+                _ => 3
+            },
+            _ => unit.Trimestre
+        };
+
+    private static string ApplySubjectPreprocessing(string pdfText, string asignatura, string ciclo) =>
+        (asignatura, ciclo) switch
+        {
+            ("Religión", "III Ciclo") => ExtractBetween(pdfText, "Sétimo año", "Décimo año"),
+            _ => pdfText
+        };
+
+    private static string ExtractBetween(string text, string startMarker, string endMarker)
+    {
+        var start = text.IndexOf(startMarker, StringComparison.OrdinalIgnoreCase);
+        if (start < 0)
+            return text;
+
+        var end = text.IndexOf(endMarker, start, StringComparison.OrdinalIgnoreCase);
+        if (end < 0 || end <= start)
+            end = text.Length;
+
+        return text[start..end];
+    }
 
     private static List<string> BuildChunks(string text)
     {
@@ -295,7 +347,7 @@ public sealed class ExtractCurriculumJob(
 
     private sealed record ExtractedUnit(
         int Nivel,
-        int Trimestre,
+        int? Trimestre,
         int UnidadNumero,
         string UnidadNombre,
         List<string> AprendizajesEsperados,
